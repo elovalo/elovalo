@@ -22,7 +22,7 @@ int main() {
 
 	while(1){
 		//Read MIDI
-		_delay_ms(1000);
+		_delay_ms(1500);
 		PORTB=0x00;
 		_delay_ms(1000);
 		PORTB=0xff;
