@@ -9,6 +9,7 @@
 
 int main(void);
 
-void initPorts();
+void SPI_MasterTransmit(char cData);
+
 
 #endif /* MAIN_H_ */

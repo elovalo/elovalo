@@ -2,16 +2,29 @@
  * test.c
  */
 
-#include <util/delay.h>
 #include <avr/io.h>
+#include <util/delay.h>
+//#include "init.h"
+#include "main.h"
+#include <avr/interrupt.h>
 //#include "ym2612.h"
 //#include "input.h"
-#include "main.h"
+
 
 //int ym2612_data=0x00;
 //int input_states=0xF0;
 //int *ptr_input_states = &input_states;
 //int i;
+
+
+
+ISR(USART_RXC_vectr)
+{
+	_delay_ms(1500);
+	PORTB=0x00;
+	_delay_ms(1000);
+	PORTB=0xff;
+}
 
 int main() {
 	//YM_CS_ON; //Chip not selected
@@ -22,10 +35,6 @@ int main() {
 
 	while(1){
 		//Read MIDI
-		_delay_ms(1500);
-		PORTB=0x00;
-		_delay_ms(1000);
-		PORTB=0xff;
 		//Read DIN Module
 		//input_states = readInputs();
 		//PORTB=input_states;
@@ -42,54 +51,30 @@ return 0;
 
 void initPorts(){
 
-	/**Port A initialization
-	*Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In
-	*State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T
+	/**
+	* Port B initialization
+	* PORTB Output all
+	* Set to zero
 	*/
+
 	PORTB=0xff;
 	DDRB=0b00000000;
 
-	/** Port B initialization
-	* Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In
-	* State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T
-	*/
-	//PORTB=0x00;
-	//DDRB=0xff;
+	/** Port C initialization*/
 
-	/** Port C initialization
-	*	Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In
-	* 	State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T
-	*/
-	//PORTC=0x00;
-	//DDRC=0x00;
+	PORTC=0x00;
+	DDRC=0xff;
 
-	/** Port D initialization
-	* Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out
-	* State7=0 State6=0 State5=0 State4=0 State3=0 State2=0 State1=0 State0=0
-	*/
-	//PORTD=0x00;
-	//DDRD=0xFF;
+	U2X0=0; //Normal Mode
+	UCSR0A=0x00;
+	UCSR0B=0b10010000;
+	UCSR0C=0b00000110;
 
-	/* 	Port E initialization
-	* 	Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=In Func0=In
-	* 	State7=0 State6=0 State5=0 State4=0 State3=0 State2=0 State1=T State0=T
-	*/
-	//PORTE=0b00011001;
-	//DDRE=0xFF;
+	// USART0 Baud rate: 9600
+	UBRR0H=0x00;
+	UBRR0L=0b1000100;
 
-	/**	Port F initialization
-	*	Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In
-	*	State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T
-	*/
-	//PORTF=0x00;
-	//DDRF=0x00;
-
-	/* 	Port G initialization
-	*	Func4=In Func3=In Func2=In Func1=In Func0=In
-	*	State4=T State3=T State2=T State1=T State0=T
-	*/
-	//PORTG=0x00;
-	//DDRG=0x00;
+	__asm ("cli");
 
 	/** Timer/Counter 0 initialization
 	* 	Clock source: System Clock
@@ -193,145 +178,11 @@ void initPorts(){
 	//ACSR=0x80;
 	//SFIOR=0x00;
 
-	__asm ("cli");
+	// USART0 initialization
+	// Communication Parameters: 8 Data, 1 Stop, No Parity
+	// USART0 Receiver: On
+	// USART0 Transmitter: Off
+	// USART0 Mode: Asynchronous
+	// USART0 Baud rate: 31250
 
 }
-
-/*void initYM2612(){
-	YM_WR_ON;
-	YM_RD_ON;
-	YM_A0_OFF;
-	YM_A1_OFF;
-
-	YM_CS_ON;*/
-
-	//Reset
-//	_delay_ms(10);
-//	PORTE&=~(1<<4);
-//	_delay_ms(20);
-//	PORTE|=(1<<4);
-//
-//	//Start initializing registers
-//
-//	writeToPart0(0x22, 0x00);
-//
-//	//isReady(0x22, &ym2612_data);
-//
-//	//PORTB = ym2612_data;
-//
-//	writeToPart0(0x28, 0x00);
-//	writeToPart0(0x28, 0x01);
-//	writeToPart0(0x28, 0x02);
-//	writeToPart0(0x28, 0x03);
-//	writeToPart0(0x28, 0x04);
-//	writeToPart0(0x28, 0x05);
-//	writeToPart0(0x28, 0x06);
-//
-//	/*keyOnOff(0,0);
-//	keyOnOff(1,0);
-//	keyOnOff(2,0);
-//	keyOnOff(4,0);
-//	keyOnOff(5,0);
-//	keyOnOff(6,0);*/
-//
-//	allChannelOff();
-//
-//	writeToPart0(0x2B, 0x00);
-//	disableDAC();
-//
-//	//DT1/MUL
-//	writeToPart0(0x30, 0x71);
-//
-//	writeToPart0(0x34, 0x0D);
-//
-//	writeToPart0(0x38, 0x33);
-//
-//	writeToPart0(0x3C, 0x01);
-//
-//
-//	//Total Level
-//	writeToPart0(0x40, 0x23);
-//
-//	writeToPart0(0x44, 0x2D);
-//
-//	writeToPart0(0x48, 0x26);
-//
-//	writeToPart0(0x4C, 0x00);
-//
-//	//RS/AR
-//
-//	writeToPart0(0x50, 0x5F);
-//
-//	writeToPart0(0x54, 0x99);
-//
-//	writeToPart0(0x58, 0x5F);
-//
-//	writeToPart0(0x5C, 0x94);
-//
-//	//AM/D1R
-//
-//	writeToPart0(0x60, 0x05);
-//
-//	writeToPart0(0x64, 0x05);
-//
-//	writeToPart0(0x68, 0x05);
-//
-//	writeToPart0(0x6C, 0x07);
-//
-//	//D2R
-//
-//	writeToPart0(0x70, 0x02);
-//
-//	writeToPart0(0x74, 0x02);
-//
-//	writeToPart0(0x78, 0x02);
-//
-//	writeToPart0(0x7C, 0x02);
-//
-//	//D1L/RR
-//
-//	writeToPart0(0x80, 0x11);
-//
-//	writeToPart0(0x84, 0x11);
-//
-//	writeToPart0(0x88, 0x11);
-//
-//	writeToPart0(0x8C, 0xA6);
-//
-//	//Proprietary
-//
-//	writeToPart0(0x90, 0x00);
-//
-//	writeToPart0(0x94, 0x00);
-//
-//	writeToPart0(0x98, 0x00);
-//
-//	writeToPart0(0x9C, 0x00);
-//
-//	//Feedback/algorithm
-//
-//	writeToPart0(0xB0, 0x32);
-//
-//	//Both speakers on
-//
-//	writeToPart0(0xB4, 0xC0);
-//
-//	//Key off
-//
-//	writeToPart0(0x28, 0x00);
-//
-//	//Set Frequency
-//	writeToPart0(0xA4, 0x22);
-//
-//	writeToPart0(0xA0, 0x69);
-//
-//	_delay_ms(500);
-//	//Key on
-//	//PORTB=0xf0;
-//
-//	writeToPart0(0x28, 0xF0);
-//
-//	//_delay_ms(2500);
-//	//writeToPart0(0x28, 0xF0);
-
-//}
