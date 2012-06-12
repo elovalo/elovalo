@@ -9,7 +9,7 @@
 #define INIT_H_
 
 void initPorts(void);
-void initUSART(void);
 void initSPI(void);
+void initUSART(void);
 
 #endif /* INIT_H_ */

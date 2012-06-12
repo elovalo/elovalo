@@ -33,15 +33,10 @@ uint8_t spiTransmitBuffer[SPI_BUF_SIZE]; //SPI buffer for receiving
 
 #define BAUD_RATE 9600UL
 
-struct Usartpuskuri {
-	//Usartpuskuri *next;
-	uint8_t value;
-};
-
 int main() {
 
 	initPorts();
-	initUSART();
+	//initUSART();
 	initSPI();
 	sei();
 
@@ -51,9 +46,9 @@ int main() {
 		//	SPI_MasterTransmit(TXpuskuri[j]);
 		//}
 
-		//SPI_Transfer(c);
+		SPI_Transfer(c);
 		//UDR0=c;
-		_delay_ms(10);
+		_delay_ms(100);
 		c++;
 //		if(sendData==1){
 //			for(int i=0;i<255;i++){
@@ -78,7 +73,7 @@ void USART_Transmit()
 
 //SPI master transmission
 //Return slave data.
-uint8_t SPI_Transfer(char cData)
+void SPI_Transfer(uint8_t cData)
 {
 	/* Start transmission */
 	PORTB |= (1<<PB2);
@@ -87,7 +82,6 @@ uint8_t SPI_Transfer(char cData)
 	while(!(SPSR & (1<<SPIF)));
 	PORTB &= ~(1<<PB2);
 
-	return SPDR;
 }
 
 //SPI transmit interrupt vector

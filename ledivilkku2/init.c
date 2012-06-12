@@ -39,7 +39,7 @@ void initSPI(){
 	/* Set MOSI, !SS and SCK output, all others input */
 	DDRB = (1<<PB3)|(1<<PB5)|(1<<PB2);
 
-	SPCR = (1<<SPIE) | //We want interrupts
+	SPCR = (0<<SPIE) | //We want interrupts
 	(1<<SPE) | //We do want the SPI enabled
 	(1<<DORD) | //We want the data to be shifted out LSB
 	(1<<MSTR) | //We want the atmega to be a master

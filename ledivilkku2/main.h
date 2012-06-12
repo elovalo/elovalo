@@ -9,7 +9,7 @@
 
 int main(void);
 
-void SPI_MasterTransmit(char cData);
+void SPI_Transfer(uint8_t cData);
 
 
 #endif /* MAIN_H_ */
