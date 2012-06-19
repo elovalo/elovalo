@@ -17,8 +17,8 @@ void initPorts(){
 	* Set to zero
 	*/
 
-	//PORTB=0x00;
-	//DDRB=0xff;
+	PORTB=0xff;
+	DDRB=0xff;
 
 	/** Port C initialization*/
 
@@ -37,14 +37,14 @@ void initPorts(){
 void initSPI(){
 	//DDRB = 0xFF;
 	/* Set MOSI, !SS and SCK output, all others input */
-	DDRB = (1<<PB3)|(1<<PB5)|(1<<PB2);
+	DDRB = (1<<PB3)|(1<<PB5)|(1<<PB1)|(1<<PB2);
 
-	SPCR = (0<<SPIE) | //We want interrupts
+	SPCR = (1<<SPIE) | //We want interrupts
 	(1<<SPE) | //We do want the SPI enabled
-	(1<<DORD) | //We want the data to be shifted out LSB
+	(0<<DORD) | //We want the data to be shifted out MSB
 	(1<<MSTR) | //We want the atmega to be a master
-	(0<<CPOL) | //We want the leading edge to be rising
-	(0<<CPHA) | //We want the leading edge to be sample
+	(1<<CPOL) | //We want the leading edge to be rising
+	(1<<CPHA) | //We want the leading edge to be sample
 	(0<<SPR1) | (0<<SPR0) ; // sets the clock speed
 
 	SPSR = (0<<SPIF) | // SPI interrupt flag
@@ -72,7 +72,17 @@ void initUSART(){
 
 }
 
-
+//Init BLANK Timer
+void initBLANKTimer(){
+	//CTC with OCRA as TOP
+	TCCR0A = (1 << WGM01);
+	//clk_io/1024
+	TCCR0B = (1 << CS02) | (1 << CS00);
+	//Generate interrupt every 3x1024 (4096) clock cycles
+	OCR0A = 3;
+	// Enable Timer Compare match A interrupt
+	TIMSK0 |= (1 << OCIE0A);
+}
 
 //void Usartpuskuri_add)(struct usartpuskuri* buffer, struct usartpuskuri* newnode){
 //buffer->

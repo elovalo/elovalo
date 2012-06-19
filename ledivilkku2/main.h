@@ -7,9 +7,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-int main(void);
-
 void SPI_Transfer(uint8_t cData);
+void SPI_Transfer_TLC5940(uint8_t *FrontBuffer);
+int main(void);
 
 
 #endif /* MAIN_H_ */

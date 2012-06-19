@@ -18,8 +18,8 @@
 				<configuration artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.366706732" name="Debug" parent="de.innot.avreclipse.configuration.app.debug">
 					<folderInfo id="de.innot.avreclipse.configuration.app.debug.366706732." name="/" resourcePath="">
 						<toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.954979135" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug">
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1977379916" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug"/>
-							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.88618476" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1977379916" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug" value="true" valueType="boolean"/>
+							<option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug.88618476" name="Generate HEX file for EEPROM" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.eeprom.app.debug" value="true" valueType="boolean"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug.578440761" name="Generate Extended Listing (Source + generated Assembler)" superClass="de.innot.avreclipse.toolchain.options.toolchain.objdump.app.debug"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug.547501982" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.debug"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug.315165017" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.debug"/>
@@ -86,6 +86,9 @@
 							<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release">
 								<option id="de.innot.avreclipse.compiler.option.debug.level.632946991" name="Generate Debugging Info" superClass="de.innot.avreclipse.compiler.option.debug.level" value="de.innot.avreclipse.compiler.option.debug.level.none" valueType="enumerated"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.1073183319" name="Optimization Level" superClass="de.innot.avreclipse.compiler.option.optimize" value="de.innot.avreclipse.compiler.optimize.three" valueType="enumerated"/>
+								<option id="de.innot.avreclipse.compiler.option.verbose.1319994186" name="Verbose (-v)" superClass="de.innot.avreclipse.compiler.option.verbose" value="true" valueType="boolean"/>
+								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.1595418943" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="true" valueType="boolean"/>
+								<option id="de.innot.avreclipse.compiler.option.optimize.shortenums.1209054203" name="Short enums (-fshort-enums)" superClass="de.innot.avreclipse.compiler.option.optimize.shortenums" value="true" valueType="boolean"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.2100226609" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.1586564970" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
@@ -108,7 +111,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="tlc5940.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
