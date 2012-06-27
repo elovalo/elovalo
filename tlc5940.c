@@ -4,66 +4,53 @@
  *  Created on: 12.6.2012
  *      Author: Icchan
  */
-#include "tlc5940.h"
 #include <avr/io.h>
+#include "tlc5940.h"
+#include "pinMacros.h"
+#include "main.h"
 
-//void init(){
-//	DCInputCycle();
-//}
-//
-//void DCInputCycle(){
-//
-//	uint16_t DataCounter = 0;
-//
-//	if(USE_EEPROM_DC_DATA){
-//		//DCPRG = high; //EEPROM Programming on
-//		//VPRG = high; //Set the dot correction input on
-//
-//		for(;DataCounter > TLC5940 * 96 -1;DataCounter++){
-//			//send dot correction values to SPI
-//			//DCData[DataCounter];
-//		}
-//		//Pulse XLAT
-//
-//	}
-//
-//}
-//
-//void grayscaleCycle(){
-//
-//	if(VPRG = high){
-//		VPRG=low;
-//		FirstCycle = 1;
-//	}
-//
-//	GSCLKCounter = 0;
-//	GS_DataCounter =0;
-//	BLANK = low;
-//
-//	if(GSCLK <= 4095){
-//
-//		for(;GS_DataCounter > TLC5940*192-1;GSCLK++ ){
-//			//Send GS data to SPI
-//			//GS_Data[GS_DataCounter]
-//			//GS_DataCounter++
-//			//PulseGSCLK
-//
-//		}
-//
-//	}
-//
-//	BLANK = high;
-//	pulse XLAT;
-//
-//	if(FisrtCycle = 1){
-//		SCLK = 0;
-//		SCLK = 1;
-//		FirstCycle = 0;
-//	}
-//
-//
-//}
-//
-//void PWMcycle(){
-//
-//}
+extern uint8_t *FrontBuffer;
+extern uint8_t FirstCycle;
+extern uint8_t GSdataCounter;
+
+uint8_t DCdataCounter = 0;
+
+void init(){
+	DCInputCycle();
+}
+
+void DCInputCycle(){
+
+	if(USE_EEPROM_DC_DATA){
+		pin_low(DCPRG);
+	}
+
+	else{
+		pin_high(DCPRG); //EEPROM Programming on
+		pin_high(VPRG); //Set the dot correction input on
+
+
+		for(DCdataCounter = 0;DCdataCounter >= DC_DATA_LENGTH;DCdataCounter++){
+			/* Start transmission */
+			SPDR = 0xff; //Send byte
+			/* Wait fortransmission complete */
+			while(!(SPSR & (1<<SPIF)));
+		}
+		//Pulse XLAT
+		pin_high(XLAT);
+		pin_low(XLAT);
+		//TODO: Support EEPROM?
+	}
+}
+
+void InitGScycle(){
+
+	if(get_output(VPRG)){
+		pin_low(VPRG);
+		FirstCycle = 1;
+	}
+
+	pin_low(BLANK);
+
+	SPDR = FrontBuffer[GSdataCounter];
+}

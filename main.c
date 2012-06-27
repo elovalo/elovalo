@@ -33,6 +33,10 @@ volatile uint8_t GSdataCounter=0;
 
 volatile uint8_t spiBufferCounter = 0; //Counter for SPI buffer
 
+
+uint8_t FirstCycle = 0;
+
+
 //#define SPI_BUF_SIZE 64
 
 //#define BAUD_RATE 9600UL
@@ -67,7 +71,7 @@ int main() {
 //		if(sendData==1){
 //			for(int i=0;i<255;i++){
 //
-//				while(!(UCSR0A & (1<<UDRE0))){ //Odota, että lähetyspuskuri tyhjä.
+//				while(!(UCSR0A & (1<<UDRE0))){ //Odota, ettï¿½ lï¿½hetyspuskuri tyhjï¿½.
 //				}
 //
 //				UDR0 = i;
@@ -116,12 +120,8 @@ ISR(SPI_STC_vect)
 	//_delay_ms(500);
 	//If theres data to be sent...
 	GSdataCounter++;
-	if(GSdataCounter<=1){
+	if(GSdataCounter<=GS_DATA_LENGHT){
 		SPDR = FrontBuffer[GSdataCounter];
-	}
-	else{
-		//SS-Down (latch data)
-		pin_high(XLAT);
 	}
 }
 
@@ -139,5 +139,14 @@ ISR(USART_RX_vect)
 
 ISR(TIMER2_COMPA_vect)
 {
+	pin_high(BLANK);
+	pin_high(XLAT);
+	pin_low(XLAT);
+	if(FirstCycle){
+		pin_high(SCLK);
+		pin_low(SCLK);
+		FirstCycle = 0;
+	}
    // Code to execute on ISR fire here
+   InitGScycle();
 }
