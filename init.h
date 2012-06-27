@@ -12,4 +12,6 @@ void initPorts(void);
 void initSPI(void);
 void initUSART(void);
 
+#define DEBUG_LED D,PD4
+
 #endif /* INIT_H_ */

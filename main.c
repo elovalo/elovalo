@@ -54,12 +54,14 @@ int main() {
 	//*BackBuffer ^= *FrontBuffer;
 	//*FrontBuffer ^= *BackBuffer;
 
-	SPI_Transfer_TLC5940(FrontBuffer);
+	//SPI_Transfer_TLC5940(FrontBuffer);
 	//SPI_Transfer(GSdata[0]);
 
 	while(1){
-		c++;
-		//SPI_Transfer(c);
+		_delay_ms(500);
+		pin_high(DEBUG_LED);
+		_delay_ms(500);
+		pin_low(DEBUG_LED);
 	}
 		//if(notTransferring){
 		//SPI_Transfer_TLC5940(GSdata);

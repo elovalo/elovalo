@@ -8,6 +8,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include "pinMacros.h"
 
 void initPorts(){
 
@@ -16,9 +17,11 @@ void initPorts(){
 	* PORTB Output all
 	* Set to zero
 	*/
+	PORTD=0xff;
+	DDRD=0b00011100;
 
 	PORTB=0xff;
-	DDRB=0xff;
+	DDRB=0b000100110;;
 
 	/** Port C initialization*/
 
