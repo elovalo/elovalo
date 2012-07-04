@@ -7,6 +7,12 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+//Global variables...
+uint8_t c; //testing variable...
+
+//Global pointer...
+extern uint8_t *FrontBuffer;
+
 void SPI_Transfer(uint8_t cData);
 void SPI_Transfer_TLC5940(uint8_t *FrontBuffer);
 int main(void);
