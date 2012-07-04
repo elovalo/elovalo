@@ -51,11 +51,7 @@ void initSPI(){
 	SPCR =
 	(1<<SPIE) | //We want interrupts
 	(1<<SPE) | 	//We want the SPI enabled
-	(0<<DORD) | //We want the data to be shifted out MSB
-	(1<<MSTR) | //We want the atmega to be a master
-	(0<<CPOL) | //We want the leading edge to be rising
-	(0<<CPHA) | //We want the leading edge to be sample
-	(0<<SPR1) | (0<<SPR0) ; // sets the clock speed
+	(1<<MSTR); //We want the atmega to be a master
 
 	SPSR = (1<<SPI2X) ; //Doubles the speed of the SPI clock
 

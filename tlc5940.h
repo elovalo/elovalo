@@ -32,7 +32,8 @@
 extern uint8_t FirstCycle ;
 extern uint8_t GSdataCounter;
 extern uint8_t DCdataCounter;
-extern uint8_t c;
+extern volatile uint8_t c;
+extern uint8_t isAfterFlip;
 
 void initTLC5940();
 

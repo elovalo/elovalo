@@ -14,6 +14,7 @@
 uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
 uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
+uint8_t isAfterFlip = 0;
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){
@@ -97,6 +98,7 @@ ISR(SPI_STC_vect)
  */
 ISR(TIMER0_COMPA_vect)
 {
+	c++;
 	pin_high(BLANK);
 	pin_high(XLAT);
 	pin_low(XLAT);
@@ -106,6 +108,19 @@ ISR(TIMER0_COMPA_vect)
 		pin_low(SCLK);
 		FirstCycle = 0;
 	}
+
+	if(c>=255){
+	// flipitiflip bufferille
+		Midbuffer = FrontBuffer;
+		FrontBuffer = BackBuffer;
+		BackBuffer = Midbuffer;
+
+		c=0;
+		pin_toggle(DEBUG_LED);
+		isAfterFlip = 1;
+	}
+
    // Start new transfer....
    InitGScycle();
 }
+

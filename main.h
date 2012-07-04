@@ -8,14 +8,17 @@
 #define MAIN_H_
 
 //Global variables...
-uint8_t c; //testing variable...
+volatile uint8_t c; //testing variable...
 
 //Global pointer...
-extern uint8_t *FrontBuffer;
+extern volatile uint8_t *FrontBuffer;
+extern volatile uint8_t *BackBuffer;
+extern volatile uint8_t *Midbuffer;
 
 //TODO: Enable these functions and implement them properly for generic SPI communication if necessary.
 //void SPI_Transfer(uint8_t cData);
 //void SPI_Transfer_TLC5940(uint8_t *FrontBuffer);
 int main(void);
+void zeroArray(volatile uint8_t*, uint8_t);
 
 #endif /* MAIN_H_ */

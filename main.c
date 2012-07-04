@@ -22,19 +22,25 @@
 //volatile uint8_t producer;
 //volatile uint8_t consumer;
 
-uint8_t c=0; //Global testing variable...
+volatile uint8_t c=0; //Global testing variable...
 
 //Grayscale data array, lenght is 24 * number of devices * number of layers in a cube...
 //TODO: currently fixed to 1 device, calculate from number of devices an fill with values
-uint8_t GSdata[24*TLC5940]={0xff,0xf0,0x00,0xff,0xf0,0x00,0xff,0xf0,
-							0x00,0xff,0xf0,0x00,0xff,0xf0,0x00,0xff,
-							0xf0,0x00,0xff,0xf0,0x00,0xff,0xf0,0x00};
+volatile uint8_t GSdata[24*TLC5940]={0x00,0x0f,0xff,0x00,0x0f,0xff,0xff,0xff,
+							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+
+volatile uint8_t GSdata2[24*TLC5940]={0xf0,0x0f,0xf0,0x00,0x00,0x00,0xff,0xff,
+							0xff,0xff,0xff,0xff,0x00,0x00,0xff,0xff,
+							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+
+volatile uint8_t *Midbuffer = 0;
 
 //TODO: backbuffer for double buffering...
-//volatile uint8_t *BackBuffer = GSdata2;
+volatile uint8_t *BackBuffer = GSdata2;
 
 //Pointer to the GS data buffer that holds the data to be sent to the TLC5940
-uint8_t *FrontBuffer = GSdata;
+volatile uint8_t *FrontBuffer = GSdata;
 
 //USART variables...
 //volatile uint8_t RXpuskuri;
@@ -62,11 +68,40 @@ int main() {
 	* *BackBuffer ^= *FrontBuffer;
 	* *FrontBuffer ^= *BackBuffer;
 	*/
+	int i = 0;
 
 	while(1){
+		// Clear backbuffer
+		if (isAfterFlip) {
+			zeroArray(BackBuffer, 24*TLC5940);
+			i++;
+			isAfterFlip = 0;
+		}
+
+		if (i < 24*TLC5940 -1) {
+
+			if (i % 2 == 0) {
+				BackBuffer[i] = 0x0f;
+				BackBuffer[i + 1] = 0xff;
+			}
+			else {
+				BackBuffer[i] = 0xff;
+				BackBuffer[i + 1] = 0xf0;
+			}
+		}
+		else {
+			i = 0;
+		}
 	}
 
 	return 0;
+}
+
+void zeroArray(volatile uint8_t* arr, uint8_t len) {
+	int i = 0;
+	for (; i < len; i++) {
+		arr[i] = 0x00;
+	}
 }
 
 ////Send byte via USART
