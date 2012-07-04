@@ -8,7 +8,7 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
-#include <util/delay.h>
+//#include <util/delay.h>
 #include "pinMacros.h"
 #include "init.h"
 
@@ -28,16 +28,16 @@ void initPorts(){
 	//TODO: Remove unnecessary initialization and trust the defaults from the datasheet after debugging...
 	MCUCR |= (0<<PUD); //Ensure we're using pull-ups if configured to be so...
 
-	DDRB = 0x00; //Should be this way in reset, but to make sure...
+	//DDRB = 0x00; //Should be this way after reset, but to make sure...
 
 	//TODO: Move these over to the respective modules...
 	DDRB |= (1<<PB1)|(1<<PB2)|(1<<PB3)|(1<<PB5);
 	//Set BLANK high (it doubles as !SS pin, thus it has to be an output to stay in master SPI mode)...
 	PORTB |= (1<<PB2);
 
-	DDRC = 0x00;
+	//DDRC = 0x00;
 
-	DDRD = 0x00;
+	//DDRD = 0x00;
 	DDRD |= (1<<PD2)|(1<<PD3)|(1<<PD4); //PD4 = debug led...
 	PORTD |= (1<<PD3); //Put only VPRG to high on init...
 
@@ -46,7 +46,7 @@ void initPorts(){
 void initSPI(){
 
 	/* Set MOSI, !SS and SCK output*/
-	DDRB = (1<<PB2)|(1<<PB3)|(1<<PB5);
+	DDRB |= (1<<PB2)|(1<<PB3)|(1<<PB5);
 
 	SPCR =
 	(1<<SPIE) | //We want interrupts
@@ -59,6 +59,18 @@ void initSPI(){
 
 	SPSR = (1<<SPI2X) ; //Doubles the speed of the SPI clock
 
+}
+
+//Initialize BLANK Timer Timer0
+void initBLANKTimer(){
+	//CTC with OCRA as TOP
+	TCCR0A = (1 << WGM01);
+	//Generate interrupt every 3x1024 (4096) clock cycles
+	OCR0A = 3;
+	// Enable Timer Compare match A interrupt
+	TIMSK0 |= (1 << OCIE0A);
+	//clk_io/1024 timer ON!
+	TCCR0B = (1 << CS02) | (1 << CS00);
 }
 
 void initUSART(){
@@ -80,14 +92,4 @@ void initUSART(){
 
 }
 
-//Initialize BLANK Timer Timer0
-void initBLANKTimer(){
-	//CTC with OCRA as TOP
-	TCCR0A = (1 << WGM01);
-	//Generate interrupt every 3x1024 (4096) clock cycles
-	OCR0A = 3;
-	// Enable Timer Compare match A interrupt
-	TIMSK0 |= (1 << OCIE0A);
-	//clk_io/1024 timer ON!
-	TCCR0B = (1 << CS02) | (1 << CS00);
-}
+

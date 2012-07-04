@@ -29,8 +29,8 @@
 
 //Global variables...
 
-extern volatile uint8_t FirstCycle ;
-extern volatile uint8_t GSdataCounter;
+extern uint8_t FirstCycle ;
+extern uint8_t GSdataCounter;
 extern uint8_t DCdataCounter;
 extern uint8_t c;
 

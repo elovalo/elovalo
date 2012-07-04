@@ -1,10 +1,16 @@
 /**
  * Ledikuutio Main...
+ * TODO: 	Make sure that SRAM usage stays as low as possible,
+ * 			avoid using local variables or declaring variables at runtime.
+ *
+ * TODO: 	Check if there's way to monitor the stack usage at runtime
+ * 			to avoid stack overflow when pushing close the SRAM limit...
+ *
  */
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <util/delay.h>
+//#include <util/delay.h>
 #include "pinMacros.h"
 #include "main.h"
 #include "init.h"
@@ -18,11 +24,11 @@
 
 uint8_t c=0; //Global testing variable...
 
-//Grayscale data array, lenght is 24 * number of devices...
+//Grayscale data array, lenght is 24 * number of devices * number of layers in a cube...
 //TODO: currently fixed to 1 device, calculate from number of devices an fill with values
-uint8_t GSdata[24*TLC5940]={0x88,0x80,0x00,0x88,0x80,0x00,0x88,0x80,
-							0x00,0x88,0x80,0x00,0x00,0x00,0x00,0x00,
-							0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+uint8_t GSdata[24*TLC5940]={0xff,0xf0,0x00,0xff,0xf0,0x00,0xff,0xf0,
+							0x00,0xff,0xf0,0x00,0xff,0xf0,0x00,0xff,
+							0xf0,0x00,0xff,0xf0,0x00,0xff,0xf0,0x00};
 
 //TODO: backbuffer for double buffering...
 //volatile uint8_t *BackBuffer = GSdata2;
@@ -31,10 +37,10 @@ uint8_t GSdata[24*TLC5940]={0x88,0x80,0x00,0x88,0x80,0x00,0x88,0x80,
 uint8_t *FrontBuffer = GSdata;
 
 //USART variables...
-volatile uint8_t RXpuskuri;
-volatile uint8_t TXpuskuri[8];
-volatile uint8_t sendData=0;
-volatile uint8_t i=0;
+//volatile uint8_t RXpuskuri;
+//volatile uint8_t TXpuskuri[8];
+//volatile uint8_t sendData=0;
+//volatile uint8_t i=0;
 
 int main() {
 
@@ -63,23 +69,23 @@ int main() {
 	return 0;
 }
 
-//Send byte via USART
-void USART_Transmit()
-{
-
-}
-
-//Generic SPI master transmission
-//Return slave data.
-void SPI_Transfer(uint8_t cData)
-{
-	/* Start transmission */
-	PORTB |= (1<<PB1);
-	SPDR = cData; //Send byte
-	/* Wait for transmission complete */
-	while(!(SPSR & (1<<SPIF)));
-	PORTB &= ~(1<<PB1);
-}
+////Send byte via USART
+//void USART_Transmit()
+//{
+//
+//}
+//
+////Generic SPI master transmission
+////Return slave data.
+//void SPI_Transfer(uint8_t cData)
+//{
+//	/* Start transmission */
+//	PORTB |= (1<<PB1);
+//	SPDR = cData; //Send byte
+//	/* Wait for transmission complete */
+//	while(!(SPSR & (1<<SPIF)));
+//	PORTB &= ~(1<<PB1);
+//}
 
 ////SPI Transfer for TLC5940
 //void SPI_Transfer_TLC5940(uint8_t FrontBuffer[])
@@ -112,7 +118,7 @@ void SPI_Transfer(uint8_t cData)
 ISR(BADISR_vect)
 {
 
+	pin_high(DEBUG_LED); //Give us an indication about an error condition...
 	while(1){
-		pin_high(DEBUG_LED); //Give us an indication about an error condition...
 		}
 }

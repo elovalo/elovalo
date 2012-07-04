@@ -11,8 +11,8 @@
 #include "init.h"
 #include "main.h"
 
-volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
-volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array
+uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
+uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
@@ -49,7 +49,7 @@ void DCInputCycle(){
 		//Pulse XLAT to latch sent data...
 		pin_high(XLAT);
 		pin_low(XLAT);
-		//TODO: Support EEPROM?
+		//TODO: Support EEPROM writing with 22V VPRG signal?
 
 	}
 }
