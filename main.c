@@ -22,25 +22,23 @@
 //volatile uint8_t producer;
 //volatile uint8_t consumer;
 
-volatile uint8_t c=0; //Global testing variable...
+volatile uint16_t c=0; //Global testing variable...
 
 //Grayscale data array, lenght is 24 * number of devices * number of layers in a cube...
 //TODO: currently fixed to 1 device, calculate from number of devices an fill with values
-volatile uint8_t GSdata[24*TLC5940]={0x00,0x0f,0xff,0x00,0x0f,0xff,0xff,0xff,
-							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+//TODO: remember to clear these arrays or initialize them to 0 before blank goes low.
+uint8_t GSdata[24*TLC5940]={0x00};
 
-volatile uint8_t GSdata2[24*TLC5940]={0xf0,0x0f,0xf0,0x00,0x00,0x00,0xff,0xff,
-							0xff,0xff,0xff,0xff,0x00,0x00,0xff,0xff,
-							0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+uint8_t GSdata2[24*TLC5940]={0x00};
 
-volatile uint8_t *Midbuffer = 0;
+uint8_t *Midbuffer = GSdata2; //TODO: arrange the code more logically, this should be moved...
 
 //TODO: backbuffer for double buffering...
-volatile uint8_t *BackBuffer = GSdata2;
+uint8_t *BackBuffer = GSdata2;
 
 //Pointer to the GS data buffer that holds the data to be sent to the TLC5940
-volatile uint8_t *FrontBuffer = GSdata;
+uint8_t *FrontBuffer = GSdata;
+
 
 //USART variables...
 //volatile uint8_t RXpuskuri;
@@ -51,6 +49,7 @@ volatile uint8_t *FrontBuffer = GSdata;
 int main() {
 
 	cli();
+
 	disableWDT();
 	initPorts();
 	initSPI();
@@ -58,58 +57,81 @@ int main() {
 	initTLC5940();
 	initBLANKTimer();
 
+	initUSART();
 	sei();
 
 	InitGScycle(); //TODO: Send first byte to the SPI bus...
 
-	/* TODO: flipping for the buffers...
-	* flipitiflip bufferille
-	* *FrontBuffer ^= *BackBuffer;
-	* *BackBuffer ^= *FrontBuffer;
-	* *FrontBuffer ^= *BackBuffer;
-	*/
-	int i = 0;
+	uint8_t i = 0;
 
 	while(1){
-		// Clear backbuffer
+
+		// Clear backbuffer once every frame...
 		if (isAfterFlip) {
-			zeroArray(BackBuffer, 24*TLC5940);
+			clearArray(BackBuffer, 24*TLC5940);
 			i++;
+			if(i==24){
+				i=0;
+			}
+
+
+			if (i < (24*TLC5940)-1) {
+				if (i % 2 == 0) { //If odd...
+
+					USART_Transmit(i);
+					BackBuffer[i] = 0xff;
+					BackBuffer[i + 1] = 0xf0;
+				}
+				else if(i==23){ //If even...
+					//pin_low(DEBUG_LED);
+
+					BackBuffer[i] = 0xff;
+					BackBuffer[i - 1] = 0x0f;
+				}
+				else{
+					BackBuffer[i] = 0x0f;
+					BackBuffer[i + 1] = 0xff;
+				}
+			}
+
 			isAfterFlip = 0;
 		}
 
-		if (i < 24*TLC5940 -1) {
+		//Backbuffer drawing code goes here!
+		//cli();
 
-			if (i % 2 == 0) {
-				BackBuffer[i] = 0x0f;
-				BackBuffer[i + 1] = 0xff;
-			}
-			else {
-				BackBuffer[i] = 0xff;
-				BackBuffer[i + 1] = 0xf0;
-			}
-		}
-		else {
-			i = 0;
-		}
+
+
+		//sei();
 	}
 
 	return 0;
 }
 
-void zeroArray(volatile uint8_t* arr, uint8_t len) {
-	int i = 0;
-	for (; i < len; i++) {
-		arr[i] = 0x00;
-	}
+void animSnake(){
+	//USART_Transmit(i);
+
 }
 
-////Send byte via USART
-//void USART_Transmit()
-//{
-//
-//}
-//
+void clearArray(volatile uint8_t *arr, uint8_t len) {
+
+	pin_toggle(DEBUG_LED);
+	for (uint8_t r = 0; r < len; r++) {
+		arr[r] = 0x00;
+	}
+
+}
+
+//Send byte via USART
+void USART_Transmit(uint8_t data)
+{
+	/* Wait for empty transmit buffer*/
+	while( !( UCSR0A & (1<<UDRE0)) );
+	UDR0 = data;
+	/* Put data into buffer, sends the data*/
+
+}
+
 ////Generic SPI master transmission
 ////Return slave data.
 //void SPI_Transfer(uint8_t cData)

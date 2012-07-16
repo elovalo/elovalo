@@ -11,7 +11,8 @@
 #define TLC5940 1 //Number of devices
 #define GS_DATA_LENGHT (TLC5940*24)-1 //One layers data length
 #define DC_DATA_LENGTH (TLC5940*12)-1 //Dot correction data lenght for one layer
-#define USE_EEPROM_DC_DATA 1 //Use preprogrammed EEPROMdata in dot correction
+
+#define USE_EEPROM_DC_DATA 0 //Use preprogrammed EEPROMdata in dot correction
 
 //Define IO
 
@@ -29,11 +30,11 @@
 
 //Global variables...
 
-extern uint8_t FirstCycle ;
-extern uint8_t GSdataCounter;
+extern volatile uint8_t FirstCycle ;
+extern volatile uint8_t GSdataCounter;
 extern uint8_t DCdataCounter;
-extern volatile uint8_t c;
-extern uint8_t isAfterFlip;
+//extern volatile uint16_t c;
+extern volatile uint8_t isAfterFlip;
 
 void initTLC5940();
 

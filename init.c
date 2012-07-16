@@ -26,14 +26,16 @@ void disableWDT(){
 void initPorts(){
 
 	//TODO: Remove unnecessary initialization and trust the defaults from the datasheet after debugging...
-	MCUCR |= (0<<PUD); //Ensure we're using pull-ups if configured to be so...
+	//MCUCR = (0<<PUD); //Ensure we're using pull-ups if configured to be so...
 
 	//DDRB = 0x00; //Should be this way after reset, but to make sure...
 
 	//TODO: Move these over to the respective modules...
-	DDRB |= (1<<PB1)|(1<<PB2)|(1<<PB3)|(1<<PB5);
+
 	//Set BLANK high (it doubles as !SS pin, thus it has to be an output to stay in master SPI mode)...
+	DDRB |= (1<<PB1)|(1<<PB2)|(1<<PB3)|(1<<PB5);
 	PORTB |= (1<<PB2);
+
 
 	//DDRC = 0x00;
 
@@ -48,12 +50,12 @@ void initSPI(){
 	/* Set MOSI, !SS and SCK output*/
 	DDRB |= (1<<PB2)|(1<<PB3)|(1<<PB5);
 
-	SPCR =
+	SPCR |=
 	(1<<SPIE) | //We want interrupts
 	(1<<SPE) | 	//We want the SPI enabled
 	(1<<MSTR); //We want the atmega to be a master
 
-	SPSR = (1<<SPI2X) ; //Doubles the speed of the SPI clock
+	SPSR |= (1<<SPI2X) ; //Doubles the speed of the SPI clock
 
 }
 
@@ -66,15 +68,16 @@ void initBLANKTimer(){
 	// Enable Timer Compare match A interrupt
 	TIMSK0 |= (1 << OCIE0A);
 	//clk_io/1024 timer ON!
-	TCCR0B = (1 << CS02) | (1 << CS00);
+	TCCR0B |= (1 << CS02) | (1 << CS00);
 }
 
 void initUSART(){
 
 	uint16_t ubrr = 103; //(F_CPU/(16UL*BAUD_RATE))-1;
 
+	DDRD |= (1<<PD1);
 	// disable all interrupts before configuration
-	cli();
+	//cli();
 
 	// USART0 Baud Rate Register
 	// set clock divider
@@ -83,8 +86,8 @@ void initUSART(){
 
     // Set frame format to 8 data bits, no parity, 1 stop bit
     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
-    //enable reception and RC complete interrupt
-    UCSR0B |= (1<<RXEN0)|(1<<RXCIE0)|(1<<TXEN0);
+    //enable transmitter
+    UCSR0B |= (1<<TXEN0);
 
 }
 
