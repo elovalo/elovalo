@@ -62,36 +62,39 @@ int main() {
 
 	InitGScycle(); //TODO: Send first byte to the SPI bus...
 
-	uint8_t i = 0;
-
+	uint8_t i = 1;
+	uint8_t apu = 1; //we need this in order to determine if the non-skipped number is odd
 	while(1){
 
 		// Clear backbuffer once every frame...
 		if (isAfterFlip) {
 			clearArray(BackBuffer, 24*TLC5940);
-			i++;
-			if(i==24){
-				i=0;
+
+			if (i < (25*TLC5940)) {
+
+				if(i%3==0){ //Skip!
+					i++;
+					apu=1; //we need to reset the helper
+				}
+
+
+				if(apu==1){ //Odd
+					BackBuffer[i-1]=0xff;
+					BackBuffer[i]=0xf0;
+				}else{//even
+					BackBuffer[i-1]=0x0f;
+					BackBuffer[i]=0xff;
+				}
+				apu++;
+
 			}
 
+			i++;
 
-			if (i < (24*TLC5940)-1) {
-				if (i % 2 == 0) { //If odd...
-
-					USART_Transmit(i);
-					BackBuffer[i] = 0xff;
-					BackBuffer[i + 1] = 0xf0;
-				}
-				else if(i==23){ //If even...
-					//pin_low(DEBUG_LED);
-
-					BackBuffer[i] = 0xff;
-					BackBuffer[i - 1] = 0x0f;
-				}
-				else{
-					BackBuffer[i] = 0x0f;
-					BackBuffer[i + 1] = 0xff;
-				}
+			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
+				i=1;
+				apu=1;
+				//clearArray(BackBuffer, 24*TLC5940);
 			}
 
 			isAfterFlip = 0;
@@ -115,7 +118,7 @@ void animSnake(){
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
 
-	pin_toggle(DEBUG_LED);
+	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
 		arr[r] = 0x00;
 	}

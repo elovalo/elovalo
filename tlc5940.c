@@ -109,11 +109,12 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	if(GSdataCounter!=0){
-		pin_high(DEBUG_LED);
+		//pin_toggle(DEBUG_LED);
 	}
 
-	if(c==1200){
-		c=0;
+	if(c>=100){
+
+		pin_toggle(DEBUG_LED);
 		/* Flip the display buffer
 		* TODO: flipping for the buffers...
 		* flipitiflip bufferille
@@ -126,6 +127,7 @@ ISR(TIMER0_COMPA_vect)
 		FrontBuffer = BackBuffer;
 		BackBuffer = Midbuffer;
 
+		c=0;
 		isAfterFlip = 1;
 	}
 

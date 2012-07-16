@@ -1,0 +1,72 @@
+diff --git a/tlc5940.c b/tlc5940.c
+index d5a44f7..6457669 100644
+--- a/tlc5940.c
++++ b/tlc5940.c
+@@ -11,10 +11,10 @@
+ #include "init.h"
+ #include "main.h"
+ 
+-uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
+-uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
++volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
++volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
+ uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
+-uint8_t isAfterFlip = 0;
++volatile uint8_t isAfterFlip = 0;
+ 
+ //Sets all the signals to their expected values and initiates the dot correction cycle...
+ void initTLC5940(){
+@@ -40,7 +40,7 @@ void DCInputCycle(){
+ 		pin_high(VPRG); //Set dot correction data input mode on
+ 
+ 		//Send dot correction data to the SPI bus...
+-		for(DCdataCounter = 0; DCdataCounter < DC_DATA_LENGTH; DCdataCounter++){
++		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
+ 			/* Start transmission */
+ 			SPDR = 0xff; //Send byte
+ 			//TODO: allow usage of dot correction data array...
+@@ -88,7 +88,6 @@ ISR(SPI_STC_vect)
+ 	}
+ 	else{
+ 		GSdataCounter=0;
+-		//TODO: access SPDR to clear SPIF flag. (it's supposed to be cleared when entering ISR)
+ 	}
+ }
+ 
+@@ -109,18 +108,31 @@ ISR(TIMER0_COMPA_vect)
+ 		FirstCycle = 0;
+ 	}
+ 
+-	if(c>=255){
+-	// flipitiflip bufferille
++	if(GSdataCounter!=0){
++		pin_high(DEBUG_LED);
++	}
++
++	if(c==1200){
++		c=0;
++		/* Flip the display buffer
++		* TODO: flipping for the buffers...
++		* flipitiflip bufferille
++		* *FrontBuffer ^= *BackBuffer;
++		* *BackBuffer ^= *FrontBuffer;
++		* *FrontBuffer ^= *BackBuffer;
++		* TODO: Optimize for 2 bytes of ram or possibly with on...
++		*/
+ 		Midbuffer = FrontBuffer;
+ 		FrontBuffer = BackBuffer;
+ 		BackBuffer = Midbuffer;
+ 
+-		c=0;
+-		pin_toggle(DEBUG_LED);
+ 		isAfterFlip = 1;
+ 	}
+ 
+    // Start new transfer....
+-   InitGScycle();
++	pin_low(BLANK);
++
++	SPDR = FrontBuffer[GSdataCounter];
++
+ }
+ 

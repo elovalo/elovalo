@@ -3,15 +3,15 @@ ledivilkku2.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000006  00800100  00000396  0000042a  2**0
+  0 .data         00000006  00800100  000003a8  0000043c  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000396  00000000  00000000  00000094  2**1
+  1 .text         000003a8  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000036  00800106  00800106  00000430  2**0
+  2 .bss          00000036  00800106  00800106  00000442  2**0
                   ALLOC
-  3 .stab         00000c90  00000000  00000000  00000430  2**2
+  3 .stab         00000c78  00000000  00000000  00000444  2**2
                   CONTENTS, READONLY, DEBUGGING
-  4 .stabstr      000008ff  00000000  00000000  000010c0  2**0
+  4 .stabstr      0000090a  00000000  00000000  000010bc  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -31,10 +31,10 @@ Disassembly of section .text:
   2c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   30:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   34:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
-  38:	0c 94 58 01 	jmp	0x2b0	; 0x2b0 <__vector_14>
+  38:	0c 94 53 01 	jmp	0x2a6	; 0x2a6 <__vector_14>
   3c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   40:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
-  44:	0c 94 2b 01 	jmp	0x256	; 0x256 <__vector_17>
+  44:	0c 94 26 01 	jmp	0x24c	; 0x24c <__vector_17>
   48:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   4c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   50:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
@@ -56,7 +56,7 @@ Disassembly of section .text:
   74:	11 e0       	ldi	r17, 0x01	; 1
   76:	a0 e0       	ldi	r26, 0x00	; 0
   78:	b1 e0       	ldi	r27, 0x01	; 1
-  7a:	e6 e9       	ldi	r30, 0x96	; 150
+  7a:	e8 ea       	ldi	r30, 0xA8	; 168
   7c:	f3 e0       	ldi	r31, 0x03	; 3
   7e:	02 c0       	rjmp	.+4      	; 0x84 <.do_copy_data_start>
 
@@ -82,11 +82,11 @@ Disassembly of section .text:
   94:	ac 33       	cpi	r26, 0x3C	; 60
   96:	b1 07       	cpc	r27, r17
   98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-  9a:	0e 94 af 00 	call	0x15e	; 0x15e <main>
-  9e:	0c 94 c9 01 	jmp	0x392	; 0x392 <_exit>
+  9a:	0e 94 a8 00 	call	0x150	; 0x150 <main>
+  9e:	0c 94 d2 01 	jmp	0x3a4	; 0x3a4 <_exit>
 
 000000a2 <__bad_interrupt>:
-  a2:	0c 94 a8 00 	jmp	0x150	; 0x150 <__vector_default>
+  a2:	0c 94 a1 00 	jmp	0x142	; 0x142 <__vector_default>
 
 000000a6 <disableWDT>:
 //#include <util/delay.h>
@@ -234,586 +234,581 @@ void animSnake(){
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
  11c:	48 2f       	mov	r20, r24
- 11e:	29 2f       	mov	r18, r25
 
-	pin_toggle(DEBUG_LED);
- 120:	8b b1       	in	r24, 0x0b	; 11
- 122:	90 e1       	ldi	r25, 0x10	; 16
- 124:	89 27       	eor	r24, r25
- 126:	8b b9       	out	0x0b, r24	; 11
+	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
- 128:	66 23       	and	r22, r22
- 12a:	49 f0       	breq	.+18     	; 0x13e <clearArray+0x22>
- 12c:	84 2f       	mov	r24, r20
- 12e:	92 2f       	mov	r25, r18
- 130:	9c 01       	movw	r18, r24
- 132:	f9 01       	movw	r30, r18
+ 11e:	66 23       	and	r22, r22
+ 120:	39 f0       	breq	.+14     	; 0x130 <clearArray+0x14>
+ 122:	9c 01       	movw	r18, r24
+ 124:	f9 01       	movw	r30, r18
 		arr[r] = 0x00;
- 134:	11 92       	st	Z+, r1
+ 126:	11 92       	st	Z+, r1
 }
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
 
-	pin_toggle(DEBUG_LED);
+	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
- 136:	8e 2f       	mov	r24, r30
- 138:	84 1b       	sub	r24, r20
- 13a:	86 17       	cp	r24, r22
- 13c:	d8 f3       	brcs	.-10     	; 0x134 <clearArray+0x18>
- 13e:	08 95       	ret
+ 128:	8e 2f       	mov	r24, r30
+ 12a:	84 1b       	sub	r24, r20
+ 12c:	86 17       	cp	r24, r22
+ 12e:	d8 f3       	brcs	.-10     	; 0x126 <clearArray+0xa>
+ 130:	08 95       	ret
 
-00000140 <USART_Transmit>:
+00000132 <USART_Transmit>:
 
 }
 
 //Send byte via USART
 void USART_Transmit(uint8_t data)
 {
- 140:	98 2f       	mov	r25, r24
+ 132:	98 2f       	mov	r25, r24
 	/* Wait for empty transmit buffer*/
 	while( !( UCSR0A & (1<<UDRE0)) );
- 142:	80 91 c0 00 	lds	r24, 0x00C0
- 146:	85 ff       	sbrs	r24, 5
- 148:	fc cf       	rjmp	.-8      	; 0x142 <USART_Transmit+0x2>
+ 134:	80 91 c0 00 	lds	r24, 0x00C0
+ 138:	85 ff       	sbrs	r24, 5
+ 13a:	fc cf       	rjmp	.-8      	; 0x134 <USART_Transmit+0x2>
 	UDR0 = data;
- 14a:	90 93 c6 00 	sts	0x00C6, r25
+ 13c:	90 93 c6 00 	sts	0x00C6, r25
 	/* Put data into buffer, sends the data*/
 
 }
- 14e:	08 95       	ret
+ 140:	08 95       	ret
 
-00000150 <__vector_default>:
+00000142 <__vector_default>:
 //	//SPI_MasterTransmit(TXpuskuri);
 //}
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
 {
- 150:	1f 92       	push	r1
- 152:	0f 92       	push	r0
- 154:	0f b6       	in	r0, 0x3f	; 63
- 156:	0f 92       	push	r0
- 158:	11 24       	eor	r1, r1
+ 142:	1f 92       	push	r1
+ 144:	0f 92       	push	r0
+ 146:	0f b6       	in	r0, 0x3f	; 63
+ 148:	0f 92       	push	r0
+ 14a:	11 24       	eor	r1, r1
 
 	pin_high(DEBUG_LED); //Give us an indication about an error condition...
- 15a:	5c 9a       	sbi	0x0b, 4	; 11
- 15c:	ff cf       	rjmp	.-2      	; 0x15c <__vector_default+0xc>
+ 14c:	5c 9a       	sbi	0x0b, 4	; 11
+ 14e:	ff cf       	rjmp	.-2      	; 0x14e <__vector_default+0xc>
 
-0000015e <main>:
+00000150 <main>:
 //volatile uint8_t sendData=0;
 //volatile uint8_t i=0;
 
 int main() {
 
 	cli();
- 15e:	f8 94       	cli
+ 150:	f8 94       	cli
 
 	disableWDT();
- 160:	0e 94 53 00 	call	0xa6	; 0xa6 <disableWDT>
+ 152:	0e 94 53 00 	call	0xa6	; 0xa6 <disableWDT>
 	initPorts();
- 164:	0e 94 5c 00 	call	0xb8	; 0xb8 <initPorts>
+ 156:	0e 94 5c 00 	call	0xb8	; 0xb8 <initPorts>
 	initSPI();
- 168:	0e 94 65 00 	call	0xca	; 0xca <initSPI>
+ 15a:	0e 94 65 00 	call	0xca	; 0xca <initSPI>
 
 	initTLC5940();
- 16c:	0e 94 b4 01 	call	0x368	; 0x368 <initTLC5940>
+ 15e:	0e 94 b1 01 	call	0x362	; 0x362 <initTLC5940>
 	initBLANKTimer();
- 170:	0e 94 6f 00 	call	0xde	; 0xde <initBLANKTimer>
+ 162:	0e 94 6f 00 	call	0xde	; 0xde <initBLANKTimer>
 
 	initUSART();
- 174:	0e 94 7c 00 	call	0xf8	; 0xf8 <initUSART>
+ 166:	0e 94 7c 00 	call	0xf8	; 0xf8 <initUSART>
 	sei();
- 178:	78 94       	sei
+ 16a:	78 94       	sei
 
 	InitGScycle(); //TODO: Send first byte to the SPI bus...
- 17a:	0e 94 19 01 	call	0x232	; 0x232 <InitGScycle>
- 17e:	40 e0       	ldi	r20, 0x00	; 0
-
-}
-
-void clearArray(volatile uint8_t *arr, uint8_t len) {
-
-	pin_toggle(DEBUG_LED);
- 180:	50 e1       	ldi	r21, 0x10	; 16
-
-			if (i < (24*TLC5940)-1) {
-				if (i % 2 == 0) { //If odd...
-
-					USART_Transmit(i);
-					BackBuffer[i] = 0xff;
- 182:	6f ef       	ldi	r22, 0xFF	; 255
-					BackBuffer[i + 1] = 0xf0;
- 184:	70 ef       	ldi	r23, 0xF0	; 240
-
-					BackBuffer[i] = 0xff;
-					BackBuffer[i - 1] = 0x0f;
+ 16c:	0e 94 14 01 	call	0x228	; 0x228 <InitGScycle>
+ 170:	21 e0       	ldi	r18, 0x01	; 1
+ 172:	31 e0       	ldi	r19, 0x01	; 1
+					apu=1; //we need to reset the helper
 				}
-				else{
-					BackBuffer[i] = 0x0f;
- 186:	af e0       	ldi	r26, 0x0F	; 15
-	uint8_t i = 0;
 
+
+				if(apu==1){ //Odd
+					BackBuffer[i-1]=0xff;
+ 174:	4f ef       	ldi	r20, 0xFF	; 255
+					BackBuffer[i]=0xf0;
+ 176:	a0 ef       	ldi	r26, 0xF0	; 240
+				}else{//even
+					BackBuffer[i-1]=0x0f;
+ 178:	5f e0       	ldi	r21, 0x0F	; 15
+	uint8_t i = 1;
+	uint8_t apu = 1; //we need this in order to determine if the non-skipped number is odd
 	while(1){
 
 		// Clear backbuffer once every frame...
 		if (isAfterFlip) {
- 188:	80 91 3b 01 	lds	r24, 0x013B
- 18c:	88 23       	and	r24, r24
- 18e:	e1 f3       	breq	.-8      	; 0x188 <main+0x2a>
+ 17a:	80 91 3b 01 	lds	r24, 0x013B
+ 17e:	88 23       	and	r24, r24
+ 180:	e1 f3       	breq	.-8      	; 0x17a <main+0x2a>
 			clearArray(BackBuffer, 24*TLC5940);
- 190:	20 91 02 01 	lds	r18, 0x0102
- 194:	30 91 03 01 	lds	r19, 0x0103
-
-}
+ 182:	e0 91 02 01 	lds	r30, 0x0102
+ 186:	f0 91 03 01 	lds	r31, 0x0103
+ 18a:	cf 01       	movw	r24, r30
+ 18c:	48 96       	adiw	r24, 0x18	; 24
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
 
-	pin_toggle(DEBUG_LED);
- 198:	8b b1       	in	r24, 0x0b	; 11
- 19a:	85 27       	eor	r24, r21
- 19c:	8b b9       	out	0x0b, r24	; 11
- 19e:	c9 01       	movw	r24, r18
- 1a0:	fc 01       	movw	r30, r24
- 1a2:	48 96       	adiw	r24, 0x18	; 24
+	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
 		arr[r] = 0x00;
- 1a4:	11 92       	st	Z+, r1
+ 18e:	11 92       	st	Z+, r1
 }
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
 
-	pin_toggle(DEBUG_LED);
+	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
- 1a6:	e8 17       	cp	r30, r24
- 1a8:	f9 07       	cpc	r31, r25
- 1aa:	e1 f7       	brne	.-8      	; 0x1a4 <main+0x46>
-	while(1){
+ 190:	e8 17       	cp	r30, r24
+ 192:	f9 07       	cpc	r31, r25
+ 194:	e1 f7       	brne	.-8      	; 0x18e <main+0x3e>
 
 		// Clear backbuffer once every frame...
 		if (isAfterFlip) {
 			clearArray(BackBuffer, 24*TLC5940);
-			i++;
- 1ac:	4f 5f       	subi	r20, 0xFF	; 255
-			if(i==24){
- 1ae:	48 31       	cpi	r20, 0x18	; 24
- 1b0:	29 f0       	breq	.+10     	; 0x1bc <main+0x5e>
-				i=0;
+
+			if (i < (25*TLC5940)) {
+ 196:	29 31       	cpi	r18, 0x19	; 25
+ 198:	c8 f4       	brcc	.+50     	; 0x1cc <main+0x7c>
+
+				if(i%3==0){ //Skip!
+ 19a:	82 2f       	mov	r24, r18
+ 19c:	63 e0       	ldi	r22, 0x03	; 3
+ 19e:	0e 94 c6 01 	call	0x38c	; 0x38c <__udivmodqi4>
+ 1a2:	99 23       	and	r25, r25
+ 1a4:	e1 f4       	brne	.+56     	; 0x1de <main+0x8e>
+					i++;
+ 1a6:	2f 5f       	subi	r18, 0xFF	; 255
+					apu=1; //we need to reset the helper
+				}
+
+
+				if(apu==1){ //Odd
+					BackBuffer[i-1]=0xff;
+ 1a8:	82 2f       	mov	r24, r18
+ 1aa:	90 e0       	ldi	r25, 0x00	; 0
+ 1ac:	e0 91 02 01 	lds	r30, 0x0102
+ 1b0:	f0 91 03 01 	lds	r31, 0x0103
+ 1b4:	e8 0f       	add	r30, r24
+ 1b6:	f9 1f       	adc	r31, r25
+ 1b8:	31 97       	sbiw	r30, 0x01	; 1
+ 1ba:	40 83       	st	Z, r20
+					BackBuffer[i]=0xf0;
+ 1bc:	e0 91 02 01 	lds	r30, 0x0102
+ 1c0:	f0 91 03 01 	lds	r31, 0x0103
+ 1c4:	e8 0f       	add	r30, r24
+ 1c6:	f9 1f       	adc	r31, r25
+ 1c8:	a0 83       	st	Z, r26
+ 1ca:	32 e0       	ldi	r19, 0x02	; 2
+				}
+				apu++;
+
 			}
 
+			i++;
+ 1cc:	2f 5f       	subi	r18, 0xFF	; 255
 
-			if (i < (24*TLC5940)-1) {
- 1b2:	47 31       	cpi	r20, 0x17	; 23
- 1b4:	d8 f0       	brcs	.+54     	; 0x1ec <main+0x8e>
-					BackBuffer[i] = 0x0f;
-					BackBuffer[i + 1] = 0xff;
-				}
+			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
+ 1ce:	28 31       	cpi	r18, 0x18	; 24
+ 1d0:	19 f0       	breq	.+6      	; 0x1d8 <main+0x88>
+				i=1;
+				apu=1;
+				//clearArray(BackBuffer, 24*TLC5940);
 			}
 
 			isAfterFlip = 0;
- 1b6:	10 92 3b 01 	sts	0x013B, r1
- 1ba:	e6 cf       	rjmp	.-52     	; 0x188 <main+0x2a>
+ 1d2:	10 92 3b 01 	sts	0x013B, r1
+ 1d6:	d1 cf       	rjmp	.-94     	; 0x17a <main+0x2a>
 
-		// Clear backbuffer once every frame...
-		if (isAfterFlip) {
-			clearArray(BackBuffer, 24*TLC5940);
-			i++;
-			if(i==24){
- 1bc:	40 e0       	ldi	r20, 0x00	; 0
- 1be:	20 e0       	ldi	r18, 0x00	; 0
- 1c0:	30 e0       	ldi	r19, 0x00	; 0
-
-//Send byte via USART
-void USART_Transmit(uint8_t data)
-{
-	/* Wait for empty transmit buffer*/
-	while( !( UCSR0A & (1<<UDRE0)) );
- 1c2:	80 91 c0 00 	lds	r24, 0x00C0
- 1c6:	85 ff       	sbrs	r24, 5
- 1c8:	fc cf       	rjmp	.-8      	; 0x1c2 <main+0x64>
-	UDR0 = data;
- 1ca:	40 93 c6 00 	sts	0x00C6, r20
-
-			if (i < (24*TLC5940)-1) {
-				if (i % 2 == 0) { //If odd...
-
-					USART_Transmit(i);
-					BackBuffer[i] = 0xff;
- 1ce:	e0 91 02 01 	lds	r30, 0x0102
- 1d2:	f0 91 03 01 	lds	r31, 0x0103
- 1d6:	e2 0f       	add	r30, r18
- 1d8:	f3 1f       	adc	r31, r19
- 1da:	60 83       	st	Z, r22
-					BackBuffer[i + 1] = 0xf0;
- 1dc:	e0 91 02 01 	lds	r30, 0x0102
- 1e0:	f0 91 03 01 	lds	r31, 0x0103
- 1e4:	e2 0f       	add	r30, r18
- 1e6:	f3 1f       	adc	r31, r19
- 1e8:	71 83       	std	Z+1, r23	; 0x01
- 1ea:	e5 cf       	rjmp	.-54     	; 0x1b6 <main+0x58>
-				i=0;
 			}
 
+			i++;
 
-			if (i < (24*TLC5940)-1) {
-				if (i % 2 == 0) { //If odd...
- 1ec:	24 2f       	mov	r18, r20
- 1ee:	30 e0       	ldi	r19, 0x00	; 0
- 1f0:	40 ff       	sbrs	r20, 0
- 1f2:	e7 cf       	rjmp	.-50     	; 0x1c2 <main+0x64>
-
-					BackBuffer[i] = 0xff;
-					BackBuffer[i - 1] = 0x0f;
+			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
+ 1d8:	21 e0       	ldi	r18, 0x01	; 1
+ 1da:	31 e0       	ldi	r19, 0x01	; 1
+ 1dc:	fa cf       	rjmp	.-12     	; 0x1d2 <main+0x82>
+					i++;
+					apu=1; //we need to reset the helper
 				}
-				else{
-					BackBuffer[i] = 0x0f;
- 1f4:	e0 91 02 01 	lds	r30, 0x0102
- 1f8:	f0 91 03 01 	lds	r31, 0x0103
- 1fc:	e2 0f       	add	r30, r18
- 1fe:	f3 1f       	adc	r31, r19
- 200:	a0 83       	st	Z, r26
-					BackBuffer[i + 1] = 0xff;
- 202:	e0 91 02 01 	lds	r30, 0x0102
- 206:	f0 91 03 01 	lds	r31, 0x0103
- 20a:	e2 0f       	add	r30, r18
- 20c:	f3 1f       	adc	r31, r19
- 20e:	61 83       	std	Z+1, r22	; 0x01
- 210:	d2 cf       	rjmp	.-92     	; 0x1b6 <main+0x58>
 
-00000212 <DCInputCycle>:
+
+				if(apu==1){ //Odd
+ 1de:	31 30       	cpi	r19, 0x01	; 1
+ 1e0:	19 f3       	breq	.-58     	; 0x1a8 <main+0x58>
+					BackBuffer[i-1]=0xff;
+					BackBuffer[i]=0xf0;
+				}else{//even
+					BackBuffer[i-1]=0x0f;
+ 1e2:	82 2f       	mov	r24, r18
+ 1e4:	90 e0       	ldi	r25, 0x00	; 0
+ 1e6:	e0 91 02 01 	lds	r30, 0x0102
+ 1ea:	f0 91 03 01 	lds	r31, 0x0103
+ 1ee:	e8 0f       	add	r30, r24
+ 1f0:	f9 1f       	adc	r31, r25
+ 1f2:	31 97       	sbiw	r30, 0x01	; 1
+ 1f4:	50 83       	st	Z, r21
+					BackBuffer[i]=0xff;
+ 1f6:	e0 91 02 01 	lds	r30, 0x0102
+ 1fa:	f0 91 03 01 	lds	r31, 0x0103
+ 1fe:	e8 0f       	add	r30, r24
+ 200:	f9 1f       	adc	r31, r25
+ 202:	40 83       	st	Z, r20
+ 204:	3f 5f       	subi	r19, 0xFF	; 255
+ 206:	e2 cf       	rjmp	.-60     	; 0x1cc <main+0x7c>
+
+00000208 <DCInputCycle>:
 
 	if(USE_EEPROM_DC_DATA){
 		pin_low(DCPRG);
 	}
 	else{
 		pin_high(DCPRG); //Dot correction register programming on
- 212:	5a 9a       	sbi	0x0b, 2	; 11
+ 208:	5a 9a       	sbi	0x0b, 2	; 11
 		pin_high(VPRG); //Set dot correction data input mode on
- 214:	5b 9a       	sbi	0x0b, 3	; 11
- 216:	8b e0       	ldi	r24, 0x0B	; 11
+ 20a:	5b 9a       	sbi	0x0b, 3	; 11
+ 20c:	8b e0       	ldi	r24, 0x0B	; 11
 
 		//Send dot correction data to the SPI bus...
 		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
 			/* Start transmission */
 			SPDR = 0xff; //Send byte
- 218:	9f ef       	ldi	r25, 0xFF	; 255
- 21a:	9e bd       	out	0x2e, r25	; 46
+ 20e:	9f ef       	ldi	r25, 0xFF	; 255
+ 210:	9e bd       	out	0x2e, r25	; 46
 			//TODO: allow usage of dot correction data array...
 			/* Wait for transmission complete */
 			while(!(SPSR & (1<<SPIF)));
- 21c:	0d b4       	in	r0, 0x2d	; 45
- 21e:	07 fe       	sbrs	r0, 7
- 220:	fd cf       	rjmp	.-6      	; 0x21c <DCInputCycle+0xa>
- 222:	81 50       	subi	r24, 0x01	; 1
- 224:	d0 f7       	brcc	.-12     	; 0x21a <DCInputCycle+0x8>
+ 212:	0d b4       	in	r0, 0x2d	; 45
+ 214:	07 fe       	sbrs	r0, 7
+ 216:	fd cf       	rjmp	.-6      	; 0x212 <DCInputCycle+0xa>
+ 218:	81 50       	subi	r24, 0x01	; 1
+ 21a:	d0 f7       	brcc	.-12     	; 0x210 <DCInputCycle+0x8>
 	else{
 		pin_high(DCPRG); //Dot correction register programming on
 		pin_high(VPRG); //Set dot correction data input mode on
 
 		//Send dot correction data to the SPI bus...
 		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
- 226:	8c e0       	ldi	r24, 0x0C	; 12
- 228:	80 93 3a 01 	sts	0x013A, r24
+ 21c:	8c e0       	ldi	r24, 0x0C	; 12
+ 21e:	80 93 3a 01 	sts	0x013A, r24
 			//TODO: allow usage of dot correction data array...
 			/* Wait for transmission complete */
 			while(!(SPSR & (1<<SPIF)));
 		}
 		//Pulse XLAT to latch sent data...
 		pin_high(XLAT);
- 22c:	29 9a       	sbi	0x05, 1	; 5
+ 222:	29 9a       	sbi	0x05, 1	; 5
 		pin_low(XLAT);
- 22e:	29 98       	cbi	0x05, 1	; 5
+ 224:	29 98       	cbi	0x05, 1	; 5
 		//TODO: Support EEPROM writing with 22V VPRG signal?
 
 	}
 }
- 230:	08 95       	ret
+ 226:	08 95       	ret
 
-00000232 <InitGScycle>:
+00000228 <InitGScycle>:
  * Consecutive bytes are sent by an ISR: SPI_STC_vect
  */
 void InitGScycle(){
 
 	//Check if DC cycle was run before this...
 	if(get_output(VPRG)){
- 232:	5b 9b       	sbis	0x0b, 3	; 11
- 234:	04 c0       	rjmp	.+8      	; 0x23e <InitGScycle+0xc>
+ 228:	5b 9b       	sbis	0x0b, 3	; 11
+ 22a:	04 c0       	rjmp	.+8      	; 0x234 <InitGScycle+0xc>
 		pin_low(VPRG);
- 236:	5b 98       	cbi	0x0b, 3	; 11
+ 22c:	5b 98       	cbi	0x0b, 3	; 11
 		FirstCycle = 1;
- 238:	81 e0       	ldi	r24, 0x01	; 1
- 23a:	80 93 38 01 	sts	0x0138, r24
+ 22e:	81 e0       	ldi	r24, 0x01	; 1
+ 230:	80 93 38 01 	sts	0x0138, r24
 	}
 
 	//TODO: TEST if this is ok!
 	//TCCR0B = (1 << CS02) | (1 << CS00); //Enable timer!
 
 	pin_low(BLANK);
- 23e:	2a 98       	cbi	0x05, 2	; 5
+ 234:	2a 98       	cbi	0x05, 2	; 5
 
 	SPDR = FrontBuffer[GSdataCounter];
- 240:	80 91 39 01 	lds	r24, 0x0139
- 244:	e0 91 04 01 	lds	r30, 0x0104
- 248:	f0 91 05 01 	lds	r31, 0x0105
- 24c:	e8 0f       	add	r30, r24
- 24e:	f1 1d       	adc	r31, r1
- 250:	80 81       	ld	r24, Z
- 252:	8e bd       	out	0x2e, r24	; 46
+ 236:	80 91 39 01 	lds	r24, 0x0139
+ 23a:	e0 91 04 01 	lds	r30, 0x0104
+ 23e:	f0 91 05 01 	lds	r31, 0x0105
+ 242:	e8 0f       	add	r30, r24
+ 244:	f1 1d       	adc	r31, r1
+ 246:	80 81       	ld	r24, Z
+ 248:	8e bd       	out	0x2e, r24	; 46
 	//TCNT0 =0x00; //Reset timer....
 
 }
- 254:	08 95       	ret
+ 24a:	08 95       	ret
 
-00000256 <__vector_17>:
+0000024c <__vector_17>:
 
 /*SPI transmit interrupt vector
  * SPIF is cleared when entering this interrupt vector...
  */
 ISR(SPI_STC_vect)
 {
- 256:	1f 92       	push	r1
- 258:	0f 92       	push	r0
- 25a:	0f b6       	in	r0, 0x3f	; 63
- 25c:	0f 92       	push	r0
- 25e:	11 24       	eor	r1, r1
- 260:	8f 93       	push	r24
- 262:	ef 93       	push	r30
- 264:	ff 93       	push	r31
+ 24c:	1f 92       	push	r1
+ 24e:	0f 92       	push	r0
+ 250:	0f b6       	in	r0, 0x3f	; 63
+ 252:	0f 92       	push	r0
+ 254:	11 24       	eor	r1, r1
+ 256:	8f 93       	push	r24
+ 258:	ef 93       	push	r30
+ 25a:	ff 93       	push	r31
 	if(GSdataCounter < GS_DATA_LENGHT){
- 266:	80 91 39 01 	lds	r24, 0x0139
- 26a:	87 31       	cpi	r24, 0x17	; 23
- 26c:	50 f0       	brcs	.+20     	; 0x282 <__vector_17+0x2c>
+ 25c:	80 91 39 01 	lds	r24, 0x0139
+ 260:	87 31       	cpi	r24, 0x17	; 23
+ 262:	50 f0       	brcs	.+20     	; 0x278 <__vector_17+0x2c>
 		GSdataCounter++;
 		SPDR = FrontBuffer[GSdataCounter];
 	}
 	else{
 		GSdataCounter=0;
- 26e:	10 92 39 01 	sts	0x0139, r1
+ 264:	10 92 39 01 	sts	0x0139, r1
 	}
 }
- 272:	ff 91       	pop	r31
- 274:	ef 91       	pop	r30
- 276:	8f 91       	pop	r24
- 278:	0f 90       	pop	r0
- 27a:	0f be       	out	0x3f, r0	; 63
- 27c:	0f 90       	pop	r0
- 27e:	1f 90       	pop	r1
- 280:	18 95       	reti
+ 268:	ff 91       	pop	r31
+ 26a:	ef 91       	pop	r30
+ 26c:	8f 91       	pop	r24
+ 26e:	0f 90       	pop	r0
+ 270:	0f be       	out	0x3f, r0	; 63
+ 272:	0f 90       	pop	r0
+ 274:	1f 90       	pop	r1
+ 276:	18 95       	reti
  * SPIF is cleared when entering this interrupt vector...
  */
 ISR(SPI_STC_vect)
 {
 	if(GSdataCounter < GS_DATA_LENGHT){
 		GSdataCounter++;
- 282:	80 91 39 01 	lds	r24, 0x0139
- 286:	8f 5f       	subi	r24, 0xFF	; 255
- 288:	80 93 39 01 	sts	0x0139, r24
+ 278:	80 91 39 01 	lds	r24, 0x0139
+ 27c:	8f 5f       	subi	r24, 0xFF	; 255
+ 27e:	80 93 39 01 	sts	0x0139, r24
 		SPDR = FrontBuffer[GSdataCounter];
- 28c:	80 91 39 01 	lds	r24, 0x0139
- 290:	e0 91 04 01 	lds	r30, 0x0104
- 294:	f0 91 05 01 	lds	r31, 0x0105
- 298:	e8 0f       	add	r30, r24
- 29a:	f1 1d       	adc	r31, r1
- 29c:	80 81       	ld	r24, Z
- 29e:	8e bd       	out	0x2e, r24	; 46
+ 282:	80 91 39 01 	lds	r24, 0x0139
+ 286:	e0 91 04 01 	lds	r30, 0x0104
+ 28a:	f0 91 05 01 	lds	r31, 0x0105
+ 28e:	e8 0f       	add	r30, r24
+ 290:	f1 1d       	adc	r31, r1
+ 292:	80 81       	ld	r24, Z
+ 294:	8e bd       	out	0x2e, r24	; 46
 	}
 	else{
 		GSdataCounter=0;
 	}
 }
- 2a0:	ff 91       	pop	r31
- 2a2:	ef 91       	pop	r30
- 2a4:	8f 91       	pop	r24
- 2a6:	0f 90       	pop	r0
- 2a8:	0f be       	out	0x3f, r0	; 63
- 2aa:	0f 90       	pop	r0
- 2ac:	1f 90       	pop	r1
- 2ae:	18 95       	reti
+ 296:	ff 91       	pop	r31
+ 298:	ef 91       	pop	r30
+ 29a:	8f 91       	pop	r24
+ 29c:	0f 90       	pop	r0
+ 29e:	0f be       	out	0x3f, r0	; 63
+ 2a0:	0f 90       	pop	r0
+ 2a2:	1f 90       	pop	r1
+ 2a4:	18 95       	reti
 
-000002b0 <__vector_14>:
+000002a6 <__vector_14>:
 /*
  * BLANK timer interrupt Timer0
  * Interrupt if TCNT0 = OCR0A
  */
 ISR(TIMER0_COMPA_vect)
 {
- 2b0:	1f 92       	push	r1
- 2b2:	0f 92       	push	r0
- 2b4:	0f b6       	in	r0, 0x3f	; 63
- 2b6:	0f 92       	push	r0
- 2b8:	11 24       	eor	r1, r1
- 2ba:	2f 93       	push	r18
- 2bc:	8f 93       	push	r24
- 2be:	9f 93       	push	r25
- 2c0:	ef 93       	push	r30
- 2c2:	ff 93       	push	r31
+ 2a6:	1f 92       	push	r1
+ 2a8:	0f 92       	push	r0
+ 2aa:	0f b6       	in	r0, 0x3f	; 63
+ 2ac:	0f 92       	push	r0
+ 2ae:	11 24       	eor	r1, r1
+ 2b0:	2f 93       	push	r18
+ 2b2:	8f 93       	push	r24
+ 2b4:	9f 93       	push	r25
+ 2b6:	ef 93       	push	r30
+ 2b8:	ff 93       	push	r31
 	c++;
- 2c4:	80 91 06 01 	lds	r24, 0x0106
- 2c8:	90 91 07 01 	lds	r25, 0x0107
- 2cc:	01 96       	adiw	r24, 0x01	; 1
- 2ce:	90 93 07 01 	sts	0x0107, r25
- 2d2:	80 93 06 01 	sts	0x0106, r24
+ 2ba:	80 91 06 01 	lds	r24, 0x0106
+ 2be:	90 91 07 01 	lds	r25, 0x0107
+ 2c2:	01 96       	adiw	r24, 0x01	; 1
+ 2c4:	90 93 07 01 	sts	0x0107, r25
+ 2c8:	80 93 06 01 	sts	0x0106, r24
 	pin_high(BLANK);
- 2d6:	2a 9a       	sbi	0x05, 2	; 5
+ 2cc:	2a 9a       	sbi	0x05, 2	; 5
 	pin_high(XLAT);
- 2d8:	29 9a       	sbi	0x05, 1	; 5
+ 2ce:	29 9a       	sbi	0x05, 1	; 5
 	pin_low(XLAT);
- 2da:	29 98       	cbi	0x05, 1	; 5
+ 2d0:	29 98       	cbi	0x05, 1	; 5
 
 	if(FirstCycle){
- 2dc:	80 91 38 01 	lds	r24, 0x0138
- 2e0:	88 23       	and	r24, r24
- 2e2:	21 f0       	breq	.+8      	; 0x2ec <__vector_14+0x3c>
+ 2d2:	80 91 38 01 	lds	r24, 0x0138
+ 2d6:	88 23       	and	r24, r24
+ 2d8:	21 f0       	breq	.+8      	; 0x2e2 <__vector_14+0x3c>
 		pin_high(SCLK);
- 2e4:	2d 9a       	sbi	0x05, 5	; 5
+ 2da:	2d 9a       	sbi	0x05, 5	; 5
 		pin_low(SCLK);
- 2e6:	2d 98       	cbi	0x05, 5	; 5
+ 2dc:	2d 98       	cbi	0x05, 5	; 5
 		FirstCycle = 0;
- 2e8:	10 92 38 01 	sts	0x0138, r1
+ 2de:	10 92 38 01 	sts	0x0138, r1
 	}
 
 	if(GSdataCounter!=0){
- 2ec:	80 91 39 01 	lds	r24, 0x0139
- 2f0:	81 11       	cpse	r24, r1
-		pin_high(DEBUG_LED);
- 2f2:	5c 9a       	sbi	0x0b, 4	; 11
+ 2e2:	80 91 39 01 	lds	r24, 0x0139
+		//pin_toggle(DEBUG_LED);
 	}
 
-	if(c==1200){
- 2f4:	80 91 06 01 	lds	r24, 0x0106
- 2f8:	90 91 07 01 	lds	r25, 0x0107
- 2fc:	80 5b       	subi	r24, 0xB0	; 176
- 2fe:	94 40       	sbci	r25, 0x04	; 4
- 300:	a9 f0       	breq	.+42     	; 0x32c <__vector_14+0x7c>
- 302:	e0 91 04 01 	lds	r30, 0x0104
- 306:	f0 91 05 01 	lds	r31, 0x0105
+	if(c>=100){
+ 2e6:	80 91 06 01 	lds	r24, 0x0106
+ 2ea:	90 91 07 01 	lds	r25, 0x0107
+ 2ee:	84 36       	cpi	r24, 0x64	; 100
+ 2f0:	91 05       	cpc	r25, r1
+ 2f2:	90 f1       	brcs	.+100    	; 0x358 <__vector_14+0xb2>
 
-		isAfterFlip = 1;
-	}
-
-   // Start new transfer....
-	pin_low(BLANK);
- 30a:	2a 98       	cbi	0x05, 2	; 5
-
-	SPDR = FrontBuffer[GSdataCounter];
- 30c:	80 91 39 01 	lds	r24, 0x0139
- 310:	e8 0f       	add	r30, r24
- 312:	f1 1d       	adc	r31, r1
- 314:	80 81       	ld	r24, Z
- 316:	8e bd       	out	0x2e, r24	; 46
-
-}
- 318:	ff 91       	pop	r31
- 31a:	ef 91       	pop	r30
- 31c:	9f 91       	pop	r25
- 31e:	8f 91       	pop	r24
- 320:	2f 91       	pop	r18
- 322:	0f 90       	pop	r0
- 324:	0f be       	out	0x3f, r0	; 63
- 326:	0f 90       	pop	r0
- 328:	1f 90       	pop	r1
- 32a:	18 95       	reti
-	if(GSdataCounter!=0){
-		pin_high(DEBUG_LED);
-	}
-
-	if(c==1200){
-		c=0;
- 32c:	10 92 07 01 	sts	0x0107, r1
- 330:	10 92 06 01 	sts	0x0106, r1
+		pin_toggle(DEBUG_LED);
+ 2f4:	8b b1       	in	r24, 0x0b	; 11
+ 2f6:	90 e1       	ldi	r25, 0x10	; 16
+ 2f8:	89 27       	eor	r24, r25
+ 2fa:	8b b9       	out	0x0b, r24	; 11
 		* *FrontBuffer ^= *BackBuffer;
 		* *BackBuffer ^= *FrontBuffer;
 		* *FrontBuffer ^= *BackBuffer;
 		* TODO: Optimize for 2 bytes of ram or possibly with on...
 		*/
 		Midbuffer = FrontBuffer;
- 334:	e0 91 04 01 	lds	r30, 0x0104
- 338:	f0 91 05 01 	lds	r31, 0x0105
- 33c:	cf 01       	movw	r24, r30
- 33e:	2e 2f       	mov	r18, r30
- 340:	e0 93 00 01 	sts	0x0100, r30
- 344:	90 93 01 01 	sts	0x0101, r25
+ 2fc:	e0 91 04 01 	lds	r30, 0x0104
+ 300:	f0 91 05 01 	lds	r31, 0x0105
+ 304:	cf 01       	movw	r24, r30
+ 306:	2e 2f       	mov	r18, r30
+ 308:	e0 93 00 01 	sts	0x0100, r30
+ 30c:	90 93 01 01 	sts	0x0101, r25
 		FrontBuffer = BackBuffer;
- 348:	e0 91 02 01 	lds	r30, 0x0102
- 34c:	f0 91 03 01 	lds	r31, 0x0103
- 350:	f0 93 05 01 	sts	0x0105, r31
- 354:	e0 93 04 01 	sts	0x0104, r30
+ 310:	e0 91 02 01 	lds	r30, 0x0102
+ 314:	f0 91 03 01 	lds	r31, 0x0103
+ 318:	f0 93 05 01 	sts	0x0105, r31
+ 31c:	e0 93 04 01 	sts	0x0104, r30
 		BackBuffer = Midbuffer;
- 358:	20 93 02 01 	sts	0x0102, r18
- 35c:	90 93 03 01 	sts	0x0103, r25
+ 320:	20 93 02 01 	sts	0x0102, r18
+ 324:	90 93 03 01 	sts	0x0103, r25
 
+		c=0;
+ 328:	10 92 07 01 	sts	0x0107, r1
+ 32c:	10 92 06 01 	sts	0x0106, r1
 		isAfterFlip = 1;
- 360:	81 e0       	ldi	r24, 0x01	; 1
- 362:	80 93 3b 01 	sts	0x013B, r24
- 366:	d1 cf       	rjmp	.-94     	; 0x30a <__vector_14+0x5a>
+ 330:	81 e0       	ldi	r24, 0x01	; 1
+ 332:	80 93 3b 01 	sts	0x013B, r24
+	}
 
-00000368 <initTLC5940>:
+   // Start new transfer....
+	pin_low(BLANK);
+ 336:	2a 98       	cbi	0x05, 2	; 5
+
+	SPDR = FrontBuffer[GSdataCounter];
+ 338:	80 91 39 01 	lds	r24, 0x0139
+ 33c:	e8 0f       	add	r30, r24
+ 33e:	f1 1d       	adc	r31, r1
+ 340:	80 81       	ld	r24, Z
+ 342:	8e bd       	out	0x2e, r24	; 46
+
+}
+ 344:	ff 91       	pop	r31
+ 346:	ef 91       	pop	r30
+ 348:	9f 91       	pop	r25
+ 34a:	8f 91       	pop	r24
+ 34c:	2f 91       	pop	r18
+ 34e:	0f 90       	pop	r0
+ 350:	0f be       	out	0x3f, r0	; 63
+ 352:	0f 90       	pop	r0
+ 354:	1f 90       	pop	r1
+ 356:	18 95       	reti
+ 358:	e0 91 04 01 	lds	r30, 0x0104
+ 35c:	f0 91 05 01 	lds	r31, 0x0105
+ 360:	ea cf       	rjmp	.-44     	; 0x336 <__vector_14+0x90>
+
+00000362 <initTLC5940>:
 uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
 volatile uint8_t isAfterFlip = 0;
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){
 	pin_low(XLAT);
- 368:	29 98       	cbi	0x05, 1	; 5
+ 362:	29 98       	cbi	0x05, 1	; 5
 	pin_low(DCPRG);
- 36a:	5a 98       	cbi	0x0b, 2	; 11
+ 364:	5a 98       	cbi	0x0b, 2	; 11
 	pin_high(VPRG);
- 36c:	5b 9a       	sbi	0x0b, 3	; 11
+ 366:	5b 9a       	sbi	0x0b, 3	; 11
 	pin_high(BLANK);
- 36e:	2a 9a       	sbi	0x05, 2	; 5
+ 368:	2a 9a       	sbi	0x05, 2	; 5
 	pin_low(SCLK);
- 370:	2d 98       	cbi	0x05, 5	; 5
+ 36a:	2d 98       	cbi	0x05, 5	; 5
 
 	if(USE_EEPROM_DC_DATA){
 		pin_low(DCPRG);
 	}
 	else{
 		pin_high(DCPRG); //Dot correction register programming on
- 372:	5a 9a       	sbi	0x0b, 2	; 11
+ 36c:	5a 9a       	sbi	0x0b, 2	; 11
 		pin_high(VPRG); //Set dot correction data input mode on
- 374:	5b 9a       	sbi	0x0b, 3	; 11
- 376:	8b e0       	ldi	r24, 0x0B	; 11
+ 36e:	5b 9a       	sbi	0x0b, 3	; 11
+ 370:	8b e0       	ldi	r24, 0x0B	; 11
 
 		//Send dot correction data to the SPI bus...
 		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
 			/* Start transmission */
 			SPDR = 0xff; //Send byte
- 378:	9f ef       	ldi	r25, 0xFF	; 255
- 37a:	9e bd       	out	0x2e, r25	; 46
+ 372:	9f ef       	ldi	r25, 0xFF	; 255
+ 374:	9e bd       	out	0x2e, r25	; 46
 			//TODO: allow usage of dot correction data array...
 			/* Wait for transmission complete */
 			while(!(SPSR & (1<<SPIF)));
- 37c:	0d b4       	in	r0, 0x2d	; 45
- 37e:	07 fe       	sbrs	r0, 7
- 380:	fd cf       	rjmp	.-6      	; 0x37c <initTLC5940+0x14>
- 382:	81 50       	subi	r24, 0x01	; 1
- 384:	d0 f7       	brcc	.-12     	; 0x37a <initTLC5940+0x12>
+ 376:	0d b4       	in	r0, 0x2d	; 45
+ 378:	07 fe       	sbrs	r0, 7
+ 37a:	fd cf       	rjmp	.-6      	; 0x376 <initTLC5940+0x14>
+ 37c:	81 50       	subi	r24, 0x01	; 1
+ 37e:	d0 f7       	brcc	.-12     	; 0x374 <initTLC5940+0x12>
 	else{
 		pin_high(DCPRG); //Dot correction register programming on
 		pin_high(VPRG); //Set dot correction data input mode on
 
 		//Send dot correction data to the SPI bus...
 		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
- 386:	8c e0       	ldi	r24, 0x0C	; 12
- 388:	80 93 3a 01 	sts	0x013A, r24
+ 380:	8c e0       	ldi	r24, 0x0C	; 12
+ 382:	80 93 3a 01 	sts	0x013A, r24
 			//TODO: allow usage of dot correction data array...
 			/* Wait for transmission complete */
 			while(!(SPSR & (1<<SPIF)));
 		}
 		//Pulse XLAT to latch sent data...
 		pin_high(XLAT);
- 38c:	29 9a       	sbi	0x05, 1	; 5
+ 386:	29 9a       	sbi	0x05, 1	; 5
 		pin_low(XLAT);
- 38e:	29 98       	cbi	0x05, 1	; 5
+ 388:	29 98       	cbi	0x05, 1	; 5
 	pin_low(DCPRG);
 	pin_high(VPRG);
 	pin_high(BLANK);
 	pin_low(SCLK);
 	DCInputCycle();
 }
- 390:	08 95       	ret
+ 38a:	08 95       	ret
 
-00000392 <_exit>:
- 392:	f8 94       	cli
+0000038c <__udivmodqi4>:
+ 38c:	99 1b       	sub	r25, r25
+ 38e:	79 e0       	ldi	r23, 0x09	; 9
+ 390:	04 c0       	rjmp	.+8      	; 0x39a <__udivmodqi4_ep>
 
-00000394 <__stop_program>:
- 394:	ff cf       	rjmp	.-2      	; 0x394 <__stop_program>
+00000392 <__udivmodqi4_loop>:
+ 392:	99 1f       	adc	r25, r25
+ 394:	96 17       	cp	r25, r22
+ 396:	08 f0       	brcs	.+2      	; 0x39a <__udivmodqi4_ep>
+ 398:	96 1b       	sub	r25, r22
+
+0000039a <__udivmodqi4_ep>:
+ 39a:	88 1f       	adc	r24, r24
+ 39c:	7a 95       	dec	r23
+ 39e:	c9 f7       	brne	.-14     	; 0x392 <__udivmodqi4_loop>
+ 3a0:	80 95       	com	r24
+ 3a2:	08 95       	ret
+
+000003a4 <_exit>:
+ 3a4:	f8 94       	cli
+
+000003a6 <__stop_program>:
+ 3a6:	ff cf       	rjmp	.-2      	; 0x3a6 <__stop_program>
