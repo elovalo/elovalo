@@ -22,6 +22,5 @@ int main(void);
 
 void clearArray(volatile uint8_t *arr, uint8_t);
 void USART_Transmit(uint8_t data);
-void animSnake();
 
 #endif /* MAIN_H_ */

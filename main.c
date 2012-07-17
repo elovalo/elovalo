@@ -39,7 +39,6 @@ uint8_t *BackBuffer = GSdata2;
 //Pointer to the GS data buffer that holds the data to be sent to the TLC5940
 uint8_t *FrontBuffer = GSdata;
 
-
 //USART variables...
 //volatile uint8_t RXpuskuri;
 //volatile uint8_t TXpuskuri[8];
@@ -96,9 +95,9 @@ int main() {
 				apu=1;
 				//clearArray(BackBuffer, 24*TLC5940);
 			}
-
 			isAfterFlip = 0;
 		}
+
 
 		//Backbuffer drawing code goes here!
 		//cli();
@@ -109,11 +108,6 @@ int main() {
 	}
 
 	return 0;
-}
-
-void animSnake(){
-	//USART_Transmit(i);
-
 }
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
@@ -135,6 +129,17 @@ void USART_Transmit(uint8_t data)
 
 }
 
+//USART Received byte vector
+//ISR(USART_RX_vect)
+//{
+//	TXpuskuri[i]=UDR0;
+//	if(i>=8){
+//		i=0;
+//	}
+//	UDR0 = TXpuskuri[i];
+//	i++;
+//	//SPI_MasterTransmit(TXpuskuri);
+//}
 ////Generic SPI master transmission
 ////Return slave data.
 //void SPI_Transfer(uint8_t cData)
@@ -162,17 +167,7 @@ void USART_Transmit(uint8_t data)
 //	//PORTB &= ~(1<<PB2);
 //}
 
-////USART Received byte vector
-//ISR(USART_RX_vect)
-//{
-//	TXpuskuri[i]=UDR0;
-//	if(i>=8){
-//		i=0;
-//	}
-//	UDR0 = TXpuskuri[i];
-//	i++;
-//	//SPI_MasterTransmit(TXpuskuri);
-//}
+
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)

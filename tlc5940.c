@@ -108,21 +108,11 @@ ISR(TIMER0_COMPA_vect)
 		FirstCycle = 0;
 	}
 
-	if(GSdataCounter!=0){
+	if(c>=50){
+
 		//pin_toggle(DEBUG_LED);
-	}
 
-	if(c>=100){
-
-		pin_toggle(DEBUG_LED);
-		/* Flip the display buffer
-		* TODO: flipping for the buffers...
-		* flipitiflip bufferille
-		* *FrontBuffer ^= *BackBuffer;
-		* *BackBuffer ^= *FrontBuffer;
-		* *FrontBuffer ^= *BackBuffer;
-		* TODO: Optimize for 2 bytes of ram or possibly with on...
-		*/
+		//Flip buffers...
 		Midbuffer = FrontBuffer;
 		FrontBuffer = BackBuffer;
 		BackBuffer = Midbuffer;
@@ -134,7 +124,9 @@ ISR(TIMER0_COMPA_vect)
    // Start new transfer....
 	pin_low(BLANK);
 
+	if(isAfterFlip){
 	SPDR = FrontBuffer[GSdataCounter];
+	}
 
 }
 

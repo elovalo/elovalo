@@ -121,7 +121,7 @@ LOAD d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000      0x3a8
+.text           0x00000000      0x39e
  *(.vectors)
  .vectors       0x00000000       0x68 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm328p.o
                 0x00000000                __vectors
@@ -206,34 +206,33 @@ LOAD d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
                 0x000000a6                disableWDT
                 0x000000de                initBLANKTimer
                 0x000000ca                initSPI
- .text          0x0000011a       0xee ./main.o
-                0x0000011c                clearArray
-                0x0000011a                animSnake
-                0x00000132                USART_Transmit
-                0x00000142                __vector_default
-                0x00000150                main
- .text          0x00000208      0x184 ./tlc5940.o
-                0x00000208                DCInputCycle
-                0x0000024c                __vector_17
-                0x00000362                initTLC5940
-                0x000002a6                __vector_14
-                0x00000228                InitGScycle
- .text          0x0000038c        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
- .text          0x0000038c        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .text          0x0000038c        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .text          0x0000038c        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
-                0x0000038c                . = ALIGN (0x2)
+ .text          0x0000011a       0xec ./main.o
+                0x0000011a                clearArray
+                0x00000130                USART_Transmit
+                0x00000140                __vector_default
+                0x0000014e                main
+ .text          0x00000206      0x17c ./tlc5940.o
+                0x00000206                DCInputCycle
+                0x0000024a                __vector_17
+                0x00000358                initTLC5940
+                0x000002a4                __vector_14
+                0x00000226                InitGScycle
+ .text          0x00000382        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+ .text          0x00000382        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .text          0x00000382        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .text          0x00000382        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+                0x00000382                . = ALIGN (0x2)
  *(.text.*)
- .text.libgcc   0x0000038c       0x18 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
-                0x0000038c                __udivmodqi4
- .text.libgcc   0x000003a4        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
- .text.libgcc   0x000003a4        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
- .text.libgcc   0x000003a4        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
-                0x000003a4                . = ALIGN (0x2)
+ .text.libgcc   0x00000382       0x18 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_udivmodqi4.o)
+                0x00000382                __udivmodqi4
+ .text.libgcc   0x0000039a        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .text.libgcc   0x0000039a        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_copy_data.o)
+ .text.libgcc   0x0000039a        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_clear_bss.o)
+                0x0000039a                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000003a4        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
-                0x000003a4                exit
-                0x000003a4                _exit
+ .fini9         0x0000039a        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+                0x0000039a                exit
+                0x0000039a                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -252,11 +251,11 @@ LOAD d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000003a4        0x4 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
+ .fini0         0x0000039a        0x4 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a(_exit.o)
  *(.fini0)
-                0x000003a8                _etext = .
+                0x0000039e                _etext = .
 
-.data           0x00800100        0x6 load address 0x000003a8
+.data           0x00800100        0x6 load address 0x0000039e
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm328p.o
@@ -299,8 +298,8 @@ LOAD d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
  *(.bss*)
  *(COMMON)
                 0x0080013c                PROVIDE (__bss_end, .)
-                0x000003a8                __data_load_start = LOADADDR (.data)
-                0x000003ae                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x0000039e                __data_load_start = LOADADDR (.data)
+                0x000003a4                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x0080013c        0x0
                 0x0080013c                PROVIDE (__noinit_start, .)
@@ -325,17 +324,17 @@ LOAD d:/winavr-20100110/bin/../lib/gcc/avr/4.3.3/avr5\libgcc.a
 .signature
  *(.signature*)
 
-.stab           0x00000000      0xc78
+.stab           0x00000000      0xc48
  *(.stab)
  .stab          0x00000000      0x468 ./init.o
- .stab          0x00000468      0x3d8 ./main.o
-                                0x5a0 (size before relaxing)
- .stab          0x00000840      0x438 ./tlc5940.o
-                                0x5f4 (size before relaxing)
+ .stab          0x00000468      0x3b4 ./main.o
+                                0x57c (size before relaxing)
+ .stab          0x0000081c      0x42c ./tlc5940.o
+                                0x5e8 (size before relaxing)
 
-.stabstr        0x00000000      0x90a
+.stabstr        0x00000000      0x8f8
  *(.stabstr)
- .stabstr       0x00000000      0x90a ./init.o
+ .stabstr       0x00000000      0x8f8 ./init.o
 
 .stab.excl
  *(.stab.excl)
