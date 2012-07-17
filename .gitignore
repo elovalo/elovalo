@@ -1,5 +1,6 @@
-Debug/
-Release/
-Ram usage/
+/Debug
+/Release
+/Ram usage
+/Release_with_extended_lss
 *.swp
 *.swo
