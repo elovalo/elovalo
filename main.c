@@ -181,7 +181,7 @@ ISR(USART_RX_vect)
 	// Wrap to start
 	if (rx_in_p == rx_buf + BUF_SIZE) rx_in_p = rx_buf;
 	
-	if (rx_in_p == rx_out_buf) {
+	if (rx_in_p == rx_out_p) {
 		// Overflow condition
 		rx_state = RX_OVERFLOW;
 	}
@@ -191,7 +191,7 @@ ISR(USART_RX_vect)
  * Returns the number of bytes available in receive buffer
  */
 uint8_t serial_available(void) {
-	return (rx_in_p - rx_out_p) % BUF_SIZE;
+	return (rx_in_p - rx_out_p) % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
 }
 
 /**
@@ -201,7 +201,7 @@ uint8_t serial_available(void) {
  */
 uint8_t serial_read(void) {
 	uint8_t data = *rx_out_p++;
-	if (rx_out_buf == rx_buf + BUF_SIZE) rx_out_p = rx_buf;
+	if (rx_out_p == rx_buf + BUF_SIZE) rx_out_p = rx_buf;
 	return data;
 }
 
