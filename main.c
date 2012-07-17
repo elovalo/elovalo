@@ -43,8 +43,10 @@ uint8_t *FrontBuffer = GSdata;
 #define BUF_SIZE 64
 #define RX_OK 0
 #define RX_OVERFLOW 1
-volatile uint8_t rx_buf[BUF_SIZE];
-volatile uint8_t *rx_in_p, *rx_out_p;
+uint8_t rx_buf[BUF_SIZE];
+uint8_t * volatile rx_in_p;
+uint8_t * volatile rx_out_p;
+
 volatile uint8_t rx_state = RX_OK;
 
 int main() {
@@ -67,50 +69,17 @@ int main() {
 
 	InitGScycle(); //TODO: Send first byte to the SPI bus...
 
-	uint8_t i = 1;
-	uint8_t apu = 1; //we need this in order to determine if the non-skipped number is odd
 	while(1){
 
 		// Clear backbuffer once every frame...
-		if (isAfterFlip) {
-			clearArray(BackBuffer, 24*TLC5940);
+//		if (isAfterFlip) {
+//		}
 
-			if (i < (25*TLC5940)) {
-
-				if(i%3==0){ //Skip!
-					i++;
-					apu=1; //we need to reset the helper
-				}
-
-
-				if(apu==1){ //Odd
-					BackBuffer[i-1]=0xff;
-					BackBuffer[i]=0xf0;
-				}else{//even
-					BackBuffer[i-1]=0x0f;
-					BackBuffer[i]=0xff;
-				}
-				apu++;
-
-			}
-
-			i++;
-
-			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
-				i=1;
-				apu=1;
-				//clearArray(BackBuffer, 24*TLC5940);
-			}
-			isAfterFlip = 0;
+		if(serial_available()>0){
+			pin_toggle(DEBUG_LED);
+			USART_Transmit(serial_read());
 		}
 
-
-		//Backbuffer drawing code goes here!
-		//cli();
-
-
-
-		//sei();
 	}
 
 	return 0;
@@ -173,7 +142,7 @@ void USART_Transmit(uint8_t data)
 //	//PORTB &= ~(1<<PB2);
 //}
 
-////USART Received byte vector
+//USART Received byte vector
 ISR(USART_RX_vect)
 {
 	*rx_in_p++ = UDR0;
@@ -191,7 +160,7 @@ ISR(USART_RX_vect)
  * Returns the number of bytes available in receive buffer
  */
 uint8_t serial_available(void) {
-	return (rx_in_p - rx_out_p) % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
+	return (rx_in_p - rx_out_p);// % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
 }
 
 /**

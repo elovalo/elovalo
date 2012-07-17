@@ -21,6 +21,10 @@ extern uint8_t *Midbuffer;
 int main(void);
 
 void clearArray(volatile uint8_t *arr, uint8_t);
+
 void USART_Transmit(uint8_t data);
+uint8_t serial_available(void);
+void serial_empty(void);
+uint8_t serial_read(void);
 
 #endif /* MAIN_H_ */

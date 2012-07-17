@@ -88,6 +88,8 @@ void initUSART(){
     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
     //enable transmitter
     UCSR0B |= (1<<TXEN0);
+    UCSR0B |= (1<<RXEN0);
+    UCSR0B |= (1<<RXCIE0);
 
 }
 
