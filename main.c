@@ -195,6 +195,13 @@ uint8_t serial_available(void) {
 }
 
 /**
+ * Empties receive buffer.
+ */
+void serial_empty(void) {
+	rx_out_p = rx_in_p;
+}
+
+/**
  * Reads a byte from receive buffer. Does not check underrun
  * condition; the user is responsible to check serial_available()
  * before calling this.
