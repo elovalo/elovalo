@@ -40,10 +40,12 @@ uint8_t *BackBuffer = GSdata2;
 uint8_t *FrontBuffer = GSdata;
 
 //USART variables...
-//volatile uint8_t RXpuskuri;
-//volatile uint8_t TXpuskuri[8];
-//volatile uint8_t sendData=0;
-//volatile uint8_t i=0;
+#define BUF_SIZE 64
+#define RX_OK 0
+#define RX_OVERFLOW 1
+volatile uint8_t rx_buf[BUF_SIZE];
+volatile uint8_t *rx_in_p, *rx_out_p;
+volatile uint8_t rx_state = RX_OK;
 
 int main() {
 
@@ -55,6 +57,10 @@ int main() {
 
 	initTLC5940();
 	initBLANKTimer();
+
+	// RX ring buffer setup
+	rx_in_p = rx_buf;
+	rx_out_p = rx_buf;
 
 	initUSART();
 	sei();
@@ -167,7 +173,37 @@ void USART_Transmit(uint8_t data)
 //	//PORTB &= ~(1<<PB2);
 //}
 
+////USART Received byte vector
+ISR(USART_RX_vect)
+{
+	*rx_in_p++ = UDR0;
 
+	// Wrap to start
+	if (rx_in_p == rx_buf + BUF_SIZE) rx_in_p = rx_buf;
+	
+	if (rx_in_p == rx_out_buf) {
+		// Overflow condition
+		rx_state = RX_OVERFLOW;
+	}
+}
+
+/**
+ * Returns the number of bytes available in receive buffer
+ */
+uint8_t serial_available(void) {
+	return (rx_in_p - rx_out_p) % BUF_SIZE;
+}
+
+/**
+ * Reads a byte from receive buffer. Does not check underrun
+ * condition; the user is responsible to check serial_available()
+ * before calling this.
+ */
+uint8_t serial_read(void) {
+	uint8_t data = *rx_out_p++;
+	if (rx_out_buf == rx_buf + BUF_SIZE) rx_out_p = rx_buf;
+	return data;
+}
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
