@@ -160,7 +160,7 @@ ISR(USART_RX_vect)
  * Returns the number of bytes available in receive buffer
  */
 uint8_t serial_available(void) {
-	return (rx_in_p - rx_out_p);// % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
+	return (rx_in_p - rx_out_p) % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
 }
 
 /**
