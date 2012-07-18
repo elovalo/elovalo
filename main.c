@@ -81,6 +81,8 @@ int main() {
 
 		if(serial_available()){
 
+			serial_send(0xf5);
+
 			if(state==DEFAULT){
 				//wait command from usart and process it
 
@@ -167,6 +169,7 @@ void processCommand(){
 void stateMachine(){
 	switch (serial_read()) {
 		case ESCAPE:
+			while(!serial_available());
 			if(serial_read()==0x00){
 				//literal escape
 				//state = 0x00
@@ -190,27 +193,6 @@ void clearArray(volatile uint8_t *arr, uint8_t len) {
 
 }
 
-//Send byte via USART. TODO DEPRECATED. Use buffered serial_send()
-void USART_Transmit(uint8_t data)
-{
-	/* Wait for empty transmit buffer*/
-	while( !( UCSR0A & (1<<UDRE0)) );
-	UDR0 = data;
-	/* Put data into buffer, sends the data*/
-
-}
-
-//USART Received byte vector
-//ISR(USART_RX_vect)
-//{
-//	TXpuskuri[i]=UDR0;
-//	if(i>=8){
-//		i=0;
-//	}
-//	UDR0 = TXpuskuri[i];
-//	i++;
-//	//SPI_MasterTransmit(TXpuskuri);
-//}
 ////Generic SPI master transmission
 ////Return slave data.
 //void SPI_Transfer(uint8_t cData)
@@ -274,8 +256,17 @@ uint8_t serial_available(void) {
 /**
  * Empties receive buffer.
  */
-void serial_empty(void) {
+void serial_RX_empty(void) {
 	rx_out_i = rx_in_i;
+}
+
+/**
+ * Empties transmit buffer.
+ * And clears the error condition
+ */
+void serial_TX_empty(void) {
+	tx_in_i = tx_out_i;
+	tx_state = TXRX_OK;
 }
 
 /**

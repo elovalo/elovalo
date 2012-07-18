@@ -22,9 +22,11 @@ int main(void);
 
 void clearArray(volatile uint8_t *arr, uint8_t);
 
-void USART_Transmit(uint8_t data);
+void serial_send(uint8_t data);
 uint8_t serial_available(void);
-void serial_empty(void);
+uint8_t serial_send_available(void);
+void serial_RX_empty(void);
+void serial_TX_empty(void);
 uint8_t serial_read(void);
 
 void processCommand();
