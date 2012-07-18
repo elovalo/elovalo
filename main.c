@@ -4,23 +4,16 @@
  * 			avoid using local variables or declaring variables at runtime.
  *
  * TODO: 	Check if there's way to monitor the stack usage at runtime
- * 			to avoid stack overflow when pushing close the SRAM limit...
+ * 			to avoid stack overflow when pushing close the SRAM limit.
  *
  */
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-//#include <util/delay.h>
 #include "pinMacros.h"
 #include "main.h"
 #include "init.h"
 #include "tlc5940.h"
-
-//int input_states=0xF0;
-//int *ptr_input_states = &input_states;
-//int i;
-//volatile uint8_t producer;
-//volatile uint8_t consumer;
 
 volatile uint16_t c=0; //Global testing variable...
 
@@ -67,7 +60,6 @@ int main() {
 
 	while(1){
 
-		// Clear backbuffer once every frame...
 //		if (isAfterFlip) {
 //		}
 
@@ -83,7 +75,6 @@ int main() {
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
 
-	//pin_toggle(DEBUG_LED);
 	for (uint8_t r = 0; r < len; r++) {
 		arr[r] = 0x00;
 	}
@@ -152,6 +143,14 @@ ISR(USART_RX_vect)
 	}
 }
 
+//USART Transmit complete interrupt
+ISR(USART_TX_vect)
+{
+	//TODO: Implement usart interrupt driven transmission
+	//Get next byte from TX buffer and put it to USART transmit buffer
+	//Manage buffer
+}
+
 /**
  * Returns the number of bytes available in receive buffer
  */
@@ -180,7 +179,6 @@ uint8_t serial_read(void) {
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
 {
-
 	pin_high(DEBUG_LED); //Give us an indication about an error condition...
 	while(1){
 		}
