@@ -67,13 +67,9 @@ void InitGScycle(){
 		FirstCycle = 1;
 	}
 
-	//TODO: TEST if this is ok!
-	//TCCR0B = (1 << CS02) | (1 << CS00); //Enable timer!
-
 	pin_low(BLANK);
 
 	SPDR = FrontBuffer[GSdataCounter];
-	//TCNT0 =0x00; //Reset timer....
 
 }
 

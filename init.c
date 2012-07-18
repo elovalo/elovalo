@@ -8,7 +8,6 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
-//#include <util/delay.h>
 #include "pinMacros.h"
 #include "init.h"
 
@@ -36,10 +35,6 @@ void initPorts(){
 	DDRB |= (1<<PB1)|(1<<PB2)|(1<<PB3)|(1<<PB5);
 	PORTB |= (1<<PB2);
 
-
-	//DDRC = 0x00;
-
-	//DDRD = 0x00;
 	DDRD |= (1<<PD2)|(1<<PD3)|(1<<PD4); //PD4 = debug led...
 	PORTD |= (1<<PD3); //Put only VPRG to high on init...
 
@@ -76,8 +71,6 @@ void initUSART(){
 	uint16_t ubrr = 103; //(F_CPU/(16UL*BAUD_RATE))-1;
 
 	DDRD |= (1<<PD1);
-	// disable all interrupts before configuration
-	//cli();
 
 	// USART0 Baud Rate Register
 	// set clock divider
@@ -86,10 +79,11 @@ void initUSART(){
 
     // Set frame format to 8 data bits, no parity, 1 stop bit
     UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
-    //enable transmitter
-    UCSR0B |= (1<<TXEN0);
-    UCSR0B |= (1<<RXEN0);
-    UCSR0B |= (1<<RXCIE0);
+
+    UCSR0B |= (1<<TXEN0); //Transmit enable
+    UCSR0B |= (1<<RXEN0); //Receive enable
+    UCSR0B |= (1<<RXCIE0); //Receive ready interrupt
+    UCSR0B |= (1<<TXCIE0); //transmit ready interrupt
 
 }
 
