@@ -83,7 +83,7 @@ void initUSART(){
     UCSR0B |= (1<<TXEN0); //Transmit enable
     UCSR0B |= (1<<RXEN0); //Receive enable
     UCSR0B |= (1<<RXCIE0); //Receive ready interrupt
-    UCSR0B |= (1<<TXCIE0); //transmit ready interrupt
+    //UCSR0B |= (1<<TXCIE0); //transmit ready interrupt
 
 }
 

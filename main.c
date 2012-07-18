@@ -36,11 +36,22 @@ uint8_t *FrontBuffer = GSdata;
 #define BUF_SIZE 64
 #define RX_OK 0
 #define RX_OVERFLOW 1
+#define ESCAPE 0x7e
+
+#define DEFAULT 0x00
+#define STANDALONE 0x01
+#define SERIAL_SLAVE 0x02
+
+uint8_t state=0x00;
+
 uint8_t rx_buf[BUF_SIZE];
 volatile uint8_t rx_in_i = 0;
 uint8_t rx_out_i = 0;
 
 volatile uint8_t rx_state = RX_OK;
+
+uint8_t i = 1;
+uint8_t apu = 1; //we need this in order to determine if the non-skipped number is odd
 
 int main() {
 
@@ -63,14 +74,107 @@ int main() {
 //		if (isAfterFlip) {
 //		}
 
-		if(serial_available()>=2){
-			pin_toggle(DEBUG_LED);
-			USART_Transmit(serial_read()+serial_read());
+		if(serial_available()){
+
+			if(state==DEFAULT){
+				//wait command from usart and process it
+
+				processCommand();
+			}
+			else{
+				stateMachine();
+			}
+
+		}
+
+		if(state == STANDALONE){
+			animSnake();
+		}
+
+		if(state == SERIAL_SLAVE){
+			//put the current byte to the backbuffer unelss it's literal escape
 		}
 
 	}
 
 	return 0;
+}
+
+void animSnake(){
+	// Clear backbuffer once every frame...
+		if (isAfterFlip) {
+			clearArray(BackBuffer, 24*TLC5940);
+
+			if (i < (25*TLC5940)) {
+
+				if(i%3==0){ //Skip!
+					i++;
+					apu=1; //we need to reset the helper
+				}
+
+
+				if(apu==1){ //Odd
+					BackBuffer[i-1]=0xff;
+					BackBuffer[i]=0xf0;
+				}else{//even
+					BackBuffer[i-1]=0x0f;
+					BackBuffer[i]=0xff;
+				}
+				apu++;
+
+			}
+
+			i++;
+
+			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
+				i=1;
+				apu=1;
+				//clearArray(BackBuffer, 24*TLC5940);
+			}
+
+			isAfterFlip = 0;
+		}
+}
+
+void processCommand(){
+	switch (serial_read()) {
+		case ESCAPE:
+
+				state = DEFAULT;
+			break;
+
+		case STANDALONE:
+
+				state = STANDALONE;
+			break;
+
+		case SERIAL_SLAVE:
+
+				state = SERIAL_SLAVE;
+			break;
+
+		default:
+			//keep the current state
+			break;
+	}
+}
+
+void stateMachine(){
+	switch (serial_read()) {
+		case ESCAPE:
+			if(serial_read()==0x00){
+				//literal escape
+				//state = 0x00
+			}
+			else{
+				state = 0x00;
+			}
+			break;
+
+		default:
+			//do whatever in the current state
+			break;
+	}
 }
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
