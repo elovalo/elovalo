@@ -33,13 +33,18 @@ uint8_t *BackBuffer = GSdata2;
 uint8_t *FrontBuffer = GSdata;
 
 //USART variables...
+#define TX_BUF_SIZE 8
 #define RX_BUF_SIZE 64
 #define TXRX_OK 0
 #define TXRX_OVERFLOW 1
 uint8_t rx_buf[RX_BUF_SIZE];
+uint8_t tx_buf[TX_BUF_SIZE];
 volatile uint8_t rx_in_i = 0;
 uint8_t rx_out_i = 0;
+uint8_t tx_in_i = 0;
+volatile uint8_t tx_out_i = 0;
 
+volatile uint8_t tx_state = TXRX_OK;
 volatile uint8_t rx_state = TXRX_OK;
 
 int main() {
@@ -81,7 +86,7 @@ void clearArray(volatile uint8_t *arr, uint8_t len) {
 
 }
 
-//Send byte via USART
+//Send byte via USART. TODO DEPRECATED. Use buffered serial_send()
 void USART_Transmit(uint8_t data)
 {
 	/* Wait for empty transmit buffer*/
@@ -146,9 +151,12 @@ ISR(USART_RX_vect)
 //USART Transmit complete interrupt
 ISR(USART_TX_vect)
 {
-	//TODO: Implement usart interrupt driven transmission
-	//Get next byte from TX buffer and put it to USART transmit buffer
-	//Manage buffer
+	// If no data in buffer, then we just bail out.
+	if (tx_in_i == tx_out_i) return;
+
+	// Send the byte and wrap to start if needed
+	UDR0 = tx_buf[tx_out_i++];
+	if (tx_out_i == TX_BUF_SIZE) tx_out_i = 0;
 }
 
 /**
@@ -175,6 +183,40 @@ uint8_t serial_read(void) {
 	uint8_t data = rx_buf[rx_out_i++];
 	if (rx_out_i == RX_BUF_SIZE) rx_out_i = 0;
 	return data;
+}
+
+/**
+ * Returns free capacity in send buffer. That is how many bytes can be
+ * transmitted at once.
+ */
+uint8_t serial_send_available(void) {
+	uint8_t diff = tx_out_i - tx_in_i - 1;
+	return (tx_out_i < tx_in_i + 1) ? diff + TX_BUF_SIZE : diff;
+}
+
+/**
+ * Send a byte to serial port. Does not check overflow condition; the
+ * user is responsible to check serial_send_available() before calling
+ * this.
+ */
+void serial_send(uint8_t data)
+{
+	/* If buffer is empty and no byte is in transit, do not queue
+	 * at all. */
+	if (tx_in_i == tx_out_i && (UCSR0A & (1<<UDRE0))) {
+		UDR0 = data;
+		return;
+	}
+
+	tx_buf[tx_in_i++] = data;
+
+	// Wrap to start
+	if (tx_in_i == RX_BUF_SIZE) tx_in_i = 0;
+	
+	if (tx_in_i == tx_out_i) {
+		// Overflow condition
+		tx_state = TXRX_OVERFLOW;
+	}	
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
