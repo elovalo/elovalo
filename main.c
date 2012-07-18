@@ -33,14 +33,14 @@ uint8_t *BackBuffer = GSdata2;
 uint8_t *FrontBuffer = GSdata;
 
 //USART variables...
-#define BUF_SIZE 64
-#define RX_OK 0
-#define RX_OVERFLOW 1
-uint8_t rx_buf[BUF_SIZE];
+#define RX_BUF_SIZE 64
+#define TXRX_OK 0
+#define TXRX_OVERFLOW 1
+uint8_t rx_buf[RX_BUF_SIZE];
 volatile uint8_t rx_in_i = 0;
 uint8_t rx_out_i = 0;
 
-volatile uint8_t rx_state = RX_OK;
+volatile uint8_t rx_state = TXRX_OK;
 
 int main() {
 
@@ -135,11 +135,11 @@ ISR(USART_RX_vect)
 	rx_buf[rx_in_i++] = UDR0;
 
 	// Wrap to start
-	if (rx_in_i == BUF_SIZE) rx_in_i = 0;
+	if (rx_in_i == RX_BUF_SIZE) rx_in_i = 0;
 	
 	if (rx_in_i == rx_out_i) {
 		// Overflow condition
-		rx_state = RX_OVERFLOW;
+		rx_state = TXRX_OVERFLOW;
 	}
 }
 
@@ -156,7 +156,7 @@ ISR(USART_TX_vect)
  */
 uint8_t serial_available(void) {
 	uint8_t diff = rx_in_i - rx_out_i;
-	return (rx_in_i < rx_out_i) ? diff + BUF_SIZE : diff;
+	return (rx_in_i < rx_out_i) ? diff + RX_BUF_SIZE : diff;
 }
 
 /**
@@ -173,7 +173,7 @@ void serial_empty(void) {
  */
 uint8_t serial_read(void) {
 	uint8_t data = rx_buf[rx_out_i++];
-	if (rx_out_i == BUF_SIZE) rx_out_i = 0;
+	if (rx_out_i == RX_BUF_SIZE) rx_out_i = 0;
 	return data;
 }
 
