@@ -44,8 +44,8 @@ uint8_t *FrontBuffer = GSdata;
 #define RX_OK 0
 #define RX_OVERFLOW 1
 uint8_t rx_buf[BUF_SIZE];
-uint8_t * volatile rx_in_p;
-uint8_t * volatile rx_out_p;
+volatile uint8_t rx_in_i = 0;
+uint8_t rx_out_i = 0;
 
 volatile uint8_t rx_state = RX_OK;
 
@@ -59,10 +59,6 @@ int main() {
 
 	initTLC5940();
 	initBLANKTimer();
-
-	// RX ring buffer setup
-	rx_in_p = rx_buf;
-	rx_out_p = rx_buf;
 
 	initUSART();
 	sei();
@@ -145,12 +141,12 @@ void USART_Transmit(uint8_t data)
 //USART Received byte vector
 ISR(USART_RX_vect)
 {
-	*rx_in_p++ = UDR0;
+	rx_buf[rx_in_i++] = UDR0;
 
 	// Wrap to start
-	if (rx_in_p == rx_buf + BUF_SIZE) rx_in_p = rx_buf;
+	if (rx_in_i == BUF_SIZE) rx_in_i = 0;
 	
-	if (rx_in_p == rx_out_p) {
+	if (rx_in_i == rx_out_i) {
 		// Overflow condition
 		rx_state = RX_OVERFLOW;
 	}
@@ -160,14 +156,14 @@ ISR(USART_RX_vect)
  * Returns the number of bytes available in receive buffer
  */
 uint8_t serial_available(void) {
-	return (rx_in_p - rx_out_p) % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
+	return (rx_in_i - rx_out_i) % BUF_SIZE; //TODO: Ensure pointer promotion to signed for possible negative result...
 }
 
 /**
  * Empties receive buffer.
  */
 void serial_empty(void) {
-	rx_out_p = rx_in_p;
+	rx_out_i = rx_in_i;
 }
 
 /**
@@ -176,8 +172,8 @@ void serial_empty(void) {
  * before calling this.
  */
 uint8_t serial_read(void) {
-	uint8_t data = *rx_out_p++;
-	if (rx_out_p == rx_buf + BUF_SIZE) rx_out_p = rx_buf;
+	uint8_t data = rx_buf[rx_out_i++];
+	if (rx_out_i == BUF_SIZE) rx_out_i = 0;
 	return data;
 }
 
