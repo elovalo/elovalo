@@ -27,4 +27,8 @@ uint8_t serial_available(void);
 void serial_empty(void);
 uint8_t serial_read(void);
 
+void processCommand();
+void stateMachine();
+void animSnake();
+
 #endif /* MAIN_H_ */
