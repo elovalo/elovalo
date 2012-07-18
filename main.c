@@ -63,9 +63,9 @@ int main() {
 //		if (isAfterFlip) {
 //		}
 
-		if(serial_available()>0){
+		if(serial_available()>=2){
 			pin_toggle(DEBUG_LED);
-			USART_Transmit(serial_read());
+			USART_Transmit(serial_read()+serial_read());
 		}
 
 	}
