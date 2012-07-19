@@ -6,6 +6,8 @@
  * NB. Do not expect this to compile!
  */
 
+#include <stdint.h>
+#include <math.h>
 #include "main.h"
 
 
@@ -33,15 +35,20 @@ void set_led(int x, int y, int z, int i)
 	 * bytes) */
 	int voxelIx = 12*12*12*x + 12*12*y + 12*z;
 
-	uint16 *raw = BackBuffer + (voxelIx / 8);
+	int pos = voxelIx / 8;
+	uint16_t raw = (BackBuffer[pos] << 8) | BackBuffer[pos+1];
 
 	// Protect from overflows. Comment out if you need to save CPU cycles.
 	if (i < 0) i = 0;
 	else if (i > 4095) i = 4095;
 
-	// Update tablee
-	if (voxelIx % 8) *raw = *raw & 0xf000 | i;
-	else *raw = *raw & 0x000f | i << 4;
+	// Update table
+	if (voxelIx % 8) raw = (raw & 0xf000) | i;
+	else raw = (raw & 0x000f) | i << 4;
+
+	// Store data back to buffer
+	BackBuffer[pos] = raw >> 8;
+	BackBuffer[pos+1] = raw;
 }
 
 /**
