@@ -11,10 +11,10 @@
 #include "init.h"
 #include "main.h"
 
-uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
-uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
+volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
+volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
-uint8_t isAfterFlip = 0;
+volatile uint8_t isAfterFlip = 0;
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){
@@ -40,7 +40,7 @@ void DCInputCycle(){
 		pin_high(VPRG); //Set dot correction data input mode on
 
 		//Send dot correction data to the SPI bus...
-		for(DCdataCounter = 0; DCdataCounter < DC_DATA_LENGTH; DCdataCounter++){
+		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
 			/* Start transmission */
 			SPDR = 0xff; //Send byte
 			//TODO: allow usage of dot correction data array...
@@ -67,13 +67,9 @@ void InitGScycle(){
 		FirstCycle = 1;
 	}
 
-	//TODO: TEST if this is ok!
-	//TCCR0B = (1 << CS02) | (1 << CS00); //Enable timer!
-
 	pin_low(BLANK);
 
 	SPDR = FrontBuffer[GSdataCounter];
-	//TCNT0 =0x00; //Reset timer....
 
 }
 
@@ -88,7 +84,6 @@ ISR(SPI_STC_vect)
 	}
 	else{
 		GSdataCounter=0;
-		//TODO: access SPDR to clear SPIF flag. (it's supposed to be cleared when entering ISR)
 	}
 }
 
@@ -109,18 +104,25 @@ ISR(TIMER0_COMPA_vect)
 		FirstCycle = 0;
 	}
 
-	if(c>=255){
-	// flipitiflip bufferille
+	if(c>=50){
+
+		//pin_toggle(DEBUG_LED);
+
+		//Flip buffers...
 		Midbuffer = FrontBuffer;
 		FrontBuffer = BackBuffer;
 		BackBuffer = Midbuffer;
 
 		c=0;
-		pin_toggle(DEBUG_LED);
 		isAfterFlip = 1;
 	}
 
    // Start new transfer....
-   InitGScycle();
+	pin_low(BLANK);
+
+	if(isAfterFlip){
+	SPDR = FrontBuffer[GSdataCounter];
+	}
+
 }
 
