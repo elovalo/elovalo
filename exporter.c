@@ -16,13 +16,14 @@ extern int frame_counter;
 
 int main(int argc, char **argv) {
 
-	FILE *f = fopen("effect.dump","wb");
+	FILE *f = fopen("effect.dump","w");
 	if (f == NULL) {
-		printf("Unable to write to effect.dump\n");
+		fprintf(stderr,"Unable to write to effect.dump\n");
 		return 1;
 	}
 
 	// Draw the frames
+	fputs("[[",f); // TODO handle errors
 	for (int i=0; i<FRAME_COUNT; i++) {
 		// Call the drawing function
 		effect_2d_plot(&plot_sine);
@@ -36,9 +37,18 @@ int main(int argc, char **argv) {
 		frame_counter++;
 
 		// Export stuff
-		fwrite(FrontBuffer,768,1,f); // TODO handle errors
-	}
+		for (int j=0; j<768; j+=3) {
+			uint16_t fst = FrontBuffer[j] << 4 | FrontBuffer[j+1] >> 4;
+			uint16_t snd = ((FrontBuffer[j+1] & 0x0f) << 8) | FrontBuffer[j+2];
 
+			fprintf(f,"%d,%d,",fst,snd);
+		}
+		// Unwind last comma
+		fseek(f,-1,SEEK_CUR); // TODO handle errors
+		fputs("],[",f); // TODO handle errors
+	}
+	fseek(f,-2,SEEK_CUR); // TODO handle errors
+	fputs("]\n",f); // TODO handle errors
 	fclose(f); // TODO handle errors
 	return 0;
 }
