@@ -9,18 +9,13 @@
 #include <stdint.h>
 #include <math.h>
 #include "main.h"
-
+#include "effects.h"
 
 // TODO some variables which are constants now...
 int frame_counter = 0; /* This variable should be some kind of time
 			  counter, eg. instruction counter */
 
 // BackBuffer contains the buffer to be drawn (should be lowerCase!!!)
-
-/* 2D plotting function. Takes frame number, x coordinate, y
- * coordinate, and returns intensity value from 0 to
- * max_intensity. May have multiple definitions. */
-typedef int(*plot_func_t)(int,int,int);
 
 /* Maximum intensity value is (number_of_rows-1)*(2^intensity_depth)-1
  * = 7*(2^12)-1 */
