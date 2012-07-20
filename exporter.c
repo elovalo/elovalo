@@ -32,8 +32,9 @@ int main(int argc, char **argv) {
 		FrontBuffer = BackBuffer;
 		BackBuffer = tmp;
 
-		// Frame counter
-		ticks++;
+		/* Increment frame counter always by 20 milliseconds
+		   to simulate slow drawing. */
+		ticks+=20;
 
 		// Export stuff
 		for (int j=0; j<768; j+=3) {
