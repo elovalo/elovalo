@@ -71,9 +71,9 @@ void effect_2d_plot(plot_func_t f)
 			}
 
 			// Do linear interpolation (two voxels per x-y pair)
-			int lower_z = i / 4096;
-			int upper_i = i % 4096;
-			int lower_i = 4095-upper_i;
+			int lower_z = i >> 12;
+			int upper_i = i & 0x0fff;
+			int lower_i = 0x0fff - upper_i;
 			set_led(x,y,lower_z,lower_i);
 			set_led(x,y,lower_z+1,upper_i);
 		}
