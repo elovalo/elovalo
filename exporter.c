@@ -15,7 +15,7 @@ uint8_t *BackBuffer = GSdata2;
 
 int main(int argc, char **argv) {
 
-	FILE *f = fopen("effect.dump","w");
+	FILE *f = fopen("simulator/effect.json","w");
 	if (f == NULL) {
 		fprintf(stderr,"Unable to write to effect.dump\n");
 		return 1;
@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 	for (int i=0; i<FRAME_COUNT; i++) {
 		// Call the drawing function
 		effect_2d_plot(&plot_sine);
+		//effect_layers_tester();
 
 		// Flip buffers to better simulate the environment
 		uint8_t *tmp = FrontBuffer;
