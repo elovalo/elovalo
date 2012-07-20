@@ -2,8 +2,6 @@
  * Led cube effects
  *
  * Not integrated to the main code, yet.
- *
- * NB. Do not expect this to compile!
  */
 
 #include <stdint.h>
@@ -11,9 +9,9 @@
 #include "main.h"
 #include "effects.h"
 
-// TODO some variables which are constants now...
-int frame_counter = 0; /* This variable should be some kind of time
-			  counter, eg. instruction counter */
+// TODO add timer which incredents ticks!
+uint16_t ticks = 0; /* This variable is incremented roughly every 1
+		       millisecond and overflows every 64th second. */
 
 // BackBuffer contains the buffer to be drawn (should be lowerCase!!!)
 
@@ -54,7 +52,7 @@ void effect_2d_plot(plot_func_t f)
 	for (int x=0; x<8; x++) {
 		for (int y=0; y<8; y++) {
 			// Get the intensity. This has 28676 values.
-			int i = (*f)(frame_counter,x,y);
+			int i = (*f)(x,y);
 			// Do linear interpolation (two voxels per x-y pair)
 			int lower_z = i / 4096;
 			int lower_i = i % 4096;
@@ -68,9 +66,9 @@ void effect_2d_plot(plot_func_t f)
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
  * not tuned, this is just taken from my head. */
-int plot_sine(int t, int x, int y) {
+int plot_sine(int x, int y) {
 	const int sine_scaler = max_intensity/2-1;
-	return sine_scaler * (1 + sin(x+t) + sin(y+t/2));
+	return sine_scaler * (1 + sin(x+ticks) + sin(y+ticks/2));
 }
 
 /**

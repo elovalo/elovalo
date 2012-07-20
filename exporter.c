@@ -12,7 +12,6 @@ uint8_t *FrontBuffer = GSdata;
 uint8_t *BackBuffer = GSdata2;
 
 #define FRAME_COUNT 100
-extern int frame_counter;
 
 int main(int argc, char **argv) {
 
@@ -34,7 +33,7 @@ int main(int argc, char **argv) {
 		BackBuffer = tmp;
 
 		// Frame counter
-		frame_counter++;
+		ticks++;
 
 		// Export stuff
 		for (int j=0; j<768; j+=3) {
