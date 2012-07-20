@@ -84,7 +84,7 @@ ISR(SPI_STC_vect)
 		SPDR = FrontBuffer[GSdataCounter];
 	}
 	else if(GSdataCounter==GS_DATA_LENGHT){
-		SPDR=0xaa;
+		SPDR=layer;
 		GSdataCounter++;
 	}
 
@@ -112,12 +112,12 @@ ISR(TIMER0_COMPA_vect)
 
 
 
-//	if(layer==0x80){
-//		layer=0x01;
-//	}
-//	else{
-//		//layer=layer<<1;
-//	}
+	if(layer==0x80){
+		layer=0x01;
+	}
+	else{
+		layer=layer<<1;
+	}
 
 	if(c>=50){
 
