@@ -26,11 +26,13 @@ const int max_intensity = 28671;
  */
 void set_led(int x, int y, int z, int i)
 {
+	// TODO x, y and z should be uint8s
+
 	/* Backbuffer has 12 bit voxels and is packed (2 voxels per 3
 	 * bytes) */
-	int voxelIx = 12*12*12*x + 12*12*y + 12*z;
+	int voxelIx = 12 * ((x<<6) + (y<<3) + z);
 
-	int pos = voxelIx / 8;
+	int pos = voxelIx >> 3;
 	uint16_t raw = (BackBuffer[pos] << 8) | BackBuffer[pos+1];
 
 	// Protect from overflows. Comment out if you need to save CPU cycles.
@@ -38,8 +40,8 @@ void set_led(int x, int y, int z, int i)
 	else if (i > 4095) i = 4095;
 
 	// Update table
-	if (voxelIx % 8) raw = (raw & 0xf000) | i;
-	else raw = (raw & 0x000f) | i << 4;
+	if (voxelIx & 0x3) raw = (raw & 0xf000) | i;
+	else raw = (raw & 0x000f) | (i << 4);
 
 	// Store data back to buffer
 	BackBuffer[pos] = raw >> 8;
@@ -51,8 +53,7 @@ void set_led(int x, int y, int z, int i)
  */
 void effect_2d_plot(plot_func_t f)
 {
-	// First, clean old data from the buffer.
-	memset(BackBuffer,0,768);
+	clear_buffer();
 
 	for (int x=0; x<8; x++) {
 		for (int y=0; y<8; y++) {
@@ -82,4 +83,26 @@ int plot_sine(int x, int y) {
  */
 void effect_2d_plot_sine(void) {
 	effect_2d_plot(&plot_sine);
+}
+
+/**
+ * Simple test function which draws voxel layers.
+ */
+void effect_layers_tester(void)
+{
+	clear_buffer();
+	uint8_t z = (ticks/20 % 8);
+
+	for (int x=0;x<8;x++) {
+		for (int y=0;y<8;y++) {
+			set_led(x,y,z,4095);
+		}
+	}
+}		
+
+/**
+ * Sets all voxels in back buffer as black
+ */
+void clear_buffer(void) {
+	memset(BackBuffer,0,768);
 }

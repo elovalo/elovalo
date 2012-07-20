@@ -4,7 +4,8 @@
 typedef int(*plot_func_t)(int,int);
 
 void effect_2d_plot(plot_func_t f);
-
 int plot_sine(int x, int y);
+void effect_layers_tester(void);
+void clear_buffer(void);
 
 extern uint16_t ticks;
