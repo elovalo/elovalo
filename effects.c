@@ -30,22 +30,22 @@ void set_led(int x, int y, int z, int i)
 
 	/* Backbuffer has 12 bit voxels and is packed (2 voxels per 3
 	 * bytes) */
-	int voxelIx = 12 * ((x<<6) + (y<<3) + z);
+	int bit_pos = 12 * ((x<<6) + (y<<3) + z);
 
-	int pos = voxelIx >> 3;
-	uint16_t raw = (BackBuffer[pos] << 8) | BackBuffer[pos+1];
+	int byte_pos = bit_pos >> 3;
+	uint16_t raw = (BackBuffer[byte_pos] << 8) | BackBuffer[byte_pos+1];
 
 	// Protect from overflows. Comment out if you need to save CPU cycles.
 	if (i < 0) i = 0;
 	else if (i > 4095) i = 4095;
 
 	// Update table
-	if (voxelIx & 0x3) raw = (raw & 0xf000) | i;
+	if (bit_pos & 0x7) raw = (raw & 0xf000) | i;
 	else raw = (raw & 0x000f) | (i << 4);
 
 	// Store data back to buffer
-	BackBuffer[pos] = raw >> 8;
-	BackBuffer[pos+1] = raw;
+	BackBuffer[byte_pos] = raw >> 8;
+	BackBuffer[byte_pos+1] = raw;
 }
 
 /**
@@ -61,8 +61,8 @@ void effect_2d_plot(plot_func_t f)
 			int i = (*f)(x,y);
 			// Do linear interpolation (two voxels per x-y pair)
 			int lower_z = i / 4096;
-			int lower_i = i % 4096;
-			int upper_i = 4095-i;
+			int upper_i = i % 4096;
+			int lower_i = 4095-upper_i;
 			set_led(x,y,lower_z,lower_i);
 			set_led(x,y,lower_z+1,upper_i);
 		}
@@ -76,6 +76,10 @@ int plot_sine(int x, int y) {
 	const int sine_scaler = max_intensity/2-1;
 
 	return sine_scaler * (1 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
+}
+
+int plot_constant(int x, int y) {
+	return 10000;
 }
 
 /**
