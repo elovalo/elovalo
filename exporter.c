@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Draw the frames
-	fputs("[[",f); // TODO handle errors
+	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 	for (int i=0; i<FRAME_COUNT; i++) {
 		// Call the drawing function
 		effect_2d_plot(&plot_sine);
@@ -41,14 +41,14 @@ int main(int argc, char **argv) {
 			uint16_t fst = FrontBuffer[j] << 4 | FrontBuffer[j+1] >> 4;
 			uint16_t snd = ((FrontBuffer[j+1] & 0x0f) << 8) | FrontBuffer[j+2];
 
-			fprintf(f,"%d,%d,",fst,snd);
+			fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
 		}
 		// Unwind last comma
 		fseek(f,-1,SEEK_CUR); // TODO handle errors
 		fputs("],[",f); // TODO handle errors
 	}
 	fseek(f,-2,SEEK_CUR); // TODO handle errors
-	fputs("]\n",f); // TODO handle errors
+	fputs("]}\n",f); // TODO handle errors
 	fclose(f); // TODO handle errors
 	return 0;
 }
