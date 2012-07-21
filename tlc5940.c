@@ -15,6 +15,7 @@ volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle().
 volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
 volatile uint8_t isAfterFlip = 0;
+volatile uint8_t layer=0x01;
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){
@@ -82,6 +83,11 @@ ISR(SPI_STC_vect)
 		GSdataCounter++;
 		SPDR = FrontBuffer[GSdataCounter];
 	}
+	else if(GSdataCounter==GS_DATA_LENGHT){
+		SPDR=layer;
+		GSdataCounter++;
+	}
+
 	else{
 		GSdataCounter=0;
 	}
@@ -102,6 +108,15 @@ ISR(TIMER0_COMPA_vect)
 		pin_high(SCLK);
 		pin_low(SCLK);
 		FirstCycle = 0;
+	}
+
+
+
+	if(layer==0x80){
+		layer=0x01;
+	}
+	else{
+		layer=layer<<1;
 	}
 
 	if(c>=50){
