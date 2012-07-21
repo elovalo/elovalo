@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="de.innot.avreclipse.configuration.app.debug.366706732">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.debug.366706732" moduleId="org.eclipse.cdt.core.settings" name="Debug">
@@ -51,6 +53,12 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.969582657" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.366706732.354780318" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278.1358140801">
+						<tool command="avr-gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278.1358140801" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278"/>
+					</fileInfo>
+					<sourceEntries>
+						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -108,8 +116,11 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.4904730" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.976598527.1625850397" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049.1767298176">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049.1767298176" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -168,8 +179,11 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.364015525" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.release.976598527.1117453622.11159190" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980.668652179">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980.668652179" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -225,6 +239,12 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.741459862" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.app.debug.366706732.1584697201.428378606" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076.372191697">
+						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076.372191697" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076"/>
+					</fileInfo>
+					<sourceEntries>
+						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

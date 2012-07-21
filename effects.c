@@ -4,6 +4,11 @@
  * Not integrated to the main code, yet.
  */
 
+// Disable assertions on embedded environment
+#ifdef AVR
+#define NDEBUG
+#endif
+
 #include <assert.h>
 #include <stdint.h>
 #include <math.h>
