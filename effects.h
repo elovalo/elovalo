@@ -1,12 +1,14 @@
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
  * max_intensity. May have multiple definitions. */
-typedef int(*plot_func_t)(int,int);
+typedef uint16_t(*plot_func_t)(uint8_t,uint8_t);
 
 void effect_2d_plot(plot_func_t f);
-int plot_sine(int x, int y);
-int plot_constant(int x, int y);
 void effect_layers_tester(void);
+
+uint16_t plot_sine(uint8_t x, uint8_t y);
+uint16_t plot_constant(uint8_t x, uint8_t y);
+
 void clear_buffer(void);
 
 extern uint16_t ticks;
