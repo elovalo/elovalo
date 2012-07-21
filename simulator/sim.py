@@ -8,6 +8,10 @@ import os
 
 import bpy
 
+JSON = 'effect'
+
+# TODO: might want to link mesh data (link mat to ob)
+
 # http://blenderpythonscripts.wordpress.com/2011/04/24/cursor-control-0-6-0/
 def space():
     area = None
@@ -50,7 +54,8 @@ def toggle(o):
         material('led_on', o)
 
 def ob(n):
-    return [a for a in bpy.context.selectable_objects if a.name == n][0]
+    scn = bpy.data.scenes[0]
+    return [a for a in scn.objects if a.name == n][0]
 
 def toggle_led(i):
     toggle(ob('led_' + str(i)))
@@ -206,7 +211,7 @@ while len(bpy.app.handlers.frame_change_pre):
 #bpy.app.handlers.frame_change_pre.append(partial(update, states))
 
 def load_data():
-    p = os.path.join(os.path.split(bpy.data.filepath)[0], 'effect.json')
+    p = os.path.join(os.path.split(bpy.data.filepath)[0], JSON + '.json')
 
     with open(p) as f:
         d = json.load(f)
@@ -214,16 +219,13 @@ def load_data():
     # fps = data['fps'] TODO: set. 25 by default for now
     # TODO: deal with geometry too
 
-    scene = bpy.data.scenes[0]
-    scene.frame_end = len(d['frames'])
-
     return d
 
 def update2(frames, scene):
     def render_frame(i):
-        if(i >= len(frames)): return
+        i = i % 95 # len(frames) # XXX: hack to make demo sine cyclic
     
-        states = frames[i - 1]
+        states = frames[i]
         
         for led_ob, alpha in zip(led_obs(), states):
             led_ob.active_material.alpha = alpha
