@@ -53,9 +53,6 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.969582657" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.debug.366706732.354780318" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278.1358140801">
-						<tool command="avr-gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278.1358140801" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -116,9 +113,6 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.4904730" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.release.976598527.1625850397" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049.1767298176">
-						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049.1767298176" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -179,9 +173,6 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.release.364015525" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.release.976598527.1117453622.11159190" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980.668652179">
-						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980.668652179" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
@@ -239,11 +230,59 @@
 							<tool id="de.innot.avreclipse.tool.avrdude.app.debug.741459862" name="AVRDude" superClass="de.innot.avreclipse.tool.avrdude.app.debug"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="de.innot.avreclipse.configuration.app.debug.366706732.1584697201.428378606" name="exporter.c" rcbsApplicability="disable" resourcePath="exporter.c" toolsToInvoke="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076.372191697">
-						<tool id="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076.372191697" name="AVR Compiler" superClass="de.innot.avreclipse.tool.compiler.winavr.app.debug.1590816076"/>
-					</fileInfo>
 					<sourceEntries>
 						<entry excluding="exporter.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="de.innot.avreclipse.configuration.app.debug.948838707">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.debug.948838707" moduleId="org.eclipse.cdt.core.settings" name="Exporter">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="Exports effets to JSON format." id="de.innot.avreclipse.configuration.app.debug.948838707" name="Exporter" parent="de.innot.avreclipse.configuration.app.debug">
+					<folderInfo id="de.innot.avreclipse.configuration.app.debug.948838707." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.264243323" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.420420064" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1137148144" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.60536327" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<builder buildPath="${workspace_loc:/ledivilkku2/JSON exporter}" id="org.eclipse.cdt.build.core.internal.builder.1551544384" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.2138723256" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.757013005" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.292751467" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.misc.other.2099238450" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 --std=gnu99" valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.165553421" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1914262722" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.1542164079" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1771283148" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.580378588" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker">
+								<option id="gnu.c.link.option.libs.251816557" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="m"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1186613445" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.34988972" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.393724113" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.2017603519" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.880976930" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<sourceEntries>
+						<entry excluding="tlc5940.c|main.c|init.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -263,8 +302,17 @@
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.366706732;de.innot.avreclipse.configuration.app.debug.366706732.;de.innot.avreclipse.tool.compiler.winavr.app.debug.2061685278;de.innot.avreclipse.compiler.winavr.input.618633982">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.948838707;de.innot.avreclipse.configuration.app.debug.948838707.;cdt.managedbuild.tool.gnu.cross.c.compiler.2138723256;cdt.managedbuild.tool.gnu.c.compiler.input.165553421">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.948838707">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.976598527;de.innot.avreclipse.configuration.app.release.976598527.;de.innot.avreclipse.tool.compiler.winavr.app.release.1268191049;de.innot.avreclipse.compiler.winavr.input.2100226609">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.debug.948838707;de.innot.avreclipse.configuration.app.debug.948838707.;cdt.managedbuild.tool.gnu.cross.c.compiler.312728932;cdt.managedbuild.tool.gnu.c.compiler.input.350668245">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="de.innot.avreclipse.configuration.app.release.976598527.1117453622;de.innot.avreclipse.configuration.app.release.976598527.1117453622.;de.innot.avreclipse.tool.compiler.winavr.app.release.1625111980;de.innot.avreclipse.compiler.winavr.input.1442998502">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="de.innot.avreclipse.core.AVRGCCManagedMakePerProjectProfileC"/>

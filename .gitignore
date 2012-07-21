@@ -2,6 +2,7 @@
 /Release
 /Ram usage
 /Release_with_extended_lss
+/Exporter
 *.swp
 *.swo
 *~

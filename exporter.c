@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 	for (int i=0; i<FRAME_COUNT; i++) {
 		// Call the drawing function
 		effect_2d_plot(&plot_sine);
+		//effect_2d_plot(&plot_constant);
 		//effect_layers_tester();
 
 		// Flip buffers to better simulate the environment
