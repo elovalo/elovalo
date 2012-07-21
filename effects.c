@@ -11,12 +11,15 @@
 #include "main.h"
 #include "effects.h"
 
-// TODO add timer which increments ticks!
-uint16_t ticks = 0; /* This variable is incremented roughly every 1
-		       millisecond and overflows every 64th second. */
-volatile uint16_t ticks_volatile = 0;
+// TODO add timer which increments ticks_volatile!
 
-// BackBuffer contains the buffer to be drawn (should be lowerCase!!!)
+/* ticks is set to ticks_volatile every time when frame calculation is
+ * started. This keeps ticks stable and removes tearing. */
+uint16_t ticks = 0; 
+
+/* ticks_volatile is incremented roughly every 1 millisecond and
+ * overflows every 64th second. */
+volatile uint16_t ticks_volatile = 0;
 
 /* Maximum intensity value is (number_of_rows-1)*(2^intensity_depth)-1
  * = 7*(2^12)-1 */
@@ -90,6 +93,10 @@ uint16_t plot_sine(uint8_t x, uint8_t y) {
 	return sine_scaler * (2 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
 }
 
+/**
+ * Constant plot. Helps to spot errors in drawing code. Replace this
+ * with something more useful in the future.
+ */
 uint16_t plot_constant(uint8_t x, uint8_t y) {
 	return 10000;
 }
