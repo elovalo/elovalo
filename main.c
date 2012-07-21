@@ -76,9 +76,6 @@ int main() {
 
 	while(1){
 
-//		if (isAfterFlip) {
-//		}
-
 		if(serial_available()){
 
 			serial_send(0xf5);
