@@ -13,9 +13,10 @@ TODO More coming later.
 
 To compile and run the PC exporter, either run the following on command line:
 
-    gcc -Wall --std=gnu99 -o exporter effects.c exporter.c -lm
+    gcc -Wall --std=gnu99 -o exporter effects.c effect_utils.c exporter.c -lm
 	./exporter
 
+or you can just execute compile\_exporter.sh to do the same thing
 or import the project to Eclipse and choose *Exporter* as your build
 configuration. You should run the produced executable (located at
 <tt>Exporter</tt> subdirectory) in the same directory as this
