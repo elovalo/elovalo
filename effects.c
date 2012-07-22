@@ -26,6 +26,14 @@
 #define LEDS_Z 8
 #define GS_DEPTH 12
 
+/* Defining set_led() as a macro which chooses the most efficient
+ * implementation available */
+#if LEDS_Y == 8 && LEDS_Z == 8 && GS_DEPTH == 12
+#define set_led(x,y,z,i) set_led_8_8_12(x,y,z,i)
+#else
+#error "There is no set_led() implementation for this geometry"
+#endif
+
 // TODO add timer which increments ticks_volatile!
 
 /* ticks is set to ticks_volatile every time when frame calculation is
@@ -43,9 +51,12 @@ const uint16_t max_intensity = (LEDS_Z-1)*(1 << GS_DEPTH)-1;
 const uint16_t buffer_len = (LEDS_X * LEDS_Y * LEDS_Z * GS_DEPTH + 7) >> 3;
 
 /**
- * Sets led intensity. i is the intensity of the LED in range 0..4095.
+ * Sets led intensity. i is the intensity of the LED in range
+ * 0..4095. This implementation is AVR optimized and handles only
+ * cases where LEDS_Y and LEDS_Z are 8 and GS_DEPTH is 12. Do not call
+ * directly, use set_led() instead.
  */
-void set_led(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
+void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 {
 	/* Assert (on testing environment) that we supply correct
 	 * data. */
@@ -54,15 +65,6 @@ void set_led(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	assert(z < LEDS_Z);
 	assert(i < (1 << GS_DEPTH));
 	
-	/* This function is hard-wired to certain cube geometry to
-	 * make it efficient on AVR platform. If these conditions are
-	 * not satisfied, you may not use this function or you should
-	 * use slower implementation. Note that there is no assertion
-	 * on LEDS_X. It may be arbitary. Checking conditions: */
-	assert(LEDS_Y == 8);
-	assert(LEDS_Z == 8);
-	assert(GS_DEPTH == 12);
-
 	/* Backbuffer is bit packed: 2 voxels per 3 bytes when
 	 * GS_DEPTH is 12. This calculates bit position efficiently by
 	 * using bit shifts. With AVR's 8-bit registers this is
