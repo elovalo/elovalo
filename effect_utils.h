@@ -1,13 +1,9 @@
 /* If you are changing LED count make sure you are not using set_led
      which is optimized to work only 12-bit depths and when y and z
      dimensions have length of 8. */
-  
-// Number of LEDs and grayscale intensity depth of LED driver
-#define LEDS_X 8
-#define LEDS_Y 8
-#define LEDS_Z 8
-#define GS_DEPTH 12
-  
+
+#include "env.h"
+
 /* Defining set_led() as a macro which chooses the most efficient
  * implementation available */
 #if LEDS_Y == 8 && LEDS_Z == 8 && GS_DEPTH == 12

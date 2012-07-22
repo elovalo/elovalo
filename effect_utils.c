@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
+#include "env.h"
 #include "main.h"
 #include "effect_utils.h"
 

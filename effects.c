@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <math.h>
+#include "env.h"
 #include "effect_utils.h"
 
 /**
