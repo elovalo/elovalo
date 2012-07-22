@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "effect_utils.h"
 #include "effects.h"
 
 uint8_t GSdata[768]={0x00};
