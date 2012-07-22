@@ -38,7 +38,7 @@
 
 /* ticks is set to ticks_volatile every time when frame calculation is
  * started. This keeps ticks stable and removes tearing. */
-uint16_t ticks = 0; 
+uint16_t ticks = 0;
 
 /* ticks_volatile is incremented roughly every 1 millisecond and
  * overflows every 64th second. */
@@ -119,7 +119,8 @@ void effect_2d_plot(plot_func_t f)
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
  * not tuned, this is just taken from my head. */
-uint16_t plot_sine(uint8_t x, uint8_t y) {
+uint16_t plot_sine(uint8_t x, uint8_t y)
+{
 	const float sine_scaler = (float)max_intensity/4;
 
 	return sine_scaler * (2 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
@@ -129,14 +130,16 @@ uint16_t plot_sine(uint8_t x, uint8_t y) {
  * Constant plot. Helps to spot errors in drawing code. Replace this
  * with something more useful in the future.
  */
-uint16_t plot_constant(uint8_t x, uint8_t y) {
+uint16_t plot_constant(uint8_t x, uint8_t y)
+{
 	return 10000;
 }
 
 /**
  * An example how to plot sine with this thingy.
  */
-void effect_2d_plot_sine(void) {
+void effect_2d_plot_sine(void)
+{
 	effect_2d_plot(&plot_sine);
 }
 
@@ -153,11 +156,12 @@ void effect_layers_tester(void)
 			set_led(x, y, z, (1<<GS_DEPTH) - 1);
 		}
 	}
-}		
+}
 
 /**
  * Sets all voxels in back buffer as black
  */
-void clear_buffer(void) {
+void clear_buffer(void)
+{
 	memset(BackBuffer,0,buffer_len);
 }
