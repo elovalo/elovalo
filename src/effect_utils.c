@@ -78,7 +78,7 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 /**
  * This function plots a 2-dimensional plot of a given function
  */
-void effect_2d_plot(plot_func_2d_t f)
+void effect_2d_plot(plot_2d_t f)
 {
 	const uint16_t gs_mask = (1<<GS_DEPTH) - 1;
 	clear_buffer();
