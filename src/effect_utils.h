@@ -25,11 +25,16 @@
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
  * max_intensity. May have multiple definitions. */
-typedef uint16_t(*plot_func_t)(uint8_t,uint8_t);
+typedef uint16_t(*plot_func_2d_t)(uint8_t,uint8_t);
+
+/* Arbitary plotting function. The implementation is responsible to
+ * set pixels by itself. Buffer flipping is done outside this
+ * function. */
+typedef void(*plot_func_t)(void);
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
-void effect_2d_plot(plot_func_t f); 
+void effect_2d_plot(plot_func_2d_t f); 
 
 void clear_buffer(void);
 
