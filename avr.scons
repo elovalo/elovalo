@@ -1,0 +1,20 @@
+# -*- mode: python; coding: utf-8 -*-
+
+env = Environment()
+
+env['CC'] = 'avr-gcc'
+env.Append(CCFLAGS = '-mmcu=atmega328 -O2 -Wall -std=gnu99')
+
+Target = 'ledcube'
+
+# Make elf
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')])
+
+# Make hex
+env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
+
+# Show memory usage
+env.Command(None, Target+".hex", "avr-size $SOURCE")
+
+# Program the thing
+#env.Command(None, Target+".hex", 'sudo avrdude -c dragon_jtag -P usb -p m1280 -u -U flash:w:$SOURCE')

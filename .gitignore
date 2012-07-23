@@ -1,8 +1,16 @@
+# Eclipse build directories
 /Debug
 /Release
 /Ram usage
 /Release_with_extended_lss
 /Exporter
+
+# SCons build directories
+/.sconsign.dblite
+/build_avr
+/build_exporter
+
+# Some temp files
 *.swp
 *.swo
 *~
