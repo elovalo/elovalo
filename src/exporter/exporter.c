@@ -13,21 +13,6 @@ uint8_t GSdata2[768]={0x00};
 uint8_t *FrontBuffer = GSdata;
 uint8_t *BackBuffer = GSdata2;
 
-typedef struct {
-	char *name;      // Name for effect. Used in file dumps.
-	init_t init;    // Initializatior, may be NULL.
-	draw_t draw;    // Drawing function, run once per buffer swap.
-	uint16_t length; // Effect duration in milliseconds.
-} effect_t;
-
-const effect_t effects[] = {
-	{ "sine", NULL, &effect_sine, 100 },
-	{ "const", NULL, &effect_constant, 100 },
-	{ "layers", NULL, &effect_layers_tester, 100 }
-};
-
-const int effects_len = sizeof(effects) / sizeof(effect_t);
-
 void export_effect(const effect_t *effect);
 
 int main(int argc, char **argv) {
@@ -55,7 +40,7 @@ void export_effect(const effect_t *effect) {
 		return;
 	}
 
-	assert(effect->init == NULL); // FIXME add initialization
+	if (effect->init != NULL) effect->init();
 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors

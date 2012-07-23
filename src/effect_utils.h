@@ -1,6 +1,5 @@
-/* If you are changing LED count make sure you are not using set_led
-     which is optimized to work only 12-bit depths and when y and z
-     dimensions have length of 8. */
+#ifndef EFFECT_UTILS_H
+#define EFFECT_UTILS_H
 
 #include "env.h"
 
@@ -27,14 +26,22 @@
  * max_intensity. May have multiple definitions. */
 typedef uint16_t(*plot_2d_t)(uint8_t,uint8_t);
 
-/* Arbitary plotting function. The implementation is responsible to
- * set pixels by itself. Buffer flipping is done outside this
- * function. */
+/* Arbitary drawing function. The implementation is responsible to set
+ * pixels by itself. Buffer flipping is done outside this function. */
 typedef void(*draw_t)(void);
 
-/* Effect initializator type. The initializator is run after an effect
- * is started. */
+/* Effect initializator type. The initializator is run before any
+ * drawing is done on that effect. */
 typedef void(*init_t)(void);
+
+/* This structure holds information about the effects and how to draw
+ * them. */
+typedef struct {
+	char *name;      // Name for effect. Used in file dumps.
+	init_t init;     // Initializatior, may be NULL.
+	draw_t draw;     // Drawing function, run once per buffer swap.
+	uint16_t length; // Effect duration in milliseconds.
+} effect_t;
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
@@ -42,4 +49,7 @@ void effect_2d_plot(plot_2d_t f);
 
 void clear_buffer(void);
 
-uint16_t ticks;
+extern uint16_t ticks;
+extern volatile uint16_t ticks_volatile;
+
+#endif // EFFECT_UTILS_H

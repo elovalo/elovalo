@@ -4,10 +4,20 @@
  * Not integrated to the main code, yet.
  */
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
 #include "env.h"
+#include "effects.h"
 #include "effect_utils.h"
+
+const effect_t effects[] = {
+	{ "sine", NULL, &effect_sine, 100 },
+	{ "const", NULL, &effect_constant, 100 },
+	{ "layers", NULL, &effect_layers_tester, 100 }
+};
+
+const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
