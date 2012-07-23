@@ -4,8 +4,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "src/effect_utils.h"
-#include "src/effects.h"
+#include "../effect_utils.h"
+#include "../effects.h"
 
 uint8_t GSdata[768]={0x00};
 uint8_t GSdata2[768]={0x00};

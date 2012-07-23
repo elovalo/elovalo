@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "env.h"
-#include "main.h"
+#include "avr/main.h" /* TODO get rid of includes from avr/ */
 #include "effect_utils.h"
 
 /* If you are changing LED count make sure you are not using set_led
@@ -56,7 +56,7 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	 * optimized to do first operations with uint8_t's and do the
 	 * last shift with uint16_t because it's the only one which
 	 * overflows from 8 bit register. */
-	const uint16_t bit_pos = 12 * (z | y << 3 | (uint16_t)x << 6); 
+	const uint16_t bit_pos = 12 * (z | y << 3 | (uint16_t)x << 6);
 
 	/* Byte position is done simply by truncating the last 8 bits
 	 * of the data. Variable raw is filled with the data. */
@@ -68,7 +68,7 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	 * (bit_pos is dividable by 8) then we put the data starting
 	 * from MSB, otherwise we start from MSB - 4 bits. */
 	if (bit_pos & 0x7) raw = (raw & 0xf000) | i;
-	else raw = (raw & 0x000f) | (i << 4); 
+	else raw = (raw & 0x000f) | (i << 4);
 
 	/* Store data back to buffer */
 	BackBuffer[byte_pos] = raw >> 8;
@@ -111,9 +111,9 @@ void effect_layers_tester(void)
 
         for (uint8_t x=0; x<LEDS_X; x++) {
                 for (uint8_t y=0; y<LEDS_Y; y++) {
-                        set_led(x, y, z, (1<<GS_DEPTH) - 1); 
-                }   
-        }   
+                        set_led(x, y, z, (1<<GS_DEPTH) - 1);
+                }
+        }
 }
 
 /**
