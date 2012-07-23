@@ -12,7 +12,7 @@
 #error "There is no set_led() implementation for this geometry"
 #endif
 
-#define MAX_INTENSITY (LEDS_Z-1)*(1 << GS_DEPTH)-1
+#define MAX_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
 
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
