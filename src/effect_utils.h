@@ -12,7 +12,15 @@
 #error "There is no set_led() implementation for this geometry"
 #endif
 
+/* Maximum intensity returned from the 2D plotting function */
 #define MAX_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
+
+/* Generates wrapper function for two-dimensional plots to make the
+ * implementations much simpler */
+#define TWOD(wrap)                                 \
+  uint16_t wrap##_kernel(uint8_t x, uint8_t y);	   \
+  void wrap(void){effect_2d_plot(&wrap##_kernel);} \
+  uint16_t wrap##_kernel(uint8_t x, uint8_t y)
 
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
@@ -22,7 +30,6 @@ typedef uint16_t(*plot_func_t)(uint8_t,uint8_t);
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
 void effect_2d_plot(plot_func_t f); 
-void effect_layers_tester(void);
 
 void clear_buffer(void);
 

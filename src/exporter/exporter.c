@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 	for (int i=0; i<FRAME_COUNT; i++) {
 		// Call the drawing function
-		effect_2d_plot(&plot_sine);
+		effect_sine();
 		//effect_2d_plot(&plot_constant);
 		//effect_layers_tester();
 

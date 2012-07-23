@@ -12,7 +12,7 @@
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
  * not tuned, this is just taken from my head. */
-uint16_t plot_sine(uint8_t x, uint8_t y)
+TWOD(effect_sine)
 {
 	const float sine_scaler = (float)MAX_INTENSITY/4;
 
@@ -23,7 +23,22 @@ uint16_t plot_sine(uint8_t x, uint8_t y)
  * Constant plot. Helps to spot errors in drawing code. Replace this
  * with something more useful in the future.
  */
-uint16_t plot_constant(uint8_t x, uint8_t y)
+TWOD(effect_constant)
 {
 	return 10000;
+}
+
+/**
+ * Simple test function which draws voxel layers.
+ */
+void effect_layers_tester(void)
+{
+        clear_buffer();
+        uint8_t z = (ticks/20 % LEDS_Z);
+
+        for (uint8_t x=0; x<LEDS_X; x++) {
+                for (uint8_t y=0; y<LEDS_Y; y++) {
+                        set_led(x, y, z, (1<<GS_DEPTH) - 1);
+                }
+        }
 }

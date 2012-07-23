@@ -102,21 +102,6 @@ void effect_2d_plot(plot_func_t f)
 }
 
 /**
- * Simple test function which draws voxel layers.
- */
-void effect_layers_tester(void)
-{
-        clear_buffer();
-        uint8_t z = (ticks/20 % LEDS_Z);
-
-        for (uint8_t x=0; x<LEDS_X; x++) {
-                for (uint8_t y=0; y<LEDS_Y; y++) {
-                        set_led(x, y, z, (1<<GS_DEPTH) - 1);
-                }
-        }
-}
-
-/**
  * Sets all voxels in back buffer as black
  */
 void clear_buffer(void)
