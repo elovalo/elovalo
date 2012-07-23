@@ -2,6 +2,7 @@
  * JSON exporter for non-embedded use.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 #include "../effect_utils.h"
@@ -12,32 +13,59 @@ uint8_t GSdata2[768]={0x00};
 uint8_t *FrontBuffer = GSdata;
 uint8_t *BackBuffer = GSdata2;
 
-#define FRAME_COUNT 100
+typedef struct {
+	char *name;      // Name for effect. Used in file dumps.
+	init_t init;    // Initializatior, may be NULL.
+	draw_t draw;    // Drawing function, run once per buffer swap.
+	uint16_t length; // Effect duration in milliseconds.
+} effect_t;
+
+const effect_t effects[] = {
+	{ "sine", NULL, &effect_sine, 100 },
+	{ "const", NULL, &effect_constant, 100 },
+	{ "layers", NULL, &effect_layers_tester, 100 }
+};
+
+const int effects_len = sizeof(effects) / sizeof(effect_t);
+
+void export_effect(const effect_t *effect);
 
 int main(int argc, char **argv) {
+	for (int i=0; i<effects_len; i++) {
+		export_effect(&effects[i]);
+	}
+}
 
-	FILE *f = fopen("simulator/effect.json","w");
+void export_effect(const effect_t *effect) {
+	const int size = 50;
+	char filename[size];
+
+	/* Increment frame counter always by 20 milliseconds
+	   to simulate slow drawing. */
+	const uint16_t drawing_time = 20;
+	
+	int bytes = snprintf(filename, size, "exports/%s.json", effect->name);
+	assert(bytes <= size);
+
+	printf("Exporting %d milliseconds of %s to file %s\n",effect->length, effect->name, filename);
+
+	FILE *f = fopen(filename,"w");
 	if (f == NULL) {
 		fprintf(stderr,"Unable to write to effect.dump\n");
-		return 1;
+		return;
 	}
+
+	assert(effect->init == NULL); // FIXME add initialization
 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
-	for (int i=0; i<FRAME_COUNT; i++) {
-		// Call the drawing function
-		effect_sine();
-		//effect_2d_plot(&plot_constant);
-		//effect_layers_tester();
+	for (ticks=0; ticks < effect->length; ticks += drawing_time) {
+		effect->draw();
 
 		// Flip buffers to better simulate the environment
 		uint8_t *tmp = FrontBuffer;
 		FrontBuffer = BackBuffer;
 		BackBuffer = tmp;
-
-		/* Increment frame counter always by 20 milliseconds
-		   to simulate slow drawing. */
-		ticks+=20;
 
 		// Export stuff
 		for (int j=0; j<768; j+=3) {
@@ -53,5 +81,4 @@ int main(int argc, char **argv) {
 	fseek(f,-2,SEEK_CUR); // TODO handle errors
 	fputs("]}\n",f); // TODO handle errors
 	fclose(f); // TODO handle errors
-	return 0;
 }

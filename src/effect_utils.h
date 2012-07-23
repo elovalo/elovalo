@@ -30,7 +30,7 @@ typedef uint16_t(*plot_2d_t)(uint8_t,uint8_t);
 /* Arbitary plotting function. The implementation is responsible to
  * set pixels by itself. Buffer flipping is done outside this
  * function. */
-typedef void(*plot_t)(void);
+typedef void(*draw_t)(void);
 
 /* Effect initializator type. The initializator is run after an effect
  * is started. */
