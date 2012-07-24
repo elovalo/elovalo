@@ -24,8 +24,6 @@ uint8_t GSdata[24*TLC5940]={0x00};
 
 uint8_t GSdata2[24*TLC5940]={0x00};
 
-uint8_t *Midbuffer = GSdata2; //TODO: arrange the code more logically, this should be moved...
-
 //TODO: backbuffer for double buffering...
 uint8_t *BackBuffer = GSdata2;
 
@@ -54,9 +52,6 @@ volatile uint8_t tx_out_i = 0;
 
 volatile uint8_t tx_state = TXRX_OK;
 volatile uint8_t rx_state = TXRX_OK;
-
-uint8_t i = 1;
-uint8_t apu = 1; //we need this in order to determine if the non-skipped number is odd
 
 int main() {
 
@@ -104,40 +99,43 @@ int main() {
 	return 0;
 }
 
-void animSnake(){
+void animSnake() {
+	// Some variables used over multiple invocations
+	static uint8_t i = 1;
+	static uint8_t apu = 1; /* we need this in order to determine
+				 * if the non-skipped number is odd */
+
 	// Clear backbuffer once every frame...
-		if (isAfterFlip) {
-			clearArray(BackBuffer, 24*TLC5940);
-
-			if (i < (25*TLC5940)) {
-
-				if(i%3==0){ //Skip!
-					i++;
-					apu=1; //we need to reset the helper
-				}
-
-
-				if(apu==1){ //Odd
-					BackBuffer[i-1]=0xff;
-					BackBuffer[i]=0xf0;
-				}else{//even
-					BackBuffer[i-1]=0x0f;
-					BackBuffer[i]=0xff;
-				}
-				apu++;
-
+	if (isAfterFlip) {
+		clearArray(BackBuffer, 24*TLC5940);
+		
+		if (i < (25*TLC5940)) {
+			
+			if(i%3==0) { //Skip!
+				i++;
+				apu=1; //we need to reset the helper
 			}
 
-			i++;
-
-			if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
-				i=1;
-				apu=1;
-				//clearArray(BackBuffer, 24*TLC5940);
+			if(apu==1) { //Odd
+				BackBuffer[i-1]=0xff;
+				BackBuffer[i]=0xf0;
+			} else { //even
+				BackBuffer[i-1]=0x0f;
+				BackBuffer[i]=0xff;
 			}
-
-			isAfterFlip = 0;
+			apu++;
 		}
+		
+		i++;
+		
+		if(i==24*TLC5940){ //Ending cell, reset EVERYTHING
+			i=1;
+			apu=1;
+			//clearArray(BackBuffer, 24*TLC5940);
+		}
+		
+		isAfterFlip = 0;
+	}
 }
 
 void processCommand(){

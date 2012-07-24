@@ -120,13 +120,10 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	if(c>=50){
-
-		//pin_toggle(DEBUG_LED);
-
 		//Flip buffers...
-		Midbuffer = FrontBuffer;
+		uint8_t *tmp = FrontBuffer;
 		FrontBuffer = BackBuffer;
-		BackBuffer = Midbuffer;
+		BackBuffer = tmp;
 
 		c=0;
 		isAfterFlip = 1;

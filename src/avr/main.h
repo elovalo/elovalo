@@ -13,7 +13,6 @@ volatile uint16_t c; //testing variable...
 //Global pointer...
 extern uint8_t *FrontBuffer;
 extern uint8_t *BackBuffer;
-extern uint8_t *Midbuffer;
 
 //TODO: Enable these functions and implement them properly for generic SPI communication if necessary.
 //void SPI_Transfer(uint8_t cData);
