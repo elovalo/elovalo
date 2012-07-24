@@ -79,7 +79,7 @@ void animSnake() {
 
 	// Clear backbuffer once every frame...
 	if (isAfterFlip) {
-		clearArray(BackBuffer, 24*TLC5940);
+		clearArray(gs_buf_back, 24*TLC5940);
 		
 		if (i < (25*TLC5940)) {
 			
@@ -89,11 +89,11 @@ void animSnake() {
 			}
 
 			if(apu==1) { //Odd
-				BackBuffer[i-1]=0xff;
-				BackBuffer[i]=0xf0;
+				gs_buf_back[i-1]=0xff;
+				gs_buf_back[i]=0xf0;
 			} else { //even
-				BackBuffer[i-1]=0x0f;
-				BackBuffer[i]=0xff;
+				gs_buf_back[i-1]=0x0f;
+				gs_buf_back[i]=0xff;
 			}
 			apu++;
 		}

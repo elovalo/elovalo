@@ -10,7 +10,9 @@
 /* Front and back buffers. Front is the one being drawn on and back is
  * the one that should be manipulated by effects. There are some
  * exceptions to this rule when doing some very nasty effects. */
-extern uint8_t *FrontBuffer;
-extern uint8_t *BackBuffer;
+extern uint8_t *gs_buf_front;
+extern uint8_t *gs_buf_back;
+
+void gs_buf_swap(void);
 
 #endif /* CUBE_H_ */

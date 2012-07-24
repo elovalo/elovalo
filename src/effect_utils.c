@@ -39,7 +39,7 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	assert(z < LEDS_Z);
 	assert(i < (1 << GS_DEPTH));
 
-	/* Backbuffer is bit packed: 2 voxels per 3 bytes when
+	/* Cube buffers are bit packed: 2 voxels per 3 bytes when
 	 * GS_DEPTH is 12. This calculates bit position efficiently by
 	 * using bit shifts. With AVR's 8-bit registers this is
 	 * optimized to do first operations with uint8_t's and do the
@@ -51,7 +51,7 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	 * of the data. Variable raw is filled with the data. */
 	const uint16_t byte_pos = bit_pos >> 3;
 	assert(byte_pos < GS_BUF_BYTES);
-	uint16_t raw = (BackBuffer[byte_pos] << 8) | BackBuffer[byte_pos+1];
+	uint16_t raw = (gs_buf_back[byte_pos] << 8) | gs_buf_back[byte_pos+1];
 
 	/* If 12-bit value starts from the beginning of the data
 	 * (bit_pos is dividable by 8) then we put the data starting
@@ -60,8 +60,8 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	else raw = (raw & 0x000f) | (i << 4);
 
 	/* Store data back to buffer */
-	BackBuffer[byte_pos] = raw >> 8;
-	BackBuffer[byte_pos+1] = raw;
+	gs_buf_back[byte_pos] = raw >> 8;
+	gs_buf_back[byte_pos+1] = raw;
 }
 
 /**
@@ -95,5 +95,5 @@ void effect_2d_plot(plot_2d_t f)
  */
 void clear_buffer(void)
 {
-	memset(BackBuffer,0,GS_BUF_BYTES);
+	memset(gs_buf_back,0,GS_BUF_BYTES);
 }

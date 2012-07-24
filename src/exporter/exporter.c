@@ -44,14 +44,16 @@ void export_effect(const effect_t *effect) {
 		effect->draw();
 
 		// Flip buffers to better simulate the environment
-		uint8_t *tmp = FrontBuffer;
-		FrontBuffer = BackBuffer;
-		BackBuffer = tmp;
+		gs_buf_swap();
 
 		// Export stuff
 		for (int j=0; j<768; j+=3) {
-			uint16_t fst = FrontBuffer[j] << 4 | FrontBuffer[j+1] >> 4;
-			uint16_t snd = ((FrontBuffer[j+1] & 0x0f) << 8) | FrontBuffer[j+2];
+			uint16_t fst =
+				gs_buf_front[j] << 4 |
+				gs_buf_front[j+1] >> 4;
+			uint16_t snd =
+				((gs_buf_front[j+1] & 0x0f) << 8) |
+				gs_buf_front[j+2];
 
 			fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
 		}

@@ -43,7 +43,7 @@ void InitGScycle(){
 
 	pin_low(BLANK);
 
-	SPDR = FrontBuffer[GSdataCounter];
+	SPDR = gs_buf_front[GSdataCounter];
 
 }
 
@@ -54,7 +54,7 @@ ISR(SPI_STC_vect)
 {
 	if(GSdataCounter < GS_DATA_LENGHT){
 		GSdataCounter++;
-		SPDR = FrontBuffer[GSdataCounter];
+		SPDR = gs_buf_front[GSdataCounter];
 	}
 	else if(GSdataCounter==GS_DATA_LENGHT){
 		SPDR=layer;
@@ -93,11 +93,7 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	if(c>=50){
-		//Flip buffers...
-		uint8_t *tmp = FrontBuffer;
-		FrontBuffer = BackBuffer;
-		BackBuffer = tmp;
-
+		gs_buf_swap();
 		c=0;
 		isAfterFlip = 1;
 	}
@@ -106,7 +102,7 @@ ISR(TIMER0_COMPA_vect)
 	pin_low(BLANK);
 
 	if(isAfterFlip){
-	SPDR = FrontBuffer[GSdataCounter];
+	SPDR = gs_buf_front[GSdataCounter];
 	}
 
 }
