@@ -8,6 +8,7 @@
 #ifndef TLC5940_H_
 #define TLC5940_H_
 
+// FIXME these are legacy defines
 #define TLC5940 1 //Number of devices
 #define GS_DATA_LENGHT (TLC5940*24)-1 //One layers data length
 

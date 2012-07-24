@@ -15,21 +15,7 @@
 #include "init.h"
 #include "tlc5940.h"
 #include "serial.h"
-
-volatile uint16_t c=0; //Global testing variable...
-
-//Grayscale data array, lenght is 24 * number of devices * number of layers in a cube...
-//TODO: currently fixed to 1 device, calculate from number of devices an fill with values
-//TODO: remember to clear these arrays or initialize them to 0 before blank goes low.
-uint8_t GSdata[24*TLC5940]={0x00};
-
-uint8_t GSdata2[24*TLC5940]={0x00};
-
-//TODO: backbuffer for double buffering...
-uint8_t *BackBuffer = GSdata2;
-
-//Pointer to the GS data buffer that holds the data to be sent to the TLC5940
-uint8_t *FrontBuffer = GSdata;
+#include "../cube.h"
 
 #define ESCAPE 0x7e
 

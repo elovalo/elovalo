@@ -10,11 +10,13 @@
 #include "pinMacros.h"
 #include "init.h"
 #include "main.h"
+#include "../cube.h"
 
 volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
 volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 volatile uint8_t isAfterFlip = 0;
 volatile uint8_t layer=0x01;
+volatile uint16_t c; //testing variable...
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){

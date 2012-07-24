@@ -7,11 +7,7 @@
 #include <stdint.h>
 #include "../effect_utils.h"
 #include "../effects.h"
-
-uint8_t GSdata[768]={0x00};
-uint8_t GSdata2[768]={0x00};
-uint8_t *FrontBuffer = GSdata;
-uint8_t *BackBuffer = GSdata2;
+#include "../cube.h"
 
 void export_effect(const effect_t *effect);
 

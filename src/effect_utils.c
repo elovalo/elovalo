@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "env.h"
-#include "avr/main.h" /* TODO get rid of includes from avr/ */
+#include "cube.h"
 #include "effect_utils.h"
 
 /* If you are changing LED count make sure you are not using set_led

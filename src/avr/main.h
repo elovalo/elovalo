@@ -7,13 +7,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-//Global variables...
-volatile uint16_t c; //testing variable...
-
-//Global pointer...
-extern uint8_t *FrontBuffer;
-extern uint8_t *BackBuffer;
-
 //TODO: Enable these functions and implement them properly for generic SPI communication if necessary.
 //void SPI_Transfer(uint8_t cData);
 //void SPI_Transfer_TLC5940(uint8_t *FrontBuffer);
