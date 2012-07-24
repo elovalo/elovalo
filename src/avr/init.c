@@ -77,13 +77,13 @@ void initUSART(){
 	UBRR0H = (uint8_t)(ubrr >> 8);
 	UBRR0L = (uint8_t)ubrr;
 
-    // Set frame format to 8 data bits, no parity, 1 stop bit
-    UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
+	// Set frame format to 8 data bits, no parity, 1 stop bit
+	UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
 
-    UCSR0B |= (1<<TXEN0); //Transmit enable
-    UCSR0B |= (1<<RXEN0); //Receive enable
-    UCSR0B |= (1<<RXCIE0); //Receive ready interrupt
-    //UCSR0B |= (1<<TXCIE0); //transmit ready interrupt
+	UCSR0B |= (1<<TXEN0);  // Transmit enable
+	UCSR0B |= (1<<RXEN0);  // Receive enable
+	UCSR0B |= (1<<RXCIE0); // Receive ready interrupt
+	UCSR0B |= (1<<TXCIE0); // transmit ready interrupt
 
 }
 
