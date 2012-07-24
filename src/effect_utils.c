@@ -29,11 +29,7 @@ const uint16_t buffer_len = (LEDS_X * LEDS_Y * LEDS_Z * GS_DEPTH + 7) >> 3;
 
 /* ticks is set to ticks_volatile every time when frame calculation is
  * started. This keeps ticks stable and removes tearing. */
-uint16_t ticks = 0;
-
-/* ticks_volatile is incremented roughly every 1 millisecond and
- * overflows every 64th second. */
-volatile uint16_t ticks_volatile = 0;
+uint16_t ticks;
 
 /**
  * Sets led intensity. i is the intensity of the LED in range

@@ -50,6 +50,5 @@ void effect_2d_plot(plot_2d_t f);
 void clear_buffer(void);
 
 extern uint16_t ticks;
-extern volatile uint16_t ticks_volatile;
 
 #endif // EFFECT_UTILS_H
