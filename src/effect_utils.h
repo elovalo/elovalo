@@ -5,14 +5,14 @@
 
 /* Defining set_led() as a macro which chooses the most efficient
  * implementation available */
-#if LEDS_Y == 8 && LEDS_Z == 8 && GS_DEPTH == 12
+#if LEDS_X == 8 && LEDS_Y == 8 && GS_DEPTH == 12 && BYTES_PER_LAYER == 96
 #define set_led(x,y,z,i) set_led_8_8_12(x,y,z,i)
 #else
 #error "There is no set_led() implementation for this geometry"
 #endif
 
 /* Maximum intensity returned from the 2D plotting function */
-#define MAX_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
+#define MAX_2D_PLOT_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
 
 /* Generates wrapper function for two-dimensional plots to make the
  * implementations much simpler */

@@ -24,7 +24,7 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
  * not tuned, this is just taken from my head. */
 TWOD(effect_sine)
 {
-	const float sine_scaler = (float)MAX_INTENSITY/4;
+	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY/4;
 
 	return sine_scaler * (2 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
 }
