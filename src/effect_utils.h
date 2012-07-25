@@ -45,7 +45,7 @@ typedef struct {
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
-void effect_2d_plot(plot_2d_t f); 
+void effect_2d_plot(plot_2d_t f);
 
 void clear_buffer(void);
 

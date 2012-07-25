@@ -12,12 +12,21 @@
 #include "effect_utils.h"
 
 const effect_t effects[] = {
+	{ "brownian", NULL, &effect_brownian, 100 },
 	{ "sine", NULL, &effect_sine, 100 },
 	{ "const", NULL, &effect_constant, 100 },
 	{ "layers", NULL, &effect_layers_tester, 100 }
 };
 
 const int effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Brownian particle. Starts from center.
+ * */
+void effect_brownian(void)
+{
+	set_led((uint8_t)(LEDS_X / 2), (uint8_t)(LEDS_Y / 2), (uint8_t)(LEDS_Z / 2), (1<<GS_DEPTH) - 1);
+}
 
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
@@ -43,12 +52,12 @@ TWOD(effect_constant)
  */
 void effect_layers_tester(void)
 {
-        clear_buffer();
-        uint8_t z = (ticks/20 % LEDS_Z);
+	clear_buffer();
+	uint8_t z = (ticks/20 % LEDS_Z);
 
-        for (uint8_t x=0; x<LEDS_X; x++) {
-                for (uint8_t y=0; y<LEDS_Y; y++) {
-                        set_led(x, y, z, (1<<GS_DEPTH) - 1);
-                }
-        }
+	for (uint8_t x=0; x<LEDS_X; x++) {
+		for (uint8_t y=0; y<LEDS_Y; y++) {
+			set_led(x, y, z, (1<<GS_DEPTH) - 1);
+		}
+	}
 }
