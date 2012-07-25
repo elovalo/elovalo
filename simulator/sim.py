@@ -8,7 +8,8 @@ import os
 
 import bpy
 
-JSON = 'effect'
+FX_DIR = '../build_exporter/exports'
+JSON = 'sine'
 
 # TODO: might want to link mesh data (link mat to ob)
 
@@ -211,7 +212,7 @@ while len(bpy.app.handlers.frame_change_pre):
 #bpy.app.handlers.frame_change_pre.append(partial(update, states))
 
 def load_data():
-    p = os.path.join(os.path.split(bpy.data.filepath)[0], JSON + '.json')
+    p = os.path.join(os.path.split(bpy.data.filepath)[0], FX_DIR, JSON + '.json')
 
     with open(p) as f:
         d = json.load(f)
@@ -223,7 +224,7 @@ def load_data():
 
 def update2(frames, scene):
     def render_frame(i):
-        i = i % 95 # len(frames) # XXX: hack to make demo sine cyclic
+        i = i % len(frames)
     
         states = frames[i]
         
