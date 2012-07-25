@@ -40,10 +40,9 @@ void effect_brownian(void)
 	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
 
 	// XXX: causes the first frame to offset for some reason!
-	// TODO: this should be offset relative to current (ie. -2, 2 to cur)
-	brown_x = (uint8_t)(LEDS_X * rand() / RAND_MAX);
-	brown_y = (uint8_t)(LEDS_Y * rand() / RAND_MAX);
-	brown_z = (uint8_t)(LEDS_Z * rand() / RAND_MAX);
+	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
+	brown_y = clamp(brown_y + randint(-2, 2), 0, LEDS_Y - 1);
+	brown_z = clamp(brown_z + randint(-2, 2), 0, LEDS_Z - 1);
 }
 
 /**

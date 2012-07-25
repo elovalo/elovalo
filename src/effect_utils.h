@@ -49,6 +49,9 @@ void effect_2d_plot(plot_2d_t f);
 
 void clear_buffer(void);
 
+uint8_t randint(uint8_t min, uint8_t max);
+uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
+
 extern uint16_t ticks;
 
 #endif // EFFECT_UTILS_H
