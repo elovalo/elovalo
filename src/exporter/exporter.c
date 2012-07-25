@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/stat.h>
 #include "../effect_utils.h"
 #include "../effects.h"
 
@@ -16,6 +17,8 @@ uint8_t *BackBuffer = GSdata2;
 void export_effect(const effect_t *effect);
 
 int main(int argc, char **argv) {
+	mkdir("exports", S_IRWXU);
+
 	for (int i=0; i<effects_len; i++) {
 		export_effect(&effects[i]);
 	}
