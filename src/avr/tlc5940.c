@@ -10,12 +10,13 @@
 #include "pinMacros.h"
 #include "init.h"
 #include "main.h"
+#include "../cube.h"
 
 volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
 volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
-uint8_t DCdataCounter = 0; //Counter to index of DCdata[] array
 volatile uint8_t isAfterFlip = 0;
 volatile uint8_t layer=0x01;
+volatile uint16_t c; //testing variable...
 
 //Sets all the signals to their expected values and initiates the dot correction cycle...
 void initTLC5940(){
@@ -24,36 +25,8 @@ void initTLC5940(){
 	pin_high(VPRG);
 	pin_high(BLANK);
 	pin_low(SCLK);
-	DCInputCycle();
-}
-
-/*
- * Send new Dot Correction data for TLC5940
- * Skipped if USE_EEPROM_DATA is set...
- */
-void DCInputCycle(){
-
-	if(USE_EEPROM_DC_DATA){
-		pin_low(DCPRG);
-	}
-	else{
-		pin_high(DCPRG); //Dot correction register programming on
-		pin_high(VPRG); //Set dot correction data input mode on
-
-		//Send dot correction data to the SPI bus...
-		for(DCdataCounter = 0; DCdataCounter <= DC_DATA_LENGTH; DCdataCounter++){
-			/* Start transmission */
-			SPDR = 0xff; //Send byte
-			//TODO: allow usage of dot correction data array...
-			/* Wait for transmission complete */
-			while(!(SPSR & (1<<SPIF)));
-		}
-		//Pulse XLAT to latch sent data...
-		pin_high(XLAT);
-		pin_low(XLAT);
-		//TODO: Support EEPROM writing with 22V VPRG signal?
-
-	}
+	pin_low(DCPRG); /* Dot correction is read from EEPROM which
+			 * effectively turns it off */
 }
 
 /*
@@ -70,7 +43,7 @@ void InitGScycle(){
 
 	pin_low(BLANK);
 
-	SPDR = FrontBuffer[GSdataCounter];
+	SPDR = gs_buf_front[GSdataCounter];
 
 }
 
@@ -81,7 +54,7 @@ ISR(SPI_STC_vect)
 {
 	if(GSdataCounter < GS_DATA_LENGHT){
 		GSdataCounter++;
-		SPDR = FrontBuffer[GSdataCounter];
+		SPDR = gs_buf_front[GSdataCounter];
 	}
 	else if(GSdataCounter==GS_DATA_LENGHT){
 		SPDR=layer;
@@ -120,14 +93,7 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	if(c>=50){
-
-		//pin_toggle(DEBUG_LED);
-
-		//Flip buffers...
-		Midbuffer = FrontBuffer;
-		FrontBuffer = BackBuffer;
-		BackBuffer = Midbuffer;
-
+		gs_buf_swap();
 		c=0;
 		isAfterFlip = 1;
 	}
@@ -136,7 +102,7 @@ ISR(TIMER0_COMPA_vect)
 	pin_low(BLANK);
 
 	if(isAfterFlip){
-	SPDR = FrontBuffer[GSdataCounter];
+	SPDR = gs_buf_front[GSdataCounter];
 	}
 
 }

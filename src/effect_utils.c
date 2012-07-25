@@ -13,19 +13,12 @@
 #include <stdint.h>
 #include <string.h>
 #include "env.h"
-#include "avr/main.h" /* TODO get rid of includes from avr/ */
+#include "cube.h"
 #include "effect_utils.h"
 
 /* If you are changing LED count make sure you are not using set_led
    which is optimized to work only 12-bit depths and when y and z
    dimensions have length of 8. */
-
-// TODO add timer which increments ticks_volatile!
-
-/* +7 >> 3 trick in
-   buffer_len is ceiling function, which makes the buffer size to
-   round towards next full byte. */
-const uint16_t buffer_len = (LEDS_X * LEDS_Y * LEDS_Z * GS_DEPTH + 7) >> 3;
 
 /* ticks is set to ticks_volatile every time when frame calculation is
  * started. This keeps ticks stable and removes tearing. */
@@ -34,8 +27,8 @@ uint16_t ticks;
 /**
  * Sets led intensity. i is the intensity of the LED in range
  * 0..4095. This implementation is AVR optimized and handles only
- * cases where LEDS_Y and LEDS_Z are 8 and GS_DEPTH is 12. Do not call
- * directly, use set_led() instead.
+ * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
+ * no padding. Do not call directly, use set_led() instead.
  */
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 {
@@ -46,19 +39,19 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	assert(z < LEDS_Z);
 	assert(i < (1 << GS_DEPTH));
 
-	/* Backbuffer is bit packed: 2 voxels per 3 bytes when
+	/* Cube buffers are bit packed: 2 voxels per 3 bytes when
 	 * GS_DEPTH is 12. This calculates bit position efficiently by
 	 * using bit shifts. With AVR's 8-bit registers this is
 	 * optimized to do first operations with uint8_t's and do the
 	 * last shift with uint16_t because it's the only one which
 	 * overflows from 8 bit register. */
-	const uint16_t bit_pos = 12 * (z | y << 3 | (uint16_t)x << 6);
+	const uint16_t bit_pos = 12 * (x | y << 3 | (uint16_t)z << 6);
 
 	/* Byte position is done simply by truncating the last 8 bits
 	 * of the data. Variable raw is filled with the data. */
 	const uint16_t byte_pos = bit_pos >> 3;
-	assert(byte_pos < buffer_len);
-	uint16_t raw = (BackBuffer[byte_pos] << 8) | BackBuffer[byte_pos+1];
+	assert(byte_pos < GS_BUF_BYTES);
+	uint16_t raw = (gs_buf_back[byte_pos] << 8) | gs_buf_back[byte_pos+1];
 
 	/* If 12-bit value starts from the beginning of the data
 	 * (bit_pos is dividable by 8) then we put the data starting
@@ -67,8 +60,8 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	else raw = (raw & 0x000f) | (i << 4);
 
 	/* Store data back to buffer */
-	BackBuffer[byte_pos] = raw >> 8;
-	BackBuffer[byte_pos+1] = raw;
+	gs_buf_back[byte_pos] = raw >> 8;
+	gs_buf_back[byte_pos+1] = raw;
 }
 
 /**
@@ -85,7 +78,7 @@ void effect_2d_plot(plot_2d_t f)
 			uint16_t i = (*f)(x,y);
 
 			// Check we receive correct intensity
-			assert(i <= MAX_INTENSITY);
+			assert(i <= MAX_2D_PLOT_INTENSITY);
 
 			// Do linear interpolation (two voxels per x-y pair)
 			uint8_t lower_z = i >> GS_DEPTH;
@@ -102,5 +95,5 @@ void effect_2d_plot(plot_2d_t f)
  */
 void clear_buffer(void)
 {
-	memset(BackBuffer,0,buffer_len);
+	memset(gs_buf_back,0,GS_BUF_BYTES);
 }
