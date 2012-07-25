@@ -107,6 +107,6 @@ uint8_t clamp(uint8_t x, uint8_t a, uint8_t b)
 uint8_t randint(uint8_t min, uint8_t max)
 {
     // not optimal always, math needs checking
-	return (rand() % (1 + max - min)) + min;
+	return (rand() % max) + min;
 }
 

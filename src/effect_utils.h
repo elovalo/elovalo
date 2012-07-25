@@ -41,7 +41,11 @@ typedef struct {
 	init_t init;     // Initializatior, may be NULL.
 	draw_t draw;     // Drawing function, run once per buffer swap.
 	uint16_t length; // Effect duration in milliseconds.
+	int flipBuffers; // Flip buffers during execution.
 } effect_t;
+
+// XXX: might want to replace flipBuffers with a set of bitfields
+// if more flags are needed
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 

@@ -43,6 +43,7 @@ void export_effect(const effect_t *effect) {
 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
+
 	for (ticks=0; ticks < effect->length; ticks += drawing_time) {
 		effect->draw();
 
@@ -60,6 +61,11 @@ void export_effect(const effect_t *effect) {
 
 			fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
 		}
+
+		// Flip back if flipping is not active
+		// This is done because set_led operates on the back buffer
+		if (effect->flipBuffers == 0) gs_buf_swap();
+
 		// Unwind last comma
 		fseek(f,-1,SEEK_CUR); // TODO handle errors
 		fputs("],[",f); // TODO handle errors

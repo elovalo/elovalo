@@ -14,16 +14,18 @@
 static void init_brownian(void);
 
 const effect_t effects[] = {
-	{ "brownian", &init_brownian, &effect_brownian, 100 },
-	{ "sine", NULL, &effect_sine, 100 },
-	{ "const", NULL, &effect_constant, 100 },
-	{ "layers", NULL, &effect_layers_tester, 100 }
+	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
+	{ "sine", NULL, &effect_sine, 1000, 1 },
+	{ "const", NULL, &effect_constant, 1000, 1 },
+	{ "layers", NULL, &effect_layers_tester, 1000, 1 }
 };
 
 const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
  * Brownian particle. Starts near center.
+ *
+ * Known issues: two leds are set at initial state (should be just one)
  * */
 uint8_t brown_x;
 uint8_t brown_y;
@@ -39,7 +41,6 @@ void effect_brownian(void)
 	// TODO: figure out how to accumulate
 	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
 
-	// XXX: causes the first frame to offset for some reason!
 	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
 	brown_y = clamp(brown_y + randint(-2, 2), 0, LEDS_Y - 1);
 	brown_z = clamp(brown_z + randint(-2, 2), 0, LEDS_Z - 1);
