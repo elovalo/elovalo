@@ -11,8 +11,10 @@
 #include "effects.h"
 #include "effect_utils.h"
 
+static void init_brownian(void);
+
 const effect_t effects[] = {
-	{ "brownian", NULL, &effect_brownian, 100 },
+	{ "brownian", &init_brownian, &effect_brownian, 100 },
 	{ "sine", NULL, &effect_sine, 100 },
 	{ "const", NULL, &effect_constant, 100 },
 	{ "layers", NULL, &effect_layers_tester, 100 }
@@ -23,9 +25,18 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
 /**
  * Brownian particle. Starts from center.
  * */
+uint8_t brown_x;
+uint8_t brown_y;
+uint8_t brown_z;
+static void init_brownian(void)
+{
+	brown_x = (uint8_t)(LEDS_X / 2);
+	brown_y = (uint8_t)(LEDS_Y / 2);
+	brown_z = (uint8_t)(LEDS_Z / 2);
+}
 void effect_brownian(void)
 {
-	set_led((uint8_t)(LEDS_X / 2), (uint8_t)(LEDS_Y / 2), (uint8_t)(LEDS_Z / 2), (1<<GS_DEPTH) - 1);
+	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
 }
 
 /**
