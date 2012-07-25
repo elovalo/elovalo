@@ -14,9 +14,9 @@ JSON = os.getenv('effect') or 'layers'
 CUR_PATH = os.path.split(bpy.data.filepath)[0]
 
 render_path = os.getenv('path')
-render_path = render_path if render_path[-1] == '/' else render_path + '/'
 
 if render_path:
+    render_path = render_path if render_path[-1] == '/' else render_path + '/'
     bpy.data.scenes[0].render.filepath = os.path.join(CUR_PATH, render_path)
 
 # TODO: might want to link mesh data (link mat to ob)
