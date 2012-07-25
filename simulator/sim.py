@@ -9,7 +9,15 @@ import os
 import bpy
 
 FX_DIR = '../build_exporter/exports'
-JSON = 'sine'
+JSON = os.getenv('effect') or 'layers'
+
+CUR_PATH = os.path.split(bpy.data.filepath)[0]
+
+render_path = os.getenv('path')
+render_path = render_path if render_path[-1] == '/' else render_path + '/'
+
+if render_path:
+    bpy.data.scenes[0].render.filepath = os.path.join(CUR_PATH, render_path)
 
 # TODO: might want to link mesh data (link mat to ob)
 
@@ -212,7 +220,7 @@ while len(bpy.app.handlers.frame_change_pre):
 #bpy.app.handlers.frame_change_pre.append(partial(update, states))
 
 def load_data():
-    p = os.path.join(os.path.split(bpy.data.filepath)[0], FX_DIR, JSON + '.json')
+    p = os.path.join(CUR_PATH, FX_DIR, JSON + '.json')
 
     with open(p) as f:
         d = json.load(f)
