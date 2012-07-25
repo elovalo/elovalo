@@ -23,7 +23,7 @@ const effect_t effects[] = {
 const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
- * Brownian particle. Starts from center.
+ * Brownian particle. Starts near center.
  * */
 uint8_t brown_x;
 uint8_t brown_y;
@@ -36,7 +36,14 @@ static void init_brownian(void)
 }
 void effect_brownian(void)
 {
+	// TODO: figure out how to accumulate
 	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
+
+	// XXX: causes the first frame to offset for some reason!
+	// TODO: this should be offset relative to current (ie. -2, 2 to cur)
+	brown_x = (uint8_t)(LEDS_X * rand() / RAND_MAX);
+	brown_y = (uint8_t)(LEDS_Y * rand() / RAND_MAX);
+	brown_z = (uint8_t)(LEDS_Z * rand() / RAND_MAX);
 }
 
 /**
