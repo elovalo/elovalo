@@ -64,7 +64,7 @@ void export_effect(const effect_t *effect) {
 
 		// Flip back if flipping is not active
 		// This is done because set_led operates on the back buffer
-		if (effect->flipBuffers == 0) gs_buf_swap();
+		if (effect->flip_buffers == 0) gs_buf_swap();
 
 		// Unwind last comma
 		fseek(f,-1,SEEK_CUR); // TODO handle errors

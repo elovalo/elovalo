@@ -41,7 +41,7 @@ typedef struct {
 	init_t init;     // Initializatior, may be NULL.
 	draw_t draw;     // Drawing function, run once per buffer swap.
 	uint16_t length; // Effect duration in milliseconds.
-	int flipBuffers; // Flip buffers during execution.
+	int flip_buffers; // Flip buffers during execution.
 } effect_t;
 
 // XXX: might want to replace flipBuffers with a set of bitfields
