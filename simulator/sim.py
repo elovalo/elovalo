@@ -8,7 +8,7 @@ import os
 
 import bpy
 
-FX_DIR = '../build_exporter/exports'
+FX_DIR = 'exports'
 JSON = os.getenv('effect') or 'brownian'
 
 CUR_PATH = os.path.split(bpy.data.filepath)[0]
