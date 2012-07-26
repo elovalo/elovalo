@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
 	for (int i=0; i<effects_len; i++) {
+		clear_buffer();
 		export_effect(&effects[i]);
 	}
 }
@@ -37,6 +38,14 @@ void export_effect(const effect_t *effect) {
 	if (f == NULL) {
 		fprintf(stderr,"Unable to write to effect.dump\n");
 		return;
+	}
+
+	/* If not flipping buffers, front must equal to back to
+	 * support simultaneous drawing of front buffer */
+	uint8_t *old_front = NULL;
+	if (!effect->flip_buffers) {
+		old_front = gs_buf_front;
+		gs_buf_front = gs_buf_back;
 	}
 
 	if (effect->init != NULL) effect->init();
@@ -62,14 +71,14 @@ void export_effect(const effect_t *effect) {
 			fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
 		}
 
-		// Flip back if flipping is not active
-		// This is done because set_led operates on the back buffer
-		if (effect->flip_buffers == 0) gs_buf_swap();
-
 		// Unwind last comma
 		fseek(f,-1,SEEK_CUR); // TODO handle errors
 		fputs("],[",f); // TODO handle errors
 	}
+
+	// Return buffers back to original
+	if (!effect->flip_buffers) gs_buf_front = old_front;
+
 	fseek(f,-2,SEEK_CUR); // TODO handle errors
 	fputs("]}\n",f); // TODO handle errors
 	fclose(f); // TODO handle errors
