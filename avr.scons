@@ -3,7 +3,7 @@
 env = Environment()
 
 env['CC'] = 'avr-gcc'
-env.Append(CCFLAGS = '-mmcu=atmega328 -O2 -Wall -std=gnu99')
+env.Append(CCFLAGS = '-mmcu=atmega328 -Os -Wall -std=gnu99')
 
 Target = 'ledcube'
 
