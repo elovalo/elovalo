@@ -9,7 +9,7 @@ import os
 import bpy
 
 FX_DIR = '../build_exporter/exports'
-JSON = os.getenv('effect') or 'layers'
+JSON = os.getenv('effect') or 'brownian'
 
 CUR_PATH = os.path.split(bpy.data.filepath)[0]
 
@@ -235,7 +235,7 @@ def load_data():
 
 def update2(frames, scene):
     def render_frame(i):
-        i = i % len(frames)
+        i = i % len(frames) - 1
     
         states = frames[i]
         

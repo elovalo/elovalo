@@ -23,9 +23,7 @@ const effect_t effects[] = {
 const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
- * Brownian particle. Starts near center.
- *
- * Known issues: two leds are set at initial state (should be just one)
+ * Brownian particle. Starts near center and then accumulates.
  * */
 uint8_t brown_x;
 uint8_t brown_y;
