@@ -20,7 +20,10 @@ if render_path:
     render_path = render_path if render_path[-1] == '/' else render_path + '/'
     render.filepath = os.path.join(CUR_PATH, render_path)
 
-render.stamp_note_text += JSON.title()
+def stamp_note(cur, fx):
+    return cur.split('-')[0].strip() + ' - ' + fx.title()
+
+render.stamp_note_text = stamp_note(render.stamp_note_text, JSON)
 
 # TODO: might want to link mesh data (link mat to ob)
 
