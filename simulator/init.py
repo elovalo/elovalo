@@ -6,7 +6,7 @@ os.environ['effect'] = sys.argv[1]
 os.environ['path'] = sys.argv[2]
 
 os.chdir('..')
-call('scons', shell=True)
+call('scons --no-avr', shell=True)
 os.chdir('simulator')
 call('../build_exporter/exporter', shell=True)
 
