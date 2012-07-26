@@ -16,6 +16,7 @@ static void init_brownian(void);
 const effect_t effects[] = {
 	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
 	{ "sine", NULL, &effect_sine, 1000, 1 },
+	{ "wave", NULL, &effect_wave, 1000, 1 },
 	{ "const", NULL, &effect_constant, 1000, 1 },
 	{ "layers", NULL, &effect_layers_tester, 1000, 1 }
 };
@@ -24,7 +25,7 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
  * Brownian particle. Starts near center and then accumulates.
- * */
+ */
 uint8_t brown_x;
 uint8_t brown_y;
 uint8_t brown_z;
@@ -36,7 +37,6 @@ static void init_brownian(void)
 }
 void effect_brownian(void)
 {
-	// TODO: figure out how to accumulate
 	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
 
 	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
@@ -46,12 +46,23 @@ void effect_brownian(void)
 
 /**
  * Plot 2-dimensional sine waves which are moving. The parameters are
- * not tuned, this is just taken from my head. */
+ * not tuned, this is just taken from my head.
+ */
 TWOD(effect_sine)
 {
 	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY/4;
 
 	return sine_scaler * (2 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
+}
+
+/**
+ * Plot 1-dimensional sine waves.
+ */
+TWOD(effect_wave)
+{
+	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
+
+	return sine_scaler * (2 + sin((float)x * 50 + (float)ticks / 150));
 }
 
 /**
