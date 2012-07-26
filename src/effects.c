@@ -17,6 +17,7 @@ const effect_t effects[] = {
 	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
 	{ "sine", NULL, &effect_sine, 1000, 1 },
 	{ "wave", NULL, &effect_wave, 1000, 1 },
+	{ "sphere", NULL, &effect_sphere, 1000, 1 },
 	{ "const", NULL, &effect_constant, 1000, 1 },
 	{ "layers", NULL, &effect_layers_tester, 1000, 1 }
 };
@@ -63,6 +64,33 @@ TWOD(effect_wave)
 	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
 
 	return sine_scaler * (2 + sin((float)x * 50 + (float)ticks / 150));
+}
+
+/**
+ * Plot sphere.
+ */
+void effect_sphere(void)
+{
+	float a = -3.5;
+	float rsq_max = 16;
+	float rsq_min = 10;
+	int step = 50;
+	int f = 1000;
+	float fac = fmax(ceil((ticks % f) / step) * step / f, 0.2);
+
+	clear_buffer();
+
+	for (float x = a; x < LEDS_X + a; x++) {
+		for (float y = a; y < LEDS_Y + a; y++) {
+			for (float z = a; z < LEDS_Z + a; z++) {
+				float sq = x * x + y * y + z * z;
+
+				if(rsq_min * fac < sq && sq < rsq_max * fac) {
+					set_led(x - a, y - a, z - a, (1<<GS_DEPTH) - 1);
+				}
+			}
+		}
+	}
 }
 
 /**
