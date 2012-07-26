@@ -7,17 +7,16 @@ animation (bottom right button at 3D view).
 ## Rendering via terminal
 
 It is possible to render via terminal as well. Make sure you have an alias for
-Blender (OS X) or have it in your path (Ubuntu, Win?). Execute the following
-command in order to render out an animation (a set of pngs) of given `effect`:
+Blender (OS X) or have it in your path (Ubuntu, Win?). Execute
 
-effect=sine path=tmp blender -b simulator.blend -P sim.py -a
+./anim sine tmp
 
 This would render the sine effect in /tmp below the current path. You should
-find a bunch of pngs there. It is possible to use certain other flags. Consider
-the following:
+find a bunch of pngs there. If you want to render just one frame, use
 
-* -f 25 - Renders frame 25 only
-* -s 1 -e 50 -a - Starts rendering from frame 1 and ends at 50
+./frame sine tmp 25
+
+where 25 is the frame number you want.
 
 ## Converting pngs to something useful
 

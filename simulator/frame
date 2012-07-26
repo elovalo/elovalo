@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# ./frame <effect> <path> <frame>
+import sys
+from subprocess import Popen
+
+import init
+
+sp = Popen(["/bin/bash", "-i", "-c",
+    "blender -b simulator.blend -P sim.py -f " + sys.argv[3]])
+sp.communicate()
