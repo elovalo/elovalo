@@ -1,0 +1,2 @@
+# toavi <input> <name>
+ffmpeg -i $1/%04d.png $2.avi

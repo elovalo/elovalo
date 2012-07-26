@@ -20,11 +20,10 @@ where 25 is the frame number you want.
 
 ## Converting pngs to something useful
 
-If you have ffmpeg installed and available at the path, you can do something
-like this:
+If you have ffmpeg installed and available at your path, execute
 
-ffmpeg -i tmp/%04d.png test.avi
+./toavi tmp test
 
-This would convert pngs from tmp into a test.avi which you can then playback
+This will convert pngs from tmp into a test.avi which you can then playback
 using ffplay (ffplay test.avi) or some other app.
 
