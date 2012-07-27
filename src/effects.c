@@ -16,8 +16,8 @@ static void init_worm(void);
 
 const effect_t effects[] = {
 	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
-	{ "sine", NULL, &effect_sine, 1000, 1 },
-	{ "wave", NULL, &effect_wave, 1000, 1 },
+	{ "sine", NULL, &effect_sine, 6000, 1 },
+	{ "wave", NULL, &effect_wave, 6000, 1 },
 	{ "sphere", NULL, &effect_sphere, 1000, 1 },
 	{ "worm", &init_worm, &effect_worm, 6000, 0 },
 	{ "const", NULL, &effect_constant, 1000, 1 },
