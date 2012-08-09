@@ -1,0 +1,25 @@
+# -*- mode: python; coding: utf-8 -*-
+
+env = Environment()
+
+env['CC'] = 'avr-gcc'
+env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -Os -Wall -std=gnu99 -fpack-struct')
+env.Append(LINKFLAGS = '-mmcu=atmega328p')
+
+Target = 'ledcube'
+
+# Make elf
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')])
+
+# Make hex
+env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
+
+# Dump assembly code
+env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
+
+# Show memory usage
+env.Command(None, Target+".hex", "avr-size $SOURCE")
+
+# Program the thing
+if GetOption('program'):
+    env.Command(None, Target+".hex", 'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a -Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m -Ulock:w:0xf:m')

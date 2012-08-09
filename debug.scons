@@ -1,0 +1,15 @@
+# -*- mode: python; coding: utf-8 -*-
+
+env = Environment()
+
+env['CC'] = 'avr-gcc'
+env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -O0 -Wall -std=gnu99 -fpack-struct')
+env.Append(LINKFLAGS = '-mmcu=atmega328p')
+
+Target = 'ledcube'
+
+# Make elf
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')])
+
+# Dump assembly code
+env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
