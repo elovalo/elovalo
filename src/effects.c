@@ -16,8 +16,8 @@ static void init_worm(void);
 
 const effect_t effects[] = {
 	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
-	{ "sine", NULL, &effect_sine, 1000, 1 },
-	{ "wave", NULL, &effect_wave, 1000, 1 },
+	{ "sine", NULL, &effect_sine, 6000, 1 },
+	{ "wave", NULL, &effect_wave, 6000, 1 },
 	{ "sphere", NULL, &effect_sphere, 1000, 1 },
 	{ "worm", &init_worm, &effect_worm, 6000, 0 },
 	{ "const", NULL, &effect_constant, 1000, 1 },
@@ -37,6 +37,8 @@ static void init_brownian(void)
 	brown_x = (uint8_t)(LEDS_X / 2);
 	brown_y = (uint8_t)(LEDS_Y / 2);
 	brown_z = (uint8_t)(LEDS_Z / 2);
+
+	clear_buffer();
 }
 void effect_brownian(void)
 {
@@ -45,8 +47,6 @@ void effect_brownian(void)
 	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
 	brown_y = clamp(brown_y + randint(-2, 2), 0, LEDS_Y - 1);
 	brown_z = clamp(brown_z + randint(-2, 2), 0, LEDS_Z - 1);
-
-	clear_buffer();
 }
 
 /**

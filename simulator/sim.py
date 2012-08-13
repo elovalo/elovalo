@@ -25,6 +25,11 @@ def stamp_note(cur, fx):
 
 render.stamp_note_text = stamp_note(render.stamp_note_text, JSON)
 
+hd = os.getenv('hd')
+
+if hd:
+    render.resolution_percentage = 100
+
 # TODO: might want to link mesh data (link mat to ob)
 
 # http://blenderpythonscripts.wordpress.com/2011/04/24/cursor-control-0-6-0/

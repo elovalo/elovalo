@@ -10,5 +10,9 @@ from subprocess import Popen
 
 import init
 
+p = init.parser()
+args = p.parse_args()
+init.execute(args)
+
 sp = Popen(["/bin/bash", "-i", "-c", "blender -b simulator.blend -P sim.py -a"])
 sp.communicate()
