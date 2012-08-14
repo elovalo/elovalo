@@ -17,3 +17,5 @@ uint8_t serial_send_available(void);
 void serial_RX_empty(void);
 void serial_TX_empty(void);
 uint8_t serial_read(void);
+uint8_t serial_read_blocking(void);
+void serial_ungetc(uint8_t x);

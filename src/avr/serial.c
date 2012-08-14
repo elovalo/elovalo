@@ -81,6 +81,25 @@ uint8_t serial_read(void) {
 	return data;
 }
 
+
+/**
+ * Put a byte back to serial buffer. Note the possibility of an
+ * overflow. Check rx_state afterwards if you want to check we are in
+ * a sane state.
+ */
+void serial_ungetc(uint8_t x)
+{
+	// Wrap to end if at the beginning
+	if (rx_out_i == 0) rx_out_i = RX_BUF_SIZE;
+
+	rx_buf[--rx_out_i] = x;
+
+	if (rx_in_i == rx_out_i) {
+		// Overflow condition
+		rx_state = TXRX_OVERFLOW;
+	}
+}
+
 /**
  * Returns free capacity in send buffer. That is how many bytes can be
  * transmitted at once.
@@ -113,4 +132,13 @@ void serial_send(uint8_t data)
 		// Overflow condition
 		tx_state = TXRX_OVERFLOW;
 	}	
+}
+
+/**
+ * Reads a byte from receive buffer. Waits in a busy wait loop for
+ * more data if no data is already available.
+ */
+uint8_t serial_read_blocking(void) {
+	while(!serial_available());
+	return serial_read();
 }
