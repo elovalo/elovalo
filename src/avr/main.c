@@ -35,6 +35,7 @@
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
 #define RESP_EFFECT_NAME    0x03
+#define RESP_EFFECT_END     0x04
 #define RESP_JUNK_CHAR      0xfd
 #define RESP_INVALID_CMD    0xfe
 #define RESP_INVALID_EFFECT 0xff
@@ -86,11 +87,22 @@ int main() {
 			// No operation
 			break;
 		case MODE_EFFECT:
-			// Execute an effect
-			// Check if we should render at all
-			// Get ticks
-			// jump to effect code
-			// flip buffers
+			// TODO check we have swapped since last time here
+
+			ticks = millis();
+			if (ticks > effect->length) {
+				// Rendered too long, stop.
+				mode = MODE_IDLE;
+
+				// Report to serial port
+				serial_send(ESCAPE);
+				serial_send(RESP_EFFECT_END);
+				
+				break;
+			}
+			effect->draw();
+
+			// TODO mark buffer ready for swapping
 			break;
 		case MODE_SNAKE:
 			// Snake effect
