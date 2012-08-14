@@ -75,9 +75,10 @@ ISR(TIMER0_COMPA_vect)
 	c++;
 	pin_high(BLANK);
 	pin_high(XLAT);
-	pin_low(XLAT);
+	pin_low(XLAT); // "Activate" data
 
 	if(FirstCycle){
+		// Not needed anymore because no dot correction is used
 		pin_high(SCLK);
 		pin_low(SCLK);
 		FirstCycle = 0;
@@ -99,7 +100,7 @@ ISR(TIMER0_COMPA_vect)
 	}
 
    // Start new transfer....
-	pin_low(BLANK);
+	pin_low(BLANK); // Start PWM timers on TLC5940
 
 	if(isAfterFlip){
 	SPDR = gs_buf_front[GSdataCounter];

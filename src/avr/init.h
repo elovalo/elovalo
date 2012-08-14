@@ -11,7 +11,8 @@
 void disableWDT();
 void initPorts(void);
 void initSPI(void);
-void initBLANKTimer(void);
+void init_blank_timer(void);
+void init_effect_timer(void);
 void initUSART(void);
 
 #define DEBUG_LED D,PD4

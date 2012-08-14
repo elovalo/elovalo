@@ -34,7 +34,8 @@ int main() {
 	initSPI();
 
 	initTLC5940();
-	initBLANKTimer();
+	init_blank_timer();
+	init_effect_timer();
 
 	initUSART();
 	sei();
