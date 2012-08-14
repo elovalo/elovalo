@@ -10,11 +10,13 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <stdlib.h>
 #include "pinMacros.h"
 #include "main.h"
 #include "init.h"
 #include "tlc5940.h"
 #include "serial.h"
+#include "timer.h"
 #include "../cube.h"
 #include "../effects.h"
 
@@ -32,6 +34,7 @@
 
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
+#define RESP_EFFECT_NAME    0x03
 #define RESP_JUNK_CHAR      0xfd
 #define RESP_INVALID_CMD    0xfe
 #define RESP_INVALID_EFFECT 0xff
@@ -169,6 +172,19 @@ void process_cmd(void)
 		// Change mode and pick correct effect from the array.
 		mode = MODE_EFFECT;
 		effect = effects + x.byte;
+
+		// Report new effect name to serial user
+		serial_send(ESCAPE);
+		serial_send(RESP_EFFECT_NAME);
+		for (char *c = effect->name; *c != '\0'; c++) {
+			send_escaped(*c);
+		}
+		send_escaped('\0');
+
+		// Prepare effect
+		reset_time();
+		if (effect->init != NULL) effect->init();
+
 		break;
 	case CMD_SERIAL_FRAME:
 		mode = MODE_IDLE;
