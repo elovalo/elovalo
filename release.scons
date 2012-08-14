@@ -18,7 +18,7 @@ env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex
 env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
 
 # Show memory usage
-env.Command(None, Target+".hex", "avr-size $SOURCE")
+env.Command(None, Target+".elf", "avr-size $SOURCE")
 
 # Program the thing
 if GetOption('program'):

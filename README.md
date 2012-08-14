@@ -60,6 +60,17 @@ To program, run:
 
     scons --program
 
+## Size optimization
+
+There is enough EEPROM but the SRAM usage is quite high because of
+front and back buffers uses 0x300 bytes each. This leaves very scarce
+resources for effect development. To see contents of SRAM, run:
+
+    avr-objdump -t -j .bss build_release/ledcube.elf
+
+Bytes used in SRAM is printed every time scons is run. When it exceeds
+2048 bytes, you are in need of optimization.
+
 ## More information
 
 For more information, feel free to contact Elovalo project group.
