@@ -17,16 +17,31 @@
 #include "serial.h"
 #include "../cube.h"
 
-#define ESCAPE 0x7e
+#define ESCAPE              0x7e
+#define LITERAL_ESCAPE      0x00
 
-#define DEFAULT 0x00
-#define STANDALONE 0x01
-#define SERIAL_SLAVE 0x02
+#define MODE_IDLE           0x00
+#define MODE_EFFECT         0x01
+#define MODE_SNAKE          0x02
 
-uint8_t state=0x00;
+#define CMD_STOP            0x00
+#define CMD_CHANGE_EFFECT   0x01
+#define CMD_SERIAL_FRAME    0x02
+#define CMD_SNAKE           0x03
+
+#define RESP_REBOOT         0x00
+#define RESP_SWAP           0x01
+#define RESP_JUNK_CHAR      0xfd
+#define RESP_INVALID_CMD    0xfe
+#define RESP_INVALID_EFFECT 0xff
+
+uint8_t mode = MODE_IDLE;
+
+// Private functions
+void process_cmd(void);
+void send_escaped(uint8_t byte);
 
 int main() {
-
 	cli();
 
 	disableWDT();
@@ -42,31 +57,40 @@ int main() {
 
 	InitGScycle(); //TODO: Send first byte to the SPI bus...
 
-	while(1){
+	// Greet the serial user
+	serial_send(ESCAPE);
+	serial_send(RESP_REBOOT);
 
-		if(serial_available()){
+	while(1) {
+		if(serial_available()) {
+			uint8_t cmd = serial_read();
 
-			serial_send(0xf5);
-
-			if(state==DEFAULT){
-				//wait command from usart and process it
-
-				processCommand();
+			if (cmd == ESCAPE) {
+				process_cmd();
+			} else {
+				// Errorneous command
+				serial_send(ESCAPE);
+				serial_send(RESP_JUNK_CHAR);
+				send_escaped(cmd);
 			}
-			else{
-				stateMachine();
-			}
-
 		}
 
-		if(state == STANDALONE){
+		switch (mode) {
+		case MODE_IDLE:
+			// No operation
+			break;
+		case MODE_EFFECT:
+			// Execute an effect
+			// Check if we should render at all
+			// Get ticks
+			// jump to effect code
+			// flip buffers
+			break;
+		case MODE_SNAKE:
+			// Snake effect
 			animSnake();
+			break;
 		}
-
-		if(state == SERIAL_SLAVE){
-			//put the current byte to the backbuffer unelss it's literal escape
-		}
-
 	}
 
 	return 0;
@@ -111,46 +135,45 @@ void animSnake() {
 	}
 }
 
-void processCommand(){
-	switch (serial_read()) {
-		case ESCAPE:
+/**
+ * Processes a command. The escape character is already read in main(). This may
+ * block because of reading serial data, but that is okay for now.
+ */
+void process_cmd(void)
+{
+	uint8_t cmd = serial_read_blocking();
 
-				state = DEFAULT;
-			break;
-
-		case STANDALONE:
-
-				state = STANDALONE;
-			break;
-
-		case SERIAL_SLAVE:
-
-				state = SERIAL_SLAVE;
-			break;
-
-		default:
-			//keep the current state
-			break;
+	switch (cmd) {
+	case ESCAPE:
+		// Put the character back
+		serial_ungetc(ESCAPE);
+		break;
+	case CMD_STOP:
+		mode = MODE_IDLE;
+		break;
+	case CMD_CHANGE_EFFECT:
+		mode = MODE_EFFECT;
+		// TODO read effect number
+		break;
+	case CMD_SERIAL_FRAME:
+		mode = MODE_IDLE;
+		// TODO read serial data
+		break;
+	case CMD_SNAKE:
+		// Temporary "snake" effect used in debugging
+		mode = MODE_SNAKE;
+		break;
+	default:
+		// Report error
+		serial_send(ESCAPE);
+		serial_send(RESP_INVALID_CMD);
+		send_escaped(cmd);
 	}
 }
 
-void stateMachine(){
-	switch (serial_read()) {
-		case ESCAPE:
-			while(!serial_available());
-			if(serial_read()==0x00){
-				//literal escape
-				//state = 0x00
-			}
-			else{
-				state = 0x00;
-			}
-			break;
-
-		default:
-			//do whatever in the current state
-			break;
-	}
+void send_escaped(uint8_t byte) {
+	serial_send(byte);
+	if (byte == ESCAPE) serial_send(LITERAL_ESCAPE);
 }
 
 void clearArray(volatile uint8_t *arr, uint8_t len) {
@@ -160,33 +183,6 @@ void clearArray(volatile uint8_t *arr, uint8_t len) {
 	}
 
 }
-
-////Generic SPI master transmission
-////Return slave data.
-//void SPI_Transfer(uint8_t cData)
-//{
-//	/* Start transmission */
-//	PORTB |= (1<<PB1);
-//	SPDR = cData; //Send byte
-//	/* Wait for transmission complete */
-//	while(!(SPSR & (1<<SPIF)));
-//	PORTB &= ~(1<<PB1);
-//}
-
-////SPI Transfer for TLC5940
-//void SPI_Transfer_TLC5940(uint8_t FrontBuffer[])
-//{
-//	GSdataCounter=0;
-//	/* Start transmission */
-//	PORTB &= ~(1<<PB1);
-//
-//	//notTransferring=0; //we're transferring data...
-//	SPDR = FrontBuffer[0]; //Send first byte to initialize the ISR managed transfer
-//
-//	/* Wait for transmission complete */
-//	//while(!(SPSR & (1<<SPIF)));
-//	//PORTB &= ~(1<<PB2);
-//}
 
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
