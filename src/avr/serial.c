@@ -81,7 +81,6 @@ uint8_t serial_read(void) {
 	return data;
 }
 
-
 /**
  * Put a byte back to serial buffer. Note the possibility of an
  * overflow. Check rx_state afterwards if you want to check we are in
@@ -89,10 +88,11 @@ uint8_t serial_read(void) {
  */
 void serial_ungetc(uint8_t x)
 {
-	// Wrap to end if at the beginning
-	if (rx_out_i == 0) rx_out_i = RX_BUF_SIZE;
+	// Done as single assignment this to avoid atomicity problem
+	if (rx_out_i == 0) rx_out_i = RX_BUF_SIZE - 1;
+	else rx_out_i--;
 
-	rx_buf[--rx_out_i] = x;
+	rx_buf[rx_out_i] = x;
 
 	if (rx_in_i == rx_out_i) {
 		// Overflow condition
@@ -116,22 +116,25 @@ uint8_t serial_send_available(void) {
  */
 void serial_send(uint8_t data)
 {
-	/* If buffer is empty and no byte is in transit, do not queue
-	 * at all. */
-	if (tx_in_i == tx_out_i && (UCSR0A & (1<<UDRE0))) {
-		UDR0 = data;
-		return;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+
+		/* If buffer is empty and no byte is in transit, do not queue
+		 * at all. */
+		if (tx_in_i == tx_out_i && (UCSR0A & (1<<UDRE0))) {
+			UDR0 = data;
+			return;
+		}
+
+		tx_buf[tx_in_i++] = data;
+
+		// Wrap to start
+		if (tx_in_i == RX_BUF_SIZE) tx_in_i = 0;
+
+		if (tx_in_i == tx_out_i) {
+			// Overflow condition
+			tx_state = TXRX_OVERFLOW;
+		}
 	}
-
-	tx_buf[tx_in_i++] = data;
-
-	// Wrap to start
-	if (tx_in_i == RX_BUF_SIZE) tx_in_i = 0;
-	
-	if (tx_in_i == tx_out_i) {
-		// Overflow condition
-		tx_state = TXRX_OVERFLOW;
-	}	
 }
 
 /**
