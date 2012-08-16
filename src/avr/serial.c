@@ -1,6 +1,7 @@
 /* Functions for USART access */
 
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include "serial.h"
 
 // RX ring buffer
