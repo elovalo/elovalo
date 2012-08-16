@@ -66,6 +66,40 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 }
 
 /**
+ * Gets led intensity from front buffer. Returns intensity of a LED in
+ * range 0..4095.  This implementation is AVR optimized and handles
+ * only cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer
+ * has no padding. Do not call directly, use get_led() instead.
+ */
+uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z)
+{
+	/* Assert (on testing environment) that we supply correct
+	 * data. */
+	assert(x < LEDS_X);
+	assert(y < LEDS_Y);
+	assert(z < LEDS_Z);
+
+	/* Cube buffers are bit packed: 2 voxels per 3 bytes when
+	 * GS_DEPTH is 12. This calculates bit position efficiently by
+	 * using bit shifts. With AVR's 8-bit registers this is
+	 * optimized to do first operations with uint8_t's and do the
+	 * last shift with uint16_t because it's the only one which
+	 * overflows from 8 bit register. */
+	const uint16_t bit_pos = 12 * (x | y << 3 | (uint16_t)z << 6);
+
+	/* Byte position is done simply by truncating the last 8 bits
+	 * of the data. Variable raw is filled with the data. */
+	const uint16_t byte_pos = bit_pos >> 3;
+	assert(byte_pos < GS_BUF_BYTES);
+	uint16_t raw = (gs_buf_front[byte_pos] << 8) | gs_buf_front[byte_pos+1];
+
+	/* If 12-bit value starts from the beginning of the data
+	 * (bit_pos is dividable by 8) then we get data starting from
+	 * MSB, otherwise we get from MSB - 4 bits. */
+	return (bit_pos & 0x7) ? raw & 0x0fff : raw >> 4;
+}
+
+/**
  * This function plots a 2-dimensional plot of a given function
  */
 void effect_2d_plot(plot_2d_t f)
