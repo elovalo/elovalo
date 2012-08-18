@@ -30,11 +30,19 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
 /**
  * Heart effect. Supposed to beat according to some input.
  */
+static void heart(uint8_t x, uint16_t intensity);
 void effect_heart(void)
 {
-	const uint8_t x = 0;
 	const uint16_t intensity = (1<<GS_DEPTH) - 1;
 
+	heart(1, (float)intensity / 100);
+	heart(2, (float)intensity / 25);
+	heart(3, intensity);
+	heart(4, intensity);
+	heart(5, (float)intensity / 25);
+	heart(6, (float)intensity / 100);
+}
+static void heart(uint8_t x, uint16_t intensity) {
 	set_row(x, 6, 1, 2, intensity);
 	set_row(x, 6, 5, 6, intensity);
 	set_row(x, 5, 0, 7, intensity);
