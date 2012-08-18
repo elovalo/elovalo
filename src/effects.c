@@ -11,11 +11,13 @@
 #include "effects.h"
 #include "effect_utils.h"
 
+static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
 
 const effect_t effects[] = {
-	{ "heart", NULL, &effect_heart, 100, 0},
+	{ "game_of_life", &init_game_of_life, &effect_game_of_life, 100, 0},
+	{ "heart", NULL, &effect_heart, 100, 1},
 	{ "brownian", &init_brownian, &effect_brownian, 100, 0 },
 	{ "sine", NULL, &effect_sine, 600, 1 },
 	{ "wave", NULL, &effect_wave, 600, 1 },
@@ -26,6 +28,18 @@ const effect_t effects[] = {
 };
 
 const int effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Conway's game of life in 3D. WIP.
+ */
+static void init_game_of_life(void)
+{
+	// TODO: generate initial objects
+}
+void effect_game_of_life(void)
+{
+	// TODO: check out each ob and their neighbour based on rules
+}
 
 /**
  * Heart effect. Supposed to beat according to some input.
