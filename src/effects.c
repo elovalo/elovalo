@@ -117,12 +117,10 @@ TWOD(effect_wave)
  */
 void effect_sphere(void)
 {
-	float a = -3.5;
-	float rsq_max = 16;
-	float rsq_min = 10;
-	int step = 50;
-	int f = 1000;
-	float fac = fmax(ceil((ticks % f) / step) * step / f, 0.2); // TODO bebraw: scale ticks
+	const float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
+	const float rsq_max = 16;
+	const float rsq_min = 8;
+	const float fac = 0.2;
 
 	clear_buffer();
 
