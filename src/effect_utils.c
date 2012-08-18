@@ -136,6 +136,20 @@ void effect_2d_plot(plot_2d_t f)
 }
 
 /**
+ * Iterates all voxels
+ */
+void iterate_3d(iterate_3d_t f)
+{
+	for(uint8_t x = 0; x < LEDS_X; x++) {
+		for(uint8_t y = 0; y < LEDS_Y; y++) {
+			for(uint8_t z = 0; z < LEDS_Z; z++) {
+				f(x, y, z);
+			}
+		}
+	}
+}
+
+/**
  * Sets all voxels in back buffer as black
  */
 void clear_buffer(void)

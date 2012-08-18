@@ -57,6 +57,9 @@ uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
 
 void effect_2d_plot(plot_2d_t f);
 
+typedef void(*iterate_3d_t)(uint8_t,uint8_t,uint8_t);
+void iterate_3d(iterate_3d_t f);
+
 void clear_buffer(void);
 
 uint8_t randint(uint8_t min, uint8_t max);

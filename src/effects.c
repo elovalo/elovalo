@@ -32,6 +32,7 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
 /**
  * Conway's game of life in 3D. WIP.
  */
+static void is_alive(uint8_t x, uint8_t y, uint8_t z);
 static void init_game_of_life(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
@@ -39,7 +40,10 @@ static void init_game_of_life(void)
 }
 void effect_game_of_life(void)
 {
-	// TODO: check out each ob and their neighbour based on rules
+	iterate_3d(is_alive);
+}
+static void is_alive(uint8_t x, uint8_t y, uint8_t z) {
+	// TODO: check neighbours now and set intensity
 }
 
 /**
