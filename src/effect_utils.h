@@ -7,7 +7,8 @@
  * implementation available */
 #if LEDS_X == 8 && LEDS_Y == 8 && GS_DEPTH == 12 && BYTES_PER_LAYER == 96
 #define set_led(x,y,z,i) set_led_8_8_12(x,y,z,i)
-#define get_led(x,y,z,i) get_led_8_8_12(x,y,z,i)
+#define get_led(x,y,z) get_led_8_8_12(x,y,z)
+#define get_led_wrap(x,y,z) get_led_wrap_8_8_12(x,y,z)
 #else
 #error "There is no set_led() implementation for this geometry"
 #endif
@@ -54,6 +55,8 @@ void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
 uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
+
+uint16_t get_led_wrap_8_8_12(int8_t x, int8_t y, int8_t z);
 
 void effect_2d_plot(plot_2d_t f);
 

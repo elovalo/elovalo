@@ -30,9 +30,10 @@ const effect_t effects[] = {
 const int effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
- * Conway's game of life in 3D. WIP.
+ * Conway's game of life in 3D
  */
-static void is_alive(uint8_t x, uint8_t y, uint8_t z);
+static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z);
+static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z);
 static void init_game_of_life(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
@@ -40,10 +41,23 @@ static void init_game_of_life(void)
 }
 void effect_game_of_life(void)
 {
-	iterate_3d(is_alive);
+	iterate_3d(set_gol_intensity);
 }
-static void is_alive(uint8_t x, uint8_t y, uint8_t z) {
-	// TODO: check neighbours now and set intensity
+static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
+	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
+
+	if(neighbours >= 9 && neighbours <= 14) set_led(x, y, z, (1<<GS_DEPTH) - 1);
+	else set_led(x, y, z, 0);
+}
+static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
+	uint8_t ret = 0;
+
+	for(int8_t cx = -1; cx <= 1; cx++)
+		for(int8_t cy = -1; cy <= 1; cy++)
+			for(int8_t cz = -1; cz <= 1; cz++)
+				ret += get_led_wrap(x + cx, y + cy, z + cz) > 0;
+
+	return ret;
 }
 
 /**

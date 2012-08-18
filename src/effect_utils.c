@@ -76,6 +76,18 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 }
 
 /**
+ * Gets led intensity. Wraps around bounds.
+ */
+uint16_t get_led_wrap_8_8_12(int8_t x, int8_t y, int8_t z)
+{
+	uint8_t rx = x < 0? LEDS_X - 1: x >= LEDS_X? 0: x;
+	uint8_t ry = y < 0? LEDS_Y - 1: y >= LEDS_Y? 0: y;
+	uint8_t rz = z < 0? LEDS_Z - 1: z >= LEDS_Z? 0: z;
+
+	return get_led_8_8_12(rx, ry, rz);
+}
+
+/**
  * Gets led intensity from front buffer. Returns intensity of a LED in
  * range 0..4095.  This implementation is AVR optimized and handles
  * only cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer
