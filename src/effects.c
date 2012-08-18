@@ -34,7 +34,8 @@ const int effects_len = sizeof(effects) / sizeof(effect_t);
  */
 static void init_game_of_life(void)
 {
-	// TODO: generate initial objects
+	// TODO: might want to use some other seed. using heart for testing
+	effect_heart();
 }
 void effect_game_of_life(void)
 {
