@@ -15,13 +15,13 @@ static void init_brownian(void);
 static void init_worm(void);
 
 const effect_t effects[] = {
-	{ "brownian", &init_brownian, &effect_brownian, 1000, 0 },
-	{ "sine", NULL, &effect_sine, 6000, 1 },
-	{ "wave", NULL, &effect_wave, 6000, 1 },
-	{ "sphere", NULL, &effect_sphere, 1000, 1 },
-	{ "worm", &init_worm, &effect_worm, 6000, 0 },
-	{ "const", NULL, &effect_constant, 1000, 1 },
-	{ "layers", NULL, &effect_layers_tester, 1000, 1 }
+	{ "brownian", &init_brownian, &effect_brownian, 100, 0 },
+	{ "sine", NULL, &effect_sine, 600, 1 },
+	{ "wave", NULL, &effect_wave, 600, 1 },
+	{ "sphere", NULL, &effect_sphere, 100, 1 },
+	{ "worm", &init_worm, &effect_worm, 600, 0 },
+	{ "const", NULL, &effect_constant, 100, 1 },
+	{ "layers", NULL, &effect_layers_tester, 100, 1 }
 };
 
 const int effects_len = sizeof(effects) / sizeof(effect_t);
@@ -57,7 +57,7 @@ TWOD(effect_sine)
 {
 	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY/4;
 
-	return sine_scaler * (2 + sin((float)x/2+(float)ticks/150) + sin((float)y/2+(float)ticks/300));
+	return sine_scaler * (2 + sin((float)x/2+(float)ticks/15) + sin((float)y/2+(float)ticks/30));
 }
 
 /**
@@ -67,7 +67,7 @@ TWOD(effect_wave)
 {
 	const float sine_scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
 
-	return sine_scaler * (2 + sin((float)x * 50 + (float)ticks / 150));
+	return sine_scaler * (2 + sin((float)x * 50 + (float)ticks / 15));
 }
 
 /**
@@ -80,7 +80,7 @@ void effect_sphere(void)
 	float rsq_min = 10;
 	int step = 50;
 	int f = 1000;
-	float fac = fmax(ceil((ticks % f) / step) * step / f, 0.2);
+	float fac = fmax(ceil((ticks % f) / step) * step / f, 0.2); // TODO bebraw: scale ticks
 
 	clear_buffer();
 
@@ -143,7 +143,7 @@ TWOD(effect_constant)
 void effect_layers_tester(void)
 {
 	clear_buffer();
-	uint8_t z = (ticks/20 % LEDS_Z);
+	uint8_t z = (ticks >> 1 % LEDS_Z);
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {

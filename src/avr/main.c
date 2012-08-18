@@ -89,7 +89,7 @@ int main() {
 		case MODE_EFFECT:
 			// TODO check we have swapped since last time here
 
-			ticks = millis();
+			ticks = centisecs();
 			if (ticks > effect->length) {
 				// Rendered too long, stop.
 				mode = MODE_IDLE;

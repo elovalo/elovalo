@@ -25,9 +25,9 @@ void export_effect(const effect_t *effect) {
 	const int size = 50;
 	char filename[size];
 
-	/* Increment frame counter always by 20 milliseconds
+	/* Increment frame counter always by 2 centiseconds
 	   to simulate slow drawing. */
-	const uint16_t drawing_time = 20;
+	const uint16_t drawing_time = 2;
 	
 	int bytes = snprintf(filename, size, "exports/%s.json", effect->name);
 	assert(bytes <= size);

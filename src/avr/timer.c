@@ -14,7 +14,7 @@ ISR(TIMER2_COMPA_vect)
 	ticks_volatile++;
 }
 
-uint16_t millis(void) {
+uint16_t centisecs(void) {
 	uint16_t copy_of_ticks;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 		copy_of_ticks = ticks_volatile;
