@@ -9,6 +9,7 @@
  */
 
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 #include <avr/io.h>
 #include <stdlib.h>
 #include "pinMacros.h"
@@ -57,18 +58,15 @@ void dislike(uint8_t error_code, uint8_t payload);
 int main() {
 	cli();
 
-	disableWDT();
-	initPorts();
-	initSPI();
+	wdt_disable(); // To make sure nothing weird happens
+	init_tlc5940();
+	init_spi();
 
-	initTLC5940();
 	init_blank_timer();
 	init_effect_timer();
 
 	initUSART();
 	sei();
-
-	InitGScycle(); //TODO: Send first byte to the SPI bus...
 
 	// Greet the serial user
 	serial_send(ESCAPE);

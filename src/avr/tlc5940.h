@@ -29,12 +29,7 @@
 
 //Global variables...
 
-extern volatile uint8_t FirstCycle ;
 extern volatile uint8_t GSdataCounter;
 extern volatile uint8_t isAfterFlip;
-
-void initTLC5940();
-
-void InitGScycle();
 
 #endif /* TLC5940_H_ */

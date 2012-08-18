@@ -1,56 +1,64 @@
 /*
  * init.c
  *
+ * Some instructions for newbies:
+ *
+ * Logic 1 to DDRx pin is configured as an output pin.
+ *
+ * Logic 1 to PORTxn output when port configured as an output,
+ * else activate pull up resistor.
+ *
+ * The DDxn bit in the DDRx Register selects the direction of this
+ * pin. If DDxn is written logic one, Pxn is configured as an output
+ * pin. If DDxn is written logic zero, Pxn is configured as an input
+ * pin.
+ *
  *  Created on: 24.5.2012
  *      Author: Icchan
  */
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include <avr/wdt.h>
 #include "pinMacros.h"
 #include "init.h"
 
-void disableWDT(){
-	wdt_disable(); //Mostly for debugging...
-}
-
-/*
- * Logic 1 to DDRx pin is configured as an output pin.
- * Logic 1 to PORTxn output when port configured as an output, else activate pull up resistor.
- *
- * The DDxn bit in the DDRx Register selects the direction of this pin. If DDxn is written logic one,
- * Pxn is configured as an output pin. If DDxn is written logic zero, Pxn is configured as an input pin.
+/**
+ * Sets up pins used by TLC5940.
  */
-void initPorts(){
-
-	//TODO: Remove unnecessary initialization and trust the defaults from the datasheet after debugging...
-	//MCUCR = (0<<PUD); //Ensure we're using pull-ups if configured to be so...
-
-	//DDRB = 0x00; //Should be this way after reset, but to make sure...
-
-	//TODO: Move these over to the respective modules...
-
-	//Set BLANK high (it doubles as !SS pin, thus it has to be an output to stay in master SPI mode)...
-	DDRB |= (1<<PB1)|(1<<PB2)|(1<<PB3)|(1<<PB5);
+void init_tlc5940(void)
+{
+	/* Set BLANK high (The pin used as BLANK is also !SS pin, thus
+	 * it has to be an output to stay in master SPI mode). Setting
+	 * state before direction to avoid blinking. And, because we
+	 * don't use dot correction we may safely leave VPRG low on
+	 * init. */
 	PORTB |= (1<<PB2);
+	DDRB |=
+		(1<<PB1)| // XLAT: output
+		(1<<PB2); // BLANK: output
 
-	DDRD |= (1<<PD2)|(1<<PD3)|(1<<PD4); //PD4 = debug led...
-	PORTD |= (1<<PD3); //Put only VPRG to high on init...
-
+	DDRD |=
+		(1<<PD2)| // DCPRG: output
+		(1<<PD3)| // VPRG: output
+		(1<<PD4); // Debug LED: output 
 }
 
-void initSPI(){
-
-	/* Set MOSI, !SS and SCK output*/
-	DDRB |= (1<<PB2)|(1<<PB3)|(1<<PB5);
+/**
+ * Initializes pins used in SPI communication.
+ */
+void init_spi(void)
+{
+	DDRB |=
+		(1<<PB2)| // !SS: output
+		(1<<PB3)| // MOSI: output
+		(1<<PB5); // SCK: output
 
 	SPCR |=
-	(1<<SPIE) | //We want interrupts
-	(1<<SPE) | 	//We want the SPI enabled
-	(1<<MSTR); //We want the atmega to be a master
+		(1<<SPIE)| // Enable interrupts
+		(1<<SPE)|  // Enable SPI
+		(1<<MSTR); // We want the to be a master
 
-	SPSR |= (1<<SPI2X) ; //Doubles the speed of the SPI clock
+	SPSR |= (1<<SPI2X); // Double the speed of the SPI clock
 
 }
 
@@ -102,5 +110,3 @@ void initUSART(){
 	UCSR0B |= (1<<TXCIE0); // transmit ready interrupt
 
 }
-
-

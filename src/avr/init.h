@@ -8,9 +8,8 @@
 #ifndef INIT_H_
 #define INIT_H_
 
-void disableWDT();
-void initPorts(void);
-void initSPI(void);
+void init_tlc5940(void);
+void init_spi(void);
 void init_blank_timer(void);
 void init_effect_timer(void);
 void initUSART(void);

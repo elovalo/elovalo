@@ -1,6 +1,10 @@
 /*
  * tlc5940.c
  *
+ * Ensure that a) all SPI and TLC5940 pins are configured as outputs
+ * and b) BLANK is HIGH and other output pins of TLC5940 are LOW after
+ * init. This module doesn't do any configuration of pins.
+ *
  *  Created on: 12.6.2012
  *      Author: Icchan
  */
@@ -12,40 +16,10 @@
 #include "main.h"
 #include "../cube.h"
 
-volatile uint8_t FirstCycle = 0; //Is this the first cycle after DCinputCycle()...
 volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
 volatile uint8_t isAfterFlip = 0;
 volatile uint8_t layer=0x01;
 volatile uint16_t c; //testing variable...
-
-//Sets all the signals to their expected values and initiates the dot correction cycle...
-void initTLC5940(){
-	pin_low(XLAT);
-	pin_low(DCPRG);
-	pin_high(VPRG);
-	pin_high(BLANK);
-	pin_low(SCLK);
-	pin_low(DCPRG); /* Dot correction is read from EEPROM which
-			 * effectively turns it off */
-}
-
-/*
- * Initiates the Grays Scale data transfer by putting first byte to the SPDR
- * Consecutive bytes are sent by an ISR: SPI_STC_vect
- */
-void InitGScycle(){
-
-	//Check if DC cycle was run before this...
-	if(get_output(VPRG)){
-		pin_low(VPRG);
-		FirstCycle = 1;
-	}
-
-	pin_low(BLANK);
-
-	SPDR = gs_buf_front[GSdataCounter];
-
-}
 
 /*SPI transmit interrupt vector
  * SPIF is cleared when entering this interrupt vector...
@@ -77,15 +51,6 @@ ISR(TIMER0_COMPA_vect)
 	pin_high(XLAT);
 	pin_low(XLAT); // "Activate" data
 
-	if(FirstCycle){
-		// Not needed anymore because no dot correction is used
-		pin_high(SCLK);
-		pin_low(SCLK);
-		FirstCycle = 0;
-	}
-
-
-
 	if(layer==0x80){
 		layer=0x01;
 	}
@@ -99,7 +64,7 @@ ISR(TIMER0_COMPA_vect)
 		isAfterFlip = 1;
 	}
 
-   // Start new transfer....
+	// Start new transfer....
 	pin_low(BLANK); // Start PWM timers on TLC5940
 
 	if(isAfterFlip){
