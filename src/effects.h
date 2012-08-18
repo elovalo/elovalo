@@ -1,5 +1,6 @@
 #include "effect_utils.h"
 
+void effect_heart(void);
 void effect_brownian(void);
 void effect_sine(void);
 void effect_wave(void);

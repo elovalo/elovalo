@@ -15,6 +15,7 @@ static void init_brownian(void);
 static void init_worm(void);
 
 const effect_t effects[] = {
+	{ "heart", NULL, &effect_heart, 100, 0},
 	{ "brownian", &init_brownian, &effect_brownian, 100, 0 },
 	{ "sine", NULL, &effect_sine, 600, 1 },
 	{ "wave", NULL, &effect_wave, 600, 1 },
@@ -25,6 +26,24 @@ const effect_t effects[] = {
 };
 
 const int effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Heart effect. Supposed to beat according to some input.
+ */
+void effect_heart(void)
+{
+	const uint8_t x = 0;
+	const uint16_t intensity = (1<<GS_DEPTH) - 1;
+
+	set_row(x, 6, 1, 2, intensity);
+	set_row(x, 6, 5, 6, intensity);
+	set_row(x, 5, 0, 7, intensity);
+	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 3, 0, 7, intensity);
+	set_row(x, 2, 1, 6, intensity);
+	set_row(x, 1, 2, 5, intensity);
+	set_row(x, 0, 3, 4, intensity);
+}
 
 /**
  * Brownian particle. Starts near center and then accumulates.

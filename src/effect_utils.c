@@ -26,6 +26,16 @@
 uint16_t ticks;
 
 /**
+ * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
+ */
+void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
+{
+	for(uint8_t i = y1; i <= y2; i++) {
+		set_led_8_8_12(x, i, z, intensity);
+	}
+}
+
+/**
  * Sets led intensity. i is the intensity of the LED in range
  * 0..4095. This implementation is AVR optimized and handles only
  * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
