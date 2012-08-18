@@ -201,7 +201,7 @@ TWOD(effect_constant)
 void effect_layers_tester(void)
 {
 	clear_buffer();
-	uint8_t z = (ticks >> 1 % LEDS_Z);
+	uint8_t z = ((ticks >> 1) % LEDS_Z);
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {
