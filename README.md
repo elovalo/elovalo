@@ -66,10 +66,19 @@ There is enough EEPROM but the SRAM usage is quite high because of
 front and back buffers uses 0x300 bytes each. This leaves very scarce
 resources for effect development. To see contents of SRAM, run:
 
-    avr-objdump -t -j .bss build_release/ledcube.elf
+    avr-objdump -t -j .data -j .bss build_release/ledcube.elf
 
-Bytes used in SRAM is printed every time scons is run. When it exceeds
-2048 bytes, you are in need of optimization.
+Bytes used in SRAM is printed every time scons is run. SRAM size in
+ATmega328p is 2048 bytes. If SRAM gets too full, there is not enough
+space for run-time stack. If so, you are in need of optimization.
+
+If there are large arrays of constant data you should place the data
+in program memory. See code in effects.c and main.c about effects[]
+access. Also, read the following:
+
+- http://nongnu.org/avr-libc/user-manual/pgmspace.html
+
+- http://www.atmel.com/Images/doc8453.pdf
 
 ## More information
 
