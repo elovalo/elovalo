@@ -32,7 +32,10 @@ void export_effect(const effect_t *effect) {
 	int bytes = snprintf(filename, size, "exports/%s.json", effect->name);
 	assert(bytes <= size);
 
-	printf("Exporting %d milliseconds of %s to file %s\n",effect->length, effect->name, filename);
+	printf("Exporting %f seconds of %s to file %s\n",
+	       (double)effect->length/100,
+	       effect->name,
+	       filename);
 
 	FILE *f = fopen(filename,"w");
 	if (f == NULL) {
