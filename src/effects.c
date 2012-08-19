@@ -24,7 +24,7 @@ const effect_t effects[] = {
 	{ "layers", NULL, &effect_layers_tester, 100, 1 }
 };
 
-const int effects_len = sizeof(effects) / sizeof(effect_t);
+const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
  * Brownian particle. Starts near center and then accumulates.

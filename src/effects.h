@@ -9,4 +9,4 @@ void effect_constant(void);
 void effect_layers_tester(void);
 
 extern const effect_t effects[];
-extern const int effects_len;
+extern const uint8_t effects_len;
