@@ -31,13 +31,13 @@ char s_const[]    PROGMEM = "const";
 char s_layers[]   PROGMEM = "layers";
 
 const effect_t effects[] PROGMEM = {
-	{ s_brownian, &init_brownian, &effect_brownian, 100, 0 },
-	{ s_sine, NULL, &effect_sine, 600, 1 },
-	{ s_wave, NULL, &effect_wave, 600, 1 },
-	{ s_sphere, NULL, &effect_sphere, 100, 1 },
-	{ s_worm, &init_worm, &effect_worm, 600, 0 },
-	{ s_const, NULL, &effect_constant, 100, 1 },
-	{ s_layers, NULL, &effect_layers_tester, 100, 1 }
+	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
+	{ s_sine, NULL, &effect_sine, 600, FLIP },
+	{ s_wave, NULL, &effect_wave, 600, FLIP },
+	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
+	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
+	{ s_const, NULL, &effect_constant, 100, FLIP },
+	{ s_layers, NULL, &effect_layers_tester, 100, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);

@@ -45,6 +45,9 @@ typedef struct {
 	uint8_t flip_buffers; // Flip buffers during execution.
 } effect_t;
 
+#define NO_FLIP 0
+#define FLIP 1
+
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
