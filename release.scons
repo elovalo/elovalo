@@ -3,8 +3,8 @@
 env = Environment()
 
 env['CC'] = 'avr-gcc'
-env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -Os -Wall -std=gnu99 -fpack-struct')
-env.Append(LINKFLAGS = '-mmcu=atmega328p')
+env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -Os -Wall -std=gnu99 -fpack-struct -fdata-sections -ffunction-sections')
+env.Append(LINKFLAGS = '-mmcu=atmega328p -Wl,--gc-sections -Wl,--print-gc-sections')
 
 Target = 'ledcube'
 
