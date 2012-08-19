@@ -9,7 +9,7 @@ env.Append(LINKFLAGS = '-mmcu=atmega328p')
 Target = 'ledcube'
 
 # Make elf
-env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')])
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')], LIBS='m')
 
 # Make hex
 env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
