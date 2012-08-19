@@ -34,7 +34,7 @@ PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
 
 const effect_t effects[] PROGMEM = {
-	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 100, NO_FLIP},
+	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 100, FLIP},
 	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
 	{ s_sine, NULL, &effect_sine, 600, FLIP },
