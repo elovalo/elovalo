@@ -12,6 +12,7 @@
 #include "effects.h"
 #include "effect_utils.h"
 
+static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
 
@@ -22,15 +23,19 @@ static void init_worm(void);
  * b) Add entry to effects[] array
  */
 
-char s_brownian[] PROGMEM = "brownian";
-char s_sine[]     PROGMEM = "sine";
-char s_wave[]     PROGMEM = "wave";
-char s_sphere[]   PROGMEM = "sphere";
-char s_worm[]     PROGMEM = "worm";
-char s_const[]    PROGMEM = "const";
-char s_layers[]   PROGMEM = "layers";
+PROGMEM char s_game_of_life[] = "game_of_life";
+PROGMEM char s_heart[]        = "heart";
+PROGMEM char s_brownian[]     = "brownian";
+PROGMEM char s_sine[]         = "sine";
+PROGMEM char s_wave[]         = "wave";
+PROGMEM char s_sphere[]       = "sphere";
+PROGMEM char s_worm[]         = "worm";
+PROGMEM char s_const[]        = "const";
+PROGMEM char s_layers[]       = "layers";
 
 const effect_t effects[] PROGMEM = {
+	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 100, NO_FLIP},
+	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
 	{ s_sine, NULL, &effect_sine, 600, FLIP },
 	{ s_wave, NULL, &effect_wave, 600, FLIP },
@@ -41,6 +46,63 @@ const effect_t effects[] PROGMEM = {
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Conway's game of life in 3D
+ */
+static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z);
+static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z);
+static void init_game_of_life(void)
+{
+	// TODO: might want to use some other seed. using heart for testing
+	effect_heart();
+}
+void effect_game_of_life(void)
+{
+	iterate_3d(set_gol_intensity);
+}
+static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
+	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
+
+	if(neighbours >= 9 && neighbours <= 14) set_led(x, y, z, (1<<GS_DEPTH) - 1);
+	else set_led(x, y, z, 0);
+}
+static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
+	uint8_t ret = 0;
+
+	for(int8_t cx = -1; cx <= 1; cx++)
+		for(int8_t cy = -1; cy <= 1; cy++)
+			for(int8_t cz = -1; cz <= 1; cz++)
+				ret += get_led_wrap(x + cx, y + cy, z + cz) > 0;
+
+	return ret;
+}
+
+/**
+ * Heart effect. Supposed to beat according to some input.
+ */
+static void heart(uint8_t x, uint16_t intensity);
+void effect_heart(void)
+{
+	const uint16_t intensity = (1<<GS_DEPTH) - 1;
+
+	heart(1, (float)intensity / 100);
+	heart(2, (float)intensity / 25);
+	heart(3, intensity);
+	heart(4, intensity);
+	heart(5, (float)intensity / 25);
+	heart(6, (float)intensity / 100);
+}
+static void heart(uint8_t x, uint16_t intensity) {
+	set_row(x, 6, 1, 2, intensity);
+	set_row(x, 6, 5, 6, intensity);
+	set_row(x, 5, 0, 7, intensity);
+	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 3, 0, 7, intensity);
+	set_row(x, 2, 1, 6, intensity);
+	set_row(x, 1, 2, 5, intensity);
+	set_row(x, 0, 3, 4, intensity);
+}
 
 /**
  * Brownian particle. Starts near center and then accumulates.
@@ -91,12 +153,10 @@ TWOD(effect_wave)
  */
 void effect_sphere(void)
 {
-	float a = -3.5;
-	float rsq_max = 16;
-	float rsq_min = 10;
-	int step = 50;
-	int f = 1000;
-	float fac = fmax(ceil((ticks % f) / step) * step / f, 0.2); // TODO bebraw: scale ticks
+	const float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
+	const float rsq_max = 16;
+	const float rsq_min = 8;
+	const float fac = 0.2;
 
 	clear_buffer();
 
@@ -159,7 +219,7 @@ TWOD(effect_constant)
 void effect_layers_tester(void)
 {
 	clear_buffer();
-	uint8_t z = (ticks >> 1 % LEDS_Z);
+	uint8_t z = ((ticks >> 1) % LEDS_Z);
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {

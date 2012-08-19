@@ -26,6 +26,16 @@
 uint16_t ticks;
 
 /**
+ * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
+ */
+void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
+{
+	for(uint8_t i = y1; i <= y2; i++) {
+		set_led_8_8_12(x, i, z, intensity);
+	}
+}
+
+/**
  * Sets led intensity. i is the intensity of the LED in range
  * 0..4095. This implementation is AVR optimized and handles only
  * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
@@ -63,6 +73,18 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	/* Store data back to buffer */
 	gs_buf_back[byte_pos] = raw >> 8;
 	gs_buf_back[byte_pos+1] = raw;
+}
+
+/**
+ * Gets led intensity. Wraps around bounds.
+ */
+uint16_t get_led_wrap_8_8_12(int8_t x, int8_t y, int8_t z)
+{
+	uint8_t rx = x < 0? LEDS_X - 1: x >= LEDS_X? 0: x;
+	uint8_t ry = y < 0? LEDS_Y - 1: y >= LEDS_Y? 0: y;
+	uint8_t rz = z < 0? LEDS_Z - 1: z >= LEDS_Z? 0: z;
+
+	return get_led_8_8_12(rx, ry, rz);
 }
 
 /**
@@ -121,6 +143,20 @@ void effect_2d_plot(plot_2d_t f)
 			uint16_t lower_i = gs_mask - upper_i;
 			set_led(x,y,lower_z,lower_i);
 			set_led(x,y,lower_z+1,upper_i);
+		}
+	}
+}
+
+/**
+ * Iterates all voxels
+ */
+void iterate_3d(iterate_3d_t f)
+{
+	for(uint8_t x = 0; x < LEDS_X; x++) {
+		for(uint8_t y = 0; y < LEDS_Y; y++) {
+			for(uint8_t z = 0; z < LEDS_Z; z++) {
+				f(x, y, z);
+			}
 		}
 	}
 }
