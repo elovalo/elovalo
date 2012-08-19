@@ -18,6 +18,7 @@
 #include "tlc5940.h"
 #include "serial.h"
 #include "timer.h"
+#include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
 
@@ -47,7 +48,7 @@ typedef struct {
 } read_t;
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
-const effect_t *effect; // Current effect
+const effect_t *effect; // Current effect. Note: points to PGM
 
 // Private functions
 void process_cmd(void);
@@ -88,7 +89,7 @@ int main() {
 			// TODO check we have swapped since last time here
 
 			ticks = centisecs();
-			if (ticks > effect->length) {
+			if (ticks > pgm_get(effect->length,word)) {
 				// Rendered too long, stop.
 				mode = MODE_IDLE;
 
@@ -98,7 +99,8 @@ int main() {
 				
 				break;
 			}
-			effect->draw();
+			draw_t draw = (draw_t)pgm_get(effect->draw,word);
+			draw();
 
 			// TODO mark buffer ready for swapping
 			break;
@@ -186,14 +188,17 @@ void process_cmd(void)
 		// Report new effect name to serial user
 		serial_send(ESCAPE);
 		serial_send(RESP_EFFECT_NAME);
-		for (char *c = effect->name; *c != '\0'; c++) {
-			send_escaped(*c);
-		}
-		send_escaped('\0');
+		uint8_t *text_pgm = (uint8_t*)pgm_get(effect->name,word);
+		uint8_t c;
+		do {
+			c = pgm_read_byte(text_pgm++);
+			send_escaped(c);
+		} while (c != '\0');
 
 		// Prepare effect
 		reset_time();
-		if (effect->init != NULL) effect->init();
+		init_t init = (init_t)pgm_get(effect->init, word);
+		if (init != NULL) init();
 
 		break;
 	case CMD_SERIAL_FRAME:

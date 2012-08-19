@@ -143,4 +143,3 @@ uint8_t randint(uint8_t min, uint8_t max)
     // not optimal always, math needs checking
 	return (rand() % max) + min;
 }
-

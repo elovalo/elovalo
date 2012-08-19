@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include "pgmspace.h"
 #include "env.h"
 #include "effects.h"
 #include "effect_utils.h"
@@ -14,14 +15,29 @@
 static void init_brownian(void);
 static void init_worm(void);
 
-const effect_t effects[] = {
-	{ "brownian", &init_brownian, &effect_brownian, 100, 0 },
-	{ "sine", NULL, &effect_sine, 600, 1 },
-	{ "wave", NULL, &effect_wave, 600, 1 },
-	{ "sphere", NULL, &effect_sphere, 100, 1 },
-	{ "worm", &init_worm, &effect_worm, 600, 0 },
-	{ "const", NULL, &effect_constant, 100, 1 },
-	{ "layers", NULL, &effect_layers_tester, 100, 1 }
+/* Some important notes about adding new effects:
+ *
+ * a) Add strings as PROGMEM entries like the ones below.
+ *
+ * b) Add entry to effects[] array
+ */
+
+char s_brownian[] PROGMEM = "brownian";
+char s_sine[]     PROGMEM = "sine";
+char s_wave[]     PROGMEM = "wave";
+char s_sphere[]   PROGMEM = "sphere";
+char s_worm[]     PROGMEM = "worm";
+char s_const[]    PROGMEM = "const";
+char s_layers[]   PROGMEM = "layers";
+
+const effect_t effects[] PROGMEM = {
+	{ s_brownian, &init_brownian, &effect_brownian, 100, 0 },
+	{ s_sine, NULL, &effect_sine, 600, 1 },
+	{ s_wave, NULL, &effect_wave, 600, 1 },
+	{ s_sphere, NULL, &effect_sphere, 100, 1 },
+	{ s_worm, &init_worm, &effect_worm, 600, 0 },
+	{ s_const, NULL, &effect_constant, 100, 1 },
+	{ s_layers, NULL, &effect_layers_tester, 100, 1 }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
