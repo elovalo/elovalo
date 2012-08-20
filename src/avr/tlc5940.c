@@ -47,7 +47,13 @@ ISR(TIMER0_COMPA_vect)
 	// Main screen turn on and start PWM timers on TLC5940
 	pin_low(BLANK);
 
-	if(layer==0x80) {
+	// Send first byte
+	SPDR = ~layer;
+
+	if (layer != 0x80) {
+		// Advance layer
+		layer <<= 1;
+	} else {
 		// Prepare drawing first layer
 		layer=0x01;
 		
@@ -60,14 +66,7 @@ ISR(TIMER0_COMPA_vect)
 		// Roll send_ptr back to start of buffer
 		send_ptr = gs_buf_front;
 	}
-	else {
-		// Advance layer
-		layer=layer<<1;
-	}
-	
+
 	// Set up byte counter for SPI interrupt
-	layer_bytes_left = BYTES_PER_LAYER + 1;
-	
-	// Send first byte
-	SPDR = layer;
+	layer_bytes_left = BYTES_PER_LAYER + 1;	
 }
