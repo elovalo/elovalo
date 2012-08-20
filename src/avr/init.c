@@ -68,8 +68,8 @@ void init_spi(void)
 void init_blank_timer(){
 	// CTC with OCRA as TOP
 	TCCR0A = (1 << WGM01);
-	// Generate interrupt every 4x1024 (4096) clock cycles
-	OCR0A = 3;
+	// Generate interrupt every 8x1024 clock cycles
+	OCR0A = 7;
 	// Enable Timer Compare match A interrupt
 	TIMSK0 |= (1 << OCIE0A);
 	// Prescaler clk_io / 1024
