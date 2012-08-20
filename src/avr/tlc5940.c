@@ -16,28 +16,17 @@
 #include "main.h"
 #include "../cube.h"
 
-volatile uint8_t GSdataCounter = 0; //Counter to index of GSdata[] array, has to be volatile since it's modified at ISR
-volatile uint8_t isAfterFlip = 0;
-volatile uint8_t layer=0x01;
-volatile uint16_t c; //testing variable...
+uint8_t spi_bytes_left;
+uint8_t *send_ptr;
+volatile uint8_t may_flip = 0;
 
-/*SPI transmit interrupt vector
- * SPIF is cleared when entering this interrupt vector...
+/* SPI transmit interrupt vector SPIF is cleared when entering this
+ * interrupt vector. This is called when byte transmission is
+ * finished.
  */
 ISR(SPI_STC_vect)
 {
-	if(GSdataCounter < GS_DATA_LENGHT){
-		GSdataCounter++;
-		SPDR = gs_buf_front[GSdataCounter];
-	}
-	else if(GSdataCounter==GS_DATA_LENGHT){
-		SPDR=layer;
-		GSdataCounter++;
-	}
-
-	else{
-		GSdataCounter=0;
-	}
+	if(--spi_bytes_left) SPDR = *send_ptr++;
 }
 
 /*
@@ -46,30 +35,37 @@ ISR(SPI_STC_vect)
  */
 ISR(TIMER0_COMPA_vect)
 {
-	c++;
-	pin_high(BLANK);
-	pin_high(XLAT);
-	pin_low(XLAT); // "Activate" data
+	static uint8_t layer = 0x01;
 
-	if(layer==0x80){
+	// Main screen turn off
+	pin_high(BLANK);
+
+	// "Activate" previously uploaded data
+	pin_high(XLAT);
+	pin_low(XLAT);
+
+	// Main screen turn on and start PWM timers on TLC5940
+	pin_low(BLANK);
+
+	if(layer==0x80) {
+		// Prepare drawing first layer
 		layer=0x01;
+		
+		// If we have new buffer, flip to it
+		if (may_flip) {
+			gs_buf_swap();
+			send_ptr = gs_buf_front;
+			may_flip = 0;
+		}
 	}
-	else{
+	else {
+		// Advance layer
 		layer=layer<<1;
 	}
-
-	if(c>=50){
-		gs_buf_swap();
-		c=0;
-		isAfterFlip = 1;
-	}
-
-	// Start new transfer....
-	pin_low(BLANK); // Start PWM timers on TLC5940
-
-	if(isAfterFlip){
-	SPDR = gs_buf_front[GSdataCounter];
-	}
-
+	
+	// Set up byte counter for SPI interrupt
+	spi_bytes_left = BYTES_PER_LAYER + 1;
+	
+	// Send first byte
+	SPDR = layer;
 }
-

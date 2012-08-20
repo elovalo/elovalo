@@ -7,8 +7,4 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
-void clearArray(volatile uint8_t *arr, uint8_t);
-
-void animSnake();
-
 #endif /* MAIN_H_ */
