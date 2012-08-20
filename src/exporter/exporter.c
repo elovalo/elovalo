@@ -51,7 +51,11 @@ void export_effect(const effect_t *effect) {
 		gs_buf_front = gs_buf_back;
 	}
 
-	if (effect->init != NULL) effect->init();
+	if (effect->init != NULL) {
+		effect->init();
+		gs_buf_swap(); /* Flip to bring initialized data
+				* accessible by get_led() */
+	}
 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
