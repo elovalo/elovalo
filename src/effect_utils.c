@@ -78,13 +78,23 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 /**
  * Gets led intensity. Wraps around bounds.
  */
-uint16_t get_led_wrap_8_8_12(int8_t x, int8_t y, int8_t z)
+uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z)
 {
-	uint8_t rx = x < 0? LEDS_X - 1: x >= LEDS_X? 0: x;
-	uint8_t ry = y < 0? LEDS_Y - 1: y >= LEDS_Y? 0: y;
-	uint8_t rz = z < 0? LEDS_Z - 1: z >= LEDS_Z? 0: z;
+	// Assert it is not too low where we can't wrap without modulus
+	assert(x >= -LEDS_X);
+	assert(y >= -LEDS_Y);
+	assert(z >= -LEDS_Z);
 
-	return get_led_8_8_12(rx, ry, rz);
+	// Assert it is not too high (for the same reason)
+	assert(x < 2*LEDS_X);
+	assert(y < 2*LEDS_Y);
+	assert(z < 2*LEDS_Z);
+
+	uint8_t rx = x < 0? LEDS_X + x: x >= LEDS_X? x-LEDS_X: x;
+	uint8_t ry = y < 0? LEDS_Y + y: y >= LEDS_Y? y-LEDS_Y: y;
+	uint8_t rz = z < 0? LEDS_Z + z: z >= LEDS_Z? z-LEDS_Z: z;
+
+	return get_led(rx, ry, rz);
 }
 
 /**
