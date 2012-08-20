@@ -34,15 +34,15 @@ PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
 
 const effect_t effects[] PROGMEM = {
-	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 100, FLIP},
+	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 2000, FLIP},
 	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
-	{ s_sine, NULL, &effect_sine, 600, FLIP },
+	{ s_sine, NULL, &effect_sine, 6000, FLIP },
 	{ s_wave, NULL, &effect_wave, 600, FLIP },
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 100, FLIP }
+	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
@@ -219,7 +219,7 @@ TWOD(effect_constant)
 void effect_layers_tester(void)
 {
 	clear_buffer();
-	uint8_t z = ((ticks >> 1) % LEDS_Z);
+	uint8_t z = ((ticks >> 7) % LEDS_Z);
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {
