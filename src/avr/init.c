@@ -34,13 +34,13 @@ void init_tlc5940(void)
 	 * init. */
 	PORTB |= (1<<PB2);
 	DDRB |=
-		(1<<PB1)| // XLAT: output
-		(1<<PB2); // BLANK: output
+		(1<<PB1); // XLAT: output
 
 	DDRD |=
 		(1<<PD2)| // DCPRG: output
 		(1<<PD3)| // VPRG: output
-		(1<<PD4); // Debug LED: output 
+		(1<<PD4)| // Debug LED: output
+		(1<<PD7); // BLANK: output
 }
 
 /**
