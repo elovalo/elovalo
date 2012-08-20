@@ -55,14 +55,11 @@ static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z);
 static void init_game_of_life(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
-	// TODO: figure out how to set this to frontbuffer so that it is
-	// available for the first frame
-	//effect_heart();
+	effect_heart();
 }
 void effect_game_of_life(void)
 {
 	iterate_3d(set_gol_intensity);
-	if(ticks < 20) effect_heart(); // XXX: nasty hack to get initial value
 }
 static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
