@@ -16,7 +16,7 @@
 #include "main.h"
 #include "../cube.h"
 
-uint8_t spi_bytes_left;
+uint8_t layer_bytes_left;
 uint8_t *send_ptr;
 volatile uint8_t may_flip = 0;
 
@@ -26,7 +26,7 @@ volatile uint8_t may_flip = 0;
  */
 ISR(SPI_STC_vect)
 {
-	if(--spi_bytes_left) SPDR = *send_ptr++;
+	if(--layer_bytes_left) SPDR = *send_ptr++;
 }
 
 /*
@@ -54,9 +54,11 @@ ISR(TIMER0_COMPA_vect)
 		// If we have new buffer, flip to it
 		if (may_flip) {
 			gs_buf_swap();
-			send_ptr = gs_buf_front;
 			may_flip = 0;
 		}
+
+		// Roll send_ptr back to start of buffer
+		send_ptr = gs_buf_front;
 	}
 	else {
 		// Advance layer
@@ -64,7 +66,7 @@ ISR(TIMER0_COMPA_vect)
 	}
 	
 	// Set up byte counter for SPI interrupt
-	spi_bytes_left = BYTES_PER_LAYER + 1;
+	layer_bytes_left = BYTES_PER_LAYER + 1;
 	
 	// Send first byte
 	SPDR = layer;
