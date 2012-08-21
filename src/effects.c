@@ -23,6 +23,7 @@ static void init_worm(void);
  * b) Add entry to effects[] array
  */
 
+PROGMEM char s_stairs[]       = "stairs";
 PROGMEM char s_game_of_life[] = "game_of_life";
 PROGMEM char s_heart[]        = "heart";
 PROGMEM char s_brownian[]     = "brownian";
@@ -34,6 +35,7 @@ PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
 
 const effect_t effects[] PROGMEM = {
+	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
 	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 2000, FLIP},
 	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
@@ -46,6 +48,18 @@ const effect_t effects[] PROGMEM = {
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Stairs tester.
+ */
+void effect_stairs(void)
+{
+	const uint16_t intensity = (1<<GS_DEPTH) - 1;
+
+	for(uint8_t i = 0; i < 8; i++) {
+		set_row(i, i, 0, 7, intensity);
+	}
+}
 
 /**
  * Conway's game of life in 3D
