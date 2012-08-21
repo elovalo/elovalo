@@ -20,15 +20,6 @@ uint8_t layer_bytes_left;
 uint8_t *send_ptr;
 volatile uint8_t may_flip = 0;
 
-/* SPI transmit interrupt vector SPIF is cleared when entering this
- * interrupt vector. This is called when byte transmission is
- * finished.
- */
-ISR(SPI_STC_vect)
-{
-	if(--layer_bytes_left) SPDR = *send_ptr++;
-}
-
 /*
  * BLANK timer interrupt Timer0
  * Interrupt if TCNT0 = OCR0A
@@ -68,5 +59,11 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	// Set up byte counter for SPI interrupt
-	layer_bytes_left = BYTES_PER_LAYER + 1;	
+	layer_bytes_left = BYTES_PER_LAYER;
+
+	// Then send all data in busy loop
+	do {
+		while(!(SPSR & (1<<SPIF)));
+		SPDR = *send_ptr++; // Send data
+	} while (--layer_bytes_left);
 }

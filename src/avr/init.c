@@ -54,7 +54,6 @@ void init_spi(void)
 		(1<<PB5); // SCK: output
 
 	SPCR |=
-		(1<<SPIE)| // Enable interrupts
 		(1<<SPE)|  // Enable SPI
 		(1<<MSTR); // We want the to be a master
 
