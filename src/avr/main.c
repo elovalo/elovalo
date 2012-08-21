@@ -152,7 +152,7 @@ void process_cmd(void)
 		uint8_t c;
 		do {
 			c = pgm_read_byte(text_pgm++);
-			send_escaped(c);
+			// send_escaped(c); // buggy serial FIXME
 		} while (c != '\0');
 
 		// Prepare effect
