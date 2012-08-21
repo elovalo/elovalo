@@ -44,11 +44,11 @@ ISR(TIMER0_COMPA_vect)
 	pin_high(XLAT);
 	pin_low(XLAT);
 
-	// Main screen turn on and start PWM timers on TLC5940
-	pin_low(BLANK);
-
 	// Send first byte
 	SPDR = ~layer;
+
+	// Main screen turn on and start PWM timers on TLC5940
+	pin_low(BLANK);
 
 	if (layer != 0x80) {
 		// Advance layer

@@ -84,6 +84,12 @@ access. Also, read the following:
 
 For more information, feel free to contact Elovalo project group.
 
-# Generating animations
+## Generating animations
 
 See file `simulator/README.md`.
+
+## License
+
+Coming later. We are moving to GPLv3 for software and Creative Commons 
+Attribution-ShareAlike. More details are coming later. In meantime, 
+you must ask us before using.
