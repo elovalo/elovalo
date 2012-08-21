@@ -90,6 +90,7 @@ See file `simulator/README.md`.
 
 ## License
 
-Coming later. We are moving to GPLv3 for software and Creative Commons 
-Attribution-ShareAlike. More details are coming later. In meantime, 
-you must ask us before using.
+Coming soon. We are moving to GPLv3 for software and Creative Commons
+Attribution-ShareAlike for hardware. More details are coming later. In
+meantime, you must ask us before using or making derivate works based
+on this.
