@@ -118,14 +118,14 @@ void effect_heart(void)
 	heart(6, (float)intensity / 100);
 }
 static void heart(uint8_t x, uint16_t intensity) {
-	set_row(x, 6, 1, 2, intensity);
-	set_row(x, 6, 5, 6, intensity);
-	set_row(x, 5, 0, 7, intensity);
-	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 0, 1, 2, intensity);
+	set_row(x, 0, 5, 6, intensity);
+	set_row(x, 1, 0, 7, intensity);
+	set_row(x, 2, 0, 7, intensity);
 	set_row(x, 3, 0, 7, intensity);
-	set_row(x, 2, 1, 6, intensity);
-	set_row(x, 1, 2, 5, intensity);
-	set_row(x, 0, 3, 4, intensity);
+	set_row(x, 4, 1, 6, intensity);
+	set_row(x, 5, 2, 5, intensity);
+	set_row(x, 6, 3, 4, intensity);
 }
 
 /**
