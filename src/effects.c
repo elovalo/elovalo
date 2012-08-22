@@ -11,6 +11,7 @@
 #include "env.h"
 #include "effects.h"
 #include "effect_utils.h"
+#include "text.h"
 
 static void init_game_of_life(void);
 static void init_brownian(void);
@@ -33,6 +34,8 @@ PROGMEM char s_sphere[]       = "sphere";
 PROGMEM char s_worm[]         = "worm";
 PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
+PROGMEM char s_character[]    = "character";
+PROGMEM char s_scroll_text[]  = "scroll_text";
 
 const effect_t effects[] PROGMEM = {
 	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
@@ -44,10 +47,29 @@ const effect_t effects[] PROGMEM = {
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP }
+	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
+	{ s_character, NULL, &effect_character, 100, NO_FLIP },
+	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Text scroller
+ */
+void effect_scroll_text(void)
+{
+	clear_buffer();
+	scroll_text("elovalo", 3, (1<<GS_DEPTH) - 1, -(ticks >> 2));
+}
+
+/**
+ * Character tester.
+ */
+void effect_character(void)
+{
+	render_character('c', 0, (1<<GS_DEPTH) - 1, 0);
+}
 
 /**
  * Stairs tester.
@@ -108,14 +130,14 @@ void effect_heart(void)
 	heart(6, (float)intensity / 100);
 }
 static void heart(uint8_t x, uint16_t intensity) {
-	set_row(x, 6, 1, 2, intensity);
-	set_row(x, 6, 5, 6, intensity);
-	set_row(x, 5, 0, 7, intensity);
-	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 0, 1, 2, intensity);
+	set_row(x, 0, 5, 6, intensity);
+	set_row(x, 1, 0, 7, intensity);
+	set_row(x, 2, 0, 7, intensity);
 	set_row(x, 3, 0, 7, intensity);
-	set_row(x, 2, 1, 6, intensity);
-	set_row(x, 1, 2, 5, intensity);
-	set_row(x, 0, 3, 4, intensity);
+	set_row(x, 4, 1, 6, intensity);
+	set_row(x, 5, 2, 5, intensity);
+	set_row(x, 6, 3, 4, intensity);
 }
 
 /**
