@@ -1,2 +1,24 @@
-# toavi <input> <name>
-ffmpeg -i $1/%04d.png $2.avi
+#!/usr/bin/env python
+# ./toavi <input> <name>
+import os
+import sys
+import json
+import subprocess
+
+def get_fps():
+    p = os.path.join(sys.argv[1], 'fps.json')
+
+    if os.path.exists(p):
+        with open(p, 'r') as f:
+            return json.load(f)['fps']
+
+    return 25
+
+if len(sys.argv) > 2:
+    fps = get_fps()
+    print fps
+    subprocess.call([
+        'ffmpeg', '-i', sys.argv[1] + '/%04d.png',
+        '-r', fps,
+        sys.argv[2] + '.avi',
+    ])
