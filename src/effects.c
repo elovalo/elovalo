@@ -12,6 +12,8 @@
 #include "effects.h"
 #include "effect_utils.h"
 
+static void init_allon(void);
+static void init_stairs(void);
 static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
@@ -33,9 +35,10 @@ PROGMEM const char s_sphere[]       = "sphere";
 PROGMEM const char s_worm[]         = "worm";
 PROGMEM const char s_const[]        = "const";
 PROGMEM const char s_layers[]       = "layers";
+PROGMEM const char s_allon[]        = "all-on";
 
 const effect_t effects[] PROGMEM = {
-	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
+	{ s_stairs, &init_stairs, NULL, 100, NO_FLIP},
 	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 2000, FLIP},
 	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
@@ -44,7 +47,8 @@ const effect_t effects[] PROGMEM = {
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP }
+	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
+	{ s_allon, &init_allon, NULL, 1000, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
@@ -52,7 +56,7 @@ const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
 /**
  * Stairs tester.
  */
-void effect_stairs(void)
+void init_stairs(void)
 {
 	for(uint8_t i = 0; i < 8; i++) {
 		set_row(i, i, 0, 7, MAX_INTENSITY);
@@ -238,3 +242,16 @@ void effect_layers_tester(void)
 	}
 }
 
+/**
+ * Simple effect: all voxel on
+ */
+void init_allon(void)
+{
+	for (float x=0; x < LEDS_X; x++) {
+		for (float y=0; y < LEDS_Y; y++) {
+			for (float z=0; z < LEDS_Z; z++) {
+				set_led(x,y,z,MAX_INTENSITY);
+			}
+		}
+	}
+}
