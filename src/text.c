@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "lib/font8x8_basic.h"
 #include "effect_utils.h"
 #include "text.h"
@@ -13,8 +14,14 @@
  */
 void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset)
 {
-	// TODO: figure out how to deal with multiple chars
-	render_character(text[0], x, intensity, offset);
+	uint8_t textLen = strlen(text);
+	uint8_t spacing = 7; // 7 seems like a good pick for this charset
+
+	offset %= (spacing + 1) * textLen;
+
+	for(uint8_t i = 0; i < textLen; i++) {
+		render_character(text[i], x, intensity, i * spacing + offset);
+	}
 }
 
 /**
