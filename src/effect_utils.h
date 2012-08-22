@@ -17,10 +17,10 @@
 
 /* Generates wrapper function for two-dimensional plots to make the
  * implementations much simpler */
-#define TWOD(wrap)                                 \
-  uint16_t wrap##_kernel(uint8_t x, uint8_t y);	   \
-  void wrap(void){effect_2d_plot(&wrap##_kernel);} \
-  uint16_t wrap##_kernel(uint8_t x, uint8_t y)
+#define TWOD(wrap)						\
+  static uint16_t wrap##_kernel(uint8_t x, uint8_t y);		\
+  static void wrap(void){effect_2d_plot(&wrap##_kernel);}	\
+  static uint16_t wrap##_kernel(uint8_t x, uint8_t y)
 
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
@@ -51,7 +51,6 @@ typedef struct {
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
-/* Sets row x, z, y1, y2 to given intensity */
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
@@ -71,5 +70,7 @@ uint8_t randint(uint8_t min, uint8_t max);
 uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
 
 extern uint16_t ticks;
+
+#define MAX_INTENSITY ((1<<GS_DEPTH)-1)
 
 #endif // EFFECT_UTILS_H

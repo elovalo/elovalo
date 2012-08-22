@@ -11,10 +11,26 @@
 #include "env.h"
 #include "effects.h"
 #include "effect_utils.h"
+#include "text.h"
 
+// Private functions
+static void init_allon(void);
+static void init_stairs(void);
 static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
+
+static void effect_scroll_text(void);
+static void effect_character(void);
+static void effect_game_of_life(void);
+static void effect_heart(void);
+static void effect_brownian(void);
+static void effect_sine(void);
+static void effect_wave(void);
+static void effect_sphere(void);
+static void effect_worm(void);
+static void effect_constant(void);
+static void effect_layers_tester(void);
 
 /* Some important notes about adding new effects:
  *
@@ -23,19 +39,22 @@ static void init_worm(void);
  * b) Add entry to effects[] array
  */
 
-PROGMEM char s_stairs[]       = "stairs";
-PROGMEM char s_game_of_life[] = "game_of_life";
-PROGMEM char s_heart[]        = "heart";
-PROGMEM char s_brownian[]     = "brownian";
-PROGMEM char s_sine[]         = "sine";
-PROGMEM char s_wave[]         = "wave";
-PROGMEM char s_sphere[]       = "sphere";
-PROGMEM char s_worm[]         = "worm";
-PROGMEM char s_const[]        = "const";
-PROGMEM char s_layers[]       = "layers";
+PROGMEM const char s_stairs[]       = "stairs";
+PROGMEM const char s_game_of_life[] = "game_of_life";
+PROGMEM const char s_heart[]        = "heart";
+PROGMEM const char s_brownian[]     = "brownian";
+PROGMEM const char s_sine[]         = "sine";
+PROGMEM const char s_wave[]         = "wave";
+PROGMEM const char s_sphere[]       = "sphere";
+PROGMEM const char s_worm[]         = "worm";
+PROGMEM const char s_const[]        = "const";
+PROGMEM const char s_layers[]       = "layers";
+PROGMEM const char s_allon[]        = "all-on";
+PROGMEM const char s_character[]    = "character";
+PROGMEM const char s_scroll_text[]  = "scroll_text";
 
 const effect_t effects[] PROGMEM = {
-	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
+	{ s_stairs, &init_stairs, NULL, 100, NO_FLIP},
 	{ s_game_of_life, &init_game_of_life, &effect_game_of_life, 2000, FLIP},
 	{ s_heart, NULL, &effect_heart, 100, FLIP},
 	{ s_brownian, &init_brownian, &effect_brownian, 100, NO_FLIP },
@@ -44,20 +63,38 @@ const effect_t effects[] PROGMEM = {
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP }
+	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
+	{ s_allon, &init_allon, NULL, 1000, FLIP },
+	{ s_character, NULL, &effect_character, 100, NO_FLIP },
+	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
 
 /**
+ * Text scroller
+ */
+void effect_scroll_text(void)
+{
+	clear_buffer();
+	scroll_text("elovalo", 3, (1<<GS_DEPTH) - 1, -(ticks >> 2));
+}
+
+/**
+ * Character tester.
+ */
+void effect_character(void)
+{
+	render_character('c', 0, (1<<GS_DEPTH) - 1, 0);
+}
+
+/**
  * Stairs tester.
  */
-void effect_stairs(void)
+static void init_stairs(void)
 {
-	const uint16_t intensity = (1<<GS_DEPTH) - 1;
-
 	for(uint8_t i = 0; i < 8; i++) {
-		set_row(i, i, 0, 7, intensity);
+		set_row(i, i, 0, 7, MAX_INTENSITY);
 	}
 }
 
@@ -71,14 +108,14 @@ static void init_game_of_life(void)
 	// TODO: might want to use some other seed. using heart for testing
 	effect_heart();
 }
-void effect_game_of_life(void)
+static void effect_game_of_life(void)
 {
 	iterate_3d(set_gol_intensity);
 }
 static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
-	if(neighbours >= 9 && neighbours <= 17) set_led(x, y, z, (1<<GS_DEPTH) - 1);
+	if(neighbours >= 9 && neighbours <= 17) set_led(x, y, z, MAX_INTENSITY);
 	else set_led(x, y, z, 0);
 }
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
@@ -96,26 +133,24 @@ static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
  * Heart effect. Supposed to beat according to some input.
  */
 static void heart(uint8_t x, uint16_t intensity);
-void effect_heart(void)
+static void effect_heart(void)
 {
-	const uint16_t intensity = (1<<GS_DEPTH) - 1;
-
-	heart(1, (float)intensity / 100);
-	heart(2, (float)intensity / 25);
-	heart(3, intensity);
-	heart(4, intensity);
-	heart(5, (float)intensity / 25);
-	heart(6, (float)intensity / 100);
+	heart(1, (float)MAX_INTENSITY / 100);
+	heart(2, (float)MAX_INTENSITY / 25);
+	heart(3, MAX_INTENSITY);
+	heart(4, MAX_INTENSITY);
+	heart(5, (float)MAX_INTENSITY / 25);
+	heart(6, (float)MAX_INTENSITY / 100);
 }
 static void heart(uint8_t x, uint16_t intensity) {
-	set_row(x, 6, 1, 2, intensity);
-	set_row(x, 6, 5, 6, intensity);
-	set_row(x, 5, 0, 7, intensity);
-	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 0, 1, 2, intensity);
+	set_row(x, 0, 5, 6, intensity);
+	set_row(x, 1, 0, 7, intensity);
+	set_row(x, 2, 0, 7, intensity);
 	set_row(x, 3, 0, 7, intensity);
-	set_row(x, 2, 1, 6, intensity);
-	set_row(x, 1, 2, 5, intensity);
-	set_row(x, 0, 3, 4, intensity);
+	set_row(x, 4, 1, 6, intensity);
+	set_row(x, 5, 2, 5, intensity);
+	set_row(x, 6, 3, 4, intensity);
 }
 
 /**
@@ -132,9 +167,9 @@ static void init_brownian(void)
 
 	clear_buffer();
 }
-void effect_brownian(void)
+static void effect_brownian(void)
 {
-	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
+	set_led(brown_x, brown_y, brown_z, MAX_INTENSITY);
 
 	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
 	brown_y = clamp(brown_y + randint(-2, 2), 0, LEDS_Y - 1);
@@ -165,7 +200,7 @@ TWOD(effect_wave)
 /**
  * Plot sphere.
  */
-void effect_sphere(void)
+static void effect_sphere(void)
 {
 	const float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
 	const float rsq_max = 16;
@@ -180,7 +215,7 @@ void effect_sphere(void)
 				float sq = x * x + y * y + z * z;
 
 				if(rsq_min * fac < sq && sq < rsq_max * fac) {
-					set_led(x - a, y - a, z - a, (1<<GS_DEPTH) - 1);
+					set_led(x - a, y - a, z - a, MAX_INTENSITY);
 				}
 			}
 		}
@@ -203,9 +238,9 @@ static void init_worm(void)
 
 	clear_buffer();
 }
-void effect_worm(void)
+static void effect_worm(void)
 {
-	set_led(worm_pos[0], worm_pos[1], worm_pos[2], (1<<GS_DEPTH) - 1);
+	set_led(worm_pos[0], worm_pos[1], worm_pos[2], MAX_INTENSITY);
 
 	// Relies on the fact that it's a cube
 	// Not entirely fool proof but probably good enough
@@ -230,14 +265,28 @@ TWOD(effect_constant)
 /**
  * Simple test function which draws voxel layers.
  */
-void effect_layers_tester(void)
+static void effect_layers_tester(void)
 {
 	clear_buffer();
 	uint8_t z = ((ticks >> 7) % LEDS_Z);
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {
-			set_led(x, y, z, (1<<GS_DEPTH) - 1);
+			set_led(x, y, z, MAX_INTENSITY);
+		}
+	}
+}
+
+/**
+ * Simple effect: all voxel on
+ */
+static void init_allon(void)
+{
+	for (float x=0; x < LEDS_X; x++) {
+		for (float y=0; y < LEDS_Y; y++) {
+			for (float z=0; z < LEDS_Z; z++) {
+				set_led(x,y,z,MAX_INTENSITY);
+			}
 		}
 	}
 }

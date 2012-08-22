@@ -1,6 +1,6 @@
 <!-- -*- mode: markdown; coding: utf-8 -*- -->
 
-# Led cube thingy
+# Elovalo LED Driver
 
 Documentation TODO.
 
@@ -82,8 +82,15 @@ access. Also, read the following:
 
 ## More information
 
-For more information, feel free to contact Elovalo project group.
+For more information, feel free to contact Elovalo project group. You can visit the project website at http://hacklabjkl.org/projektit:living-light
 
-# Generating animations
+## Generating animations
 
 See file `simulator/README.md`.
+
+## License
+
+Coming soon. We are moving to GPLv3 for software and Creative Commons
+Attribution-ShareAlike for hardware. More details are coming later. In
+meantime, you must ask us before using or making derivate works based
+on this.
