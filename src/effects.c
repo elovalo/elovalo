@@ -23,16 +23,16 @@ static void init_worm(void);
  * b) Add entry to effects[] array
  */
 
-PROGMEM char s_stairs[]       = "stairs";
-PROGMEM char s_game_of_life[] = "game_of_life";
-PROGMEM char s_heart[]        = "heart";
-PROGMEM char s_brownian[]     = "brownian";
-PROGMEM char s_sine[]         = "sine";
-PROGMEM char s_wave[]         = "wave";
-PROGMEM char s_sphere[]       = "sphere";
-PROGMEM char s_worm[]         = "worm";
-PROGMEM char s_const[]        = "const";
-PROGMEM char s_layers[]       = "layers";
+PROGMEM const char s_stairs[]       = "stairs";
+PROGMEM const char s_game_of_life[] = "game_of_life";
+PROGMEM const char s_heart[]        = "heart";
+PROGMEM const char s_brownian[]     = "brownian";
+PROGMEM const char s_sine[]         = "sine";
+PROGMEM const char s_wave[]         = "wave";
+PROGMEM const char s_sphere[]       = "sphere";
+PROGMEM const char s_worm[]         = "worm";
+PROGMEM const char s_const[]        = "const";
+PROGMEM const char s_layers[]       = "layers";
 
 const effect_t effects[] PROGMEM = {
 	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
