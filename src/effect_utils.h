@@ -51,8 +51,9 @@ typedef struct {
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
-/* Sets row x, z, y1, y2 to given intensity */
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
+
+void render_character(uint8_t index, uint8_t x, uint16_t intensity);
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 

@@ -1,5 +1,6 @@
 #include "effect_utils.h"
 
+void effect_character(void);
 void effect_stairs(void);
 void effect_game_of_life(void);
 void effect_heart(void);

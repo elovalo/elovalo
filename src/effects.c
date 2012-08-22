@@ -33,6 +33,7 @@ PROGMEM char s_sphere[]       = "sphere";
 PROGMEM char s_worm[]         = "worm";
 PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
+PROGMEM char s_character[]    = "character";
 
 const effect_t effects[] PROGMEM = {
 	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
@@ -44,10 +45,19 @@ const effect_t effects[] PROGMEM = {
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP }
+	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
+	{ s_character, NULL, &effect_character, 100, NO_FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Character tester.
+ */
+void effect_character(void)
+{
+	render_character(0x62, 0, (1<<GS_DEPTH) - 1);
+}
 
 /**
  * Stairs tester.
