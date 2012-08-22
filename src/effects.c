@@ -54,10 +54,8 @@ const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
  */
 void effect_stairs(void)
 {
-	const uint16_t intensity = (1<<GS_DEPTH) - 1;
-
 	for(uint8_t i = 0; i < 8; i++) {
-		set_row(i, i, 0, 7, intensity);
+		set_row(i, i, 0, 7, MAX_INTENSITY);
 	}
 }
 
@@ -78,7 +76,7 @@ void effect_game_of_life(void)
 static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
-	if(neighbours >= 9 && neighbours <= 17) set_led(x, y, z, (1<<GS_DEPTH) - 1);
+	if(neighbours >= 9 && neighbours <= 17) set_led(x, y, z, MAX_INTENSITY);
 	else set_led(x, y, z, 0);
 }
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
@@ -98,14 +96,12 @@ static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
 static void heart(uint8_t x, uint16_t intensity);
 void effect_heart(void)
 {
-	const uint16_t intensity = (1<<GS_DEPTH) - 1;
-
-	heart(1, (float)intensity / 100);
-	heart(2, (float)intensity / 25);
-	heart(3, intensity);
-	heart(4, intensity);
-	heart(5, (float)intensity / 25);
-	heart(6, (float)intensity / 100);
+	heart(1, (float)MAX_INTENSITY / 100);
+	heart(2, (float)MAX_INTENSITY / 25);
+	heart(3, MAX_INTENSITY);
+	heart(4, MAX_INTENSITY);
+	heart(5, (float)MAX_INTENSITY / 25);
+	heart(6, (float)MAX_INTENSITY / 100);
 }
 static void heart(uint8_t x, uint16_t intensity) {
 	set_row(x, 6, 1, 2, intensity);
@@ -134,7 +130,7 @@ static void init_brownian(void)
 }
 void effect_brownian(void)
 {
-	set_led(brown_x, brown_y, brown_z, (1<<GS_DEPTH) - 1);
+	set_led(brown_x, brown_y, brown_z, MAX_INTENSITY);
 
 	brown_x = clamp(brown_x + randint(-2, 2), 0, LEDS_X - 1);
 	brown_y = clamp(brown_y + randint(-2, 2), 0, LEDS_Y - 1);
@@ -180,7 +176,7 @@ void effect_sphere(void)
 				float sq = x * x + y * y + z * z;
 
 				if(rsq_min * fac < sq && sq < rsq_max * fac) {
-					set_led(x - a, y - a, z - a, (1<<GS_DEPTH) - 1);
+					set_led(x - a, y - a, z - a, MAX_INTENSITY);
 				}
 			}
 		}
@@ -205,7 +201,7 @@ static void init_worm(void)
 }
 void effect_worm(void)
 {
-	set_led(worm_pos[0], worm_pos[1], worm_pos[2], (1<<GS_DEPTH) - 1);
+	set_led(worm_pos[0], worm_pos[1], worm_pos[2], MAX_INTENSITY);
 
 	// Relies on the fact that it's a cube
 	// Not entirely fool proof but probably good enough
@@ -237,7 +233,8 @@ void effect_layers_tester(void)
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {
-			set_led(x, y, z, (1<<GS_DEPTH) - 1);
+			set_led(x, y, z, MAX_INTENSITY);
 		}
 	}
 }
+
