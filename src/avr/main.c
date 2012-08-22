@@ -101,10 +101,11 @@ int main() {
 
 			// Do the actual drawing
 			draw_t draw = (draw_t)pgm_get(effect->draw,word);
-			draw();
-
-			// Mark buffer ready for swapping
-			may_flip = 1;
+			if (draw != NULL) {
+				draw();
+				// Mark buffer ready for swapping
+				may_flip = 1;
+			}
 
 			break;
 		}
@@ -155,10 +156,18 @@ void process_cmd(void)
 			send_escaped(c);
 		} while (c != '\0');
 
-		// Prepare effect
-		reset_time();
+		// Prevent flipping
+		may_flip = 0;
+
+		// Fetch init pointer from PROGMEM and run it
 		init_t init = (init_t)pgm_get(effect->init, word);
 		if (init != NULL) init();
+
+		// Swap buffer to bring back buffer to front
+		gs_buf_swap(); 
+		
+		// Restart tick counter
+		reset_time();
 
 		break;
 	case CMD_SERIAL_FRAME:
