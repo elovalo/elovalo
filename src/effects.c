@@ -11,6 +11,7 @@
 #include "env.h"
 #include "effects.h"
 #include "effect_utils.h"
+#include "text.h"
 
 static void init_game_of_life(void);
 static void init_brownian(void);
@@ -34,6 +35,7 @@ PROGMEM char s_worm[]         = "worm";
 PROGMEM char s_const[]        = "const";
 PROGMEM char s_layers[]       = "layers";
 PROGMEM char s_character[]    = "character";
+PROGMEM char s_scroll_text[]  = "scroll_text";
 
 const effect_t effects[] PROGMEM = {
 	{ s_stairs, NULL, &effect_stairs, 100, NO_FLIP},
@@ -46,17 +48,26 @@ const effect_t effects[] PROGMEM = {
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
 	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
-	{ s_character, NULL, &effect_character, 100, NO_FLIP }
+	{ s_character, NULL, &effect_character, 100, NO_FLIP },
+	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Text scroller
+ */
+void effect_scroll_text(void)
+{
+	scroll_text("elovalo", 0, (1<<GS_DEPTH) - 1, ticks);
+}
 
 /**
  * Character tester.
  */
 void effect_character(void)
 {
-	render_character(0x62, 0, (1<<GS_DEPTH) - 1);
+	render_character('c', 0, (1<<GS_DEPTH) - 1);
 }
 
 /**

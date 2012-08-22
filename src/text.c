@@ -5,6 +5,16 @@
 #include <stdint.h>
 #include "lib/font8x8_basic.h"
 #include "effect_utils.h"
+#include "text.h"
+
+/**
+ * Scrolls given text
+ */
+void scroll_text(char text[], uint8_t x, uint16_t intensity, uint16_t offset)
+{
+	// TODO
+	//render_character(0x62, x, intensity);
+}
 
 /**
  * Renders character (index from font8x8_basic) at x with intensity.
