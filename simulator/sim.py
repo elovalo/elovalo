@@ -47,9 +47,6 @@ def load_data():
     with open(p) as f:
         d = json.load(f)
 
-    # fps = data['fps'] TODO: set. 25 by default for now
-    # TODO: deal with geometry too
-
     return d
 
 

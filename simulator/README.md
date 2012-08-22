@@ -21,8 +21,6 @@ where 25 is the frame number you want.
 Note that you can pass --hd flag to either command. This make it output frames
 in HD (1080p) quality.
 
-If you want to slow down the execution for some reason, use --fps FPS.
-
 ## Converting pngs to something useful
 
 If you have ffmpeg installed and available at your path, execute
