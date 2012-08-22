@@ -129,7 +129,7 @@ void serial_send(uint8_t data)
 		tx_buf[tx_in_i++] = data;
 
 		// Wrap to start
-		if (tx_in_i == RX_BUF_SIZE) tx_in_i = 0;
+		if (tx_in_i == TX_BUF_SIZE) tx_in_i = 0;
 
 		if (tx_in_i == tx_out_i) {
 			// Overflow condition
