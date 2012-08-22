@@ -12,11 +12,22 @@
 #include "effects.h"
 #include "effect_utils.h"
 
+// Private functions
 static void init_allon(void);
 static void init_stairs(void);
 static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
+
+static void effect_game_of_life(void);
+static void effect_heart(void);
+static void effect_brownian(void);
+static void effect_sine(void);
+static void effect_wave(void);
+static void effect_sphere(void);
+static void effect_worm(void);
+static void effect_constant(void);
+static void effect_layers_tester(void);
 
 /* Some important notes about adding new effects:
  *
@@ -56,7 +67,7 @@ const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
 /**
  * Stairs tester.
  */
-void init_stairs(void)
+static void init_stairs(void)
 {
 	for(uint8_t i = 0; i < 8; i++) {
 		set_row(i, i, 0, 7, MAX_INTENSITY);
@@ -73,7 +84,7 @@ static void init_game_of_life(void)
 	// TODO: might want to use some other seed. using heart for testing
 	effect_heart();
 }
-void effect_game_of_life(void)
+static void effect_game_of_life(void)
 {
 	iterate_3d(set_gol_intensity);
 }
@@ -98,7 +109,7 @@ static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
  * Heart effect. Supposed to beat according to some input.
  */
 static void heart(uint8_t x, uint16_t intensity);
-void effect_heart(void)
+static void effect_heart(void)
 {
 	heart(1, (float)MAX_INTENSITY / 100);
 	heart(2, (float)MAX_INTENSITY / 25);
@@ -132,7 +143,7 @@ static void init_brownian(void)
 
 	clear_buffer();
 }
-void effect_brownian(void)
+static void effect_brownian(void)
 {
 	set_led(brown_x, brown_y, brown_z, MAX_INTENSITY);
 
@@ -165,7 +176,7 @@ TWOD(effect_wave)
 /**
  * Plot sphere.
  */
-void effect_sphere(void)
+static void effect_sphere(void)
 {
 	const float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
 	const float rsq_max = 16;
@@ -203,7 +214,7 @@ static void init_worm(void)
 
 	clear_buffer();
 }
-void effect_worm(void)
+static void effect_worm(void)
 {
 	set_led(worm_pos[0], worm_pos[1], worm_pos[2], MAX_INTENSITY);
 
@@ -230,7 +241,7 @@ TWOD(effect_constant)
 /**
  * Simple test function which draws voxel layers.
  */
-void effect_layers_tester(void)
+static void effect_layers_tester(void)
 {
 	clear_buffer();
 	uint8_t z = ((ticks >> 7) % LEDS_Z);
@@ -245,7 +256,7 @@ void effect_layers_tester(void)
 /**
  * Simple effect: all voxel on
  */
-void init_allon(void)
+static void init_allon(void)
 {
 	for (float x=0; x < LEDS_X; x++) {
 		for (float y=0; y < LEDS_Y; y++) {

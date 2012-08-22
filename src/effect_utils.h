@@ -17,10 +17,10 @@
 
 /* Generates wrapper function for two-dimensional plots to make the
  * implementations much simpler */
-#define TWOD(wrap)                                 \
-  uint16_t wrap##_kernel(uint8_t x, uint8_t y);	   \
-  void wrap(void){effect_2d_plot(&wrap##_kernel);} \
-  uint16_t wrap##_kernel(uint8_t x, uint8_t y)
+#define TWOD(wrap)						\
+  static uint16_t wrap##_kernel(uint8_t x, uint8_t y);		\
+  static void wrap(void){effect_2d_plot(&wrap##_kernel);}	\
+  static uint16_t wrap##_kernel(uint8_t x, uint8_t y)
 
 /* 2D plotting function. Takes frame number, x coordinate, y
  * coordinate, and returns intensity value from 0 to
