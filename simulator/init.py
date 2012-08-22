@@ -7,7 +7,8 @@ def parser():
     p = argparse.ArgumentParser()
     p.add_argument('effect')
     p.add_argument('path')
-    p.add_argument("--hd", help="Render in HD", action="store_true")
+    p.add_argument('--hd', help="Render in HD", action='store_true')
+    p.add_argument('--fps', help="Framerate", metavar="FPS", type=int)
 
     return p
 
@@ -18,6 +19,9 @@ def set_env(args):
 
     if args.hd:
         os.environ['hd'] = '1'
+
+    if args.fps:
+        os.environ['fps'] = str(args.fps)
 
 
 def execute(args):

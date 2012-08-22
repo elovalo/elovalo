@@ -31,6 +31,11 @@ hd = os.getenv('hd')
 if hd:
     render.resolution_percentage = 100
 
+fps = os.getenv('fps')
+
+if fps:
+    render.fps = int(fps)
+
 # exec on frame change
 while len(bpy.app.handlers.frame_change_pre):
     bpy.app.handlers.frame_change_pre.pop()
