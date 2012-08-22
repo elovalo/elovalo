@@ -16,8 +16,8 @@
 #include "main.h"
 #include "../cube.h"
 
-uint8_t layer_bytes_left;
-uint8_t *send_ptr;
+register uint8_t layer_bytes_left asm ("r4");
+register uint8_t *send_ptr asm ("r2");
 volatile uint8_t may_flip = 0;
 
 /* SPI transmit interrupt vector SPIF is cleared when entering this
