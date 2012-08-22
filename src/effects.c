@@ -60,7 +60,7 @@ const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
 void effect_scroll_text(void)
 {
 	clear_buffer();
-	scroll_text("elovalo", 3, (1<<GS_DEPTH) - 1, -ticks);
+	scroll_text("elovalo", 3, (1<<GS_DEPTH) - 1, -(ticks >> 2));
 }
 
 /**
