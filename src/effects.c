@@ -11,6 +11,7 @@
 #include "env.h"
 #include "effects.h"
 #include "effect_utils.h"
+#include "text.h"
 
 // Private functions
 static void init_allon(void);
@@ -19,6 +20,8 @@ static void init_game_of_life(void);
 static void init_brownian(void);
 static void init_worm(void);
 
+static void effect_scroll_text(void);
+static void effect_character(void);
 static void effect_game_of_life(void);
 static void effect_heart(void);
 static void effect_brownian(void);
@@ -47,6 +50,8 @@ PROGMEM const char s_worm[]         = "worm";
 PROGMEM const char s_const[]        = "const";
 PROGMEM const char s_layers[]       = "layers";
 PROGMEM const char s_allon[]        = "all-on";
+PROGMEM const char s_character[]    = "character";
+PROGMEM const char s_scroll_text[]  = "scroll_text";
 
 const effect_t effects[] PROGMEM = {
 	{ s_stairs, &init_stairs, NULL, 100, NO_FLIP},
@@ -59,10 +64,29 @@ const effect_t effects[] PROGMEM = {
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
 	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
-	{ s_allon, &init_allon, NULL, 1000, FLIP }
+	{ s_allon, &init_allon, NULL, 1000, FLIP },
+	{ s_character, NULL, &effect_character, 100, NO_FLIP },
+	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
 };
 
 const uint8_t effects_len = sizeof(effects) / sizeof(effect_t);
+
+/**
+ * Text scroller
+ */
+void effect_scroll_text(void)
+{
+	clear_buffer();
+	scroll_text("elovalo", 3, (1<<GS_DEPTH) - 1, -(ticks >> 2));
+}
+
+/**
+ * Character tester.
+ */
+void effect_character(void)
+{
+	render_character('c', 0, (1<<GS_DEPTH) - 1, 0);
+}
 
 /**
  * Stairs tester.
@@ -119,14 +143,14 @@ static void effect_heart(void)
 	heart(6, (float)MAX_INTENSITY / 100);
 }
 static void heart(uint8_t x, uint16_t intensity) {
-	set_row(x, 6, 1, 2, intensity);
-	set_row(x, 6, 5, 6, intensity);
-	set_row(x, 5, 0, 7, intensity);
-	set_row(x, 4, 0, 7, intensity);
+	set_row(x, 0, 1, 2, intensity);
+	set_row(x, 0, 5, 6, intensity);
+	set_row(x, 1, 0, 7, intensity);
+	set_row(x, 2, 0, 7, intensity);
 	set_row(x, 3, 0, 7, intensity);
-	set_row(x, 2, 1, 6, intensity);
-	set_row(x, 1, 2, 5, intensity);
-	set_row(x, 0, 3, 4, intensity);
+	set_row(x, 4, 1, 6, intensity);
+	set_row(x, 5, 2, 5, intensity);
+	set_row(x, 6, 3, 4, intensity);
 }
 
 /**

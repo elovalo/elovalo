@@ -1,7 +1,5 @@
 /**
  * Led cube effect utilities
- *
- * Not integrated to the main code, yet.
  */
 
 // Disable assertions on embedded environment
