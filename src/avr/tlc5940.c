@@ -19,6 +19,7 @@
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
 register uint8_t int_sreg_cache asm ("r5");
+register uint16_t int_z_cache asm ("r6");
 volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
@@ -31,20 +32,18 @@ ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
 		"in      r5, __SREG__"  NL // Put SREG to int_sreg_cache
-		"push    r24"       NL
-		"push    r30"       NL
-		"push    r31"       NL
-		"and     r4, r4"    NL
+		"and     r4, r4"    NL // Is bytes left
 		"breq    spi_stc_clean"     NL
-		"dec     r4"        NL
+		"dec     r4"        NL // layer_bytes_left--
+		"movw    r6, r30"   NL // Move Z to int_z_cache
 		"movw    r30, r2"   NL // Load send_ptr to Z register
+		"push    r24"       NL // Free register for temp value
 		"ld      r24, Z+"   NL // Load byte and increment pointer
 		"out     0x2e, r24" NL // Write byte to SPDR
+		"pop     r24"       NL // Restore temp register
 		"movw    r2, r30"   NL // Write send_ptr back
+		"movw    r30,r6"    NL // Move Z to int_z_cache
 		"spi_stc_clean:"    NL
-		"pop     r31"       NL
-		"pop     r30"       NL
-		"pop     r24"       NL
 		"out     __SREG__, r5"  NL // Put SREG back
 		"reti"              NL
 		);
