@@ -29,7 +29,6 @@ volatile uint8_t may_flip = 0;
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
-		"push    r1"        NL
 		"push    r0"        NL
 		"in      r0, 0x3f"  NL
 		"push    r0"        NL
@@ -38,7 +37,7 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		"push    r30"       NL
 		"push    r31"       NL
 		"and     r4, r4"    NL
-		"breq    .+14"      NL
+		"breq    spi_stc_clean"     NL
 		"dec     r4"        NL
 		"movw    r30, r2"   NL
 		"ld      r24, Z"    NL
@@ -46,13 +45,13 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		"ldi     r24, 0xFF" NL
 		"sub     r2, r24"   NL
 		"sbc     r3, r24"   NL
+		"spi_stc_clean:"    NL
 		"pop     r31"       NL
 		"pop     r30"       NL
 		"pop     r24"       NL
 		"pop     r0"        NL
 		"out     0x3f, r0"  NL
 		"pop     r0"        NL
-		"pop     r1"        NL
 		"reti"              NL
 		);
 }
