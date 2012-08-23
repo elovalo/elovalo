@@ -14,7 +14,7 @@
 #include "text.h"
 
 // Private functions
-static void init_allon(void);
+static void init_all_on(void);
 static void init_stairs(void);
 static void init_game_of_life(void);
 static void init_brownian(void);
@@ -49,7 +49,7 @@ PROGMEM const char s_sphere[]       = "sphere";
 PROGMEM const char s_worm[]         = "worm";
 PROGMEM const char s_const[]        = "const";
 PROGMEM const char s_layers[]       = "layers";
-PROGMEM const char s_allon[]        = "all-on";
+PROGMEM const char s_all_on[]       = "all_on";
 PROGMEM const char s_character[]    = "character";
 PROGMEM const char s_scroll_text[]  = "scroll_text";
 
@@ -64,7 +64,7 @@ const effect_t effects[] PROGMEM = {
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
 	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
-	{ s_allon, &init_allon, NULL, 1000, FLIP },
+	{ s_all_on, &init_all_on, NULL, 1000, FLIP },
 	{ s_character, NULL, &effect_character, 100, NO_FLIP },
 	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
 };
@@ -280,7 +280,7 @@ static void effect_layers_tester(void)
 /**
  * Simple effect: all voxel on
  */
-static void init_allon(void)
+static void init_all_on(void)
 {
 	for (float x=0; x < LEDS_X; x++) {
 		for (float y=0; y < LEDS_Y; y++) {
