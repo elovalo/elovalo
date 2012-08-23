@@ -22,6 +22,9 @@ def set_env(args):
 
 
 def write_fps(effect, path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
     with open(os.path.join(path, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
         d = json.load(open(p, 'r'))
