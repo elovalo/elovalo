@@ -88,6 +88,20 @@ For more information, feel free to contact Elovalo project group. You can visit 
 
 See file `simulator/README.md`.
 
+## Credits
+
+* [Joni Katajamäki](https://github.com/katis) - Hardware, software debugging
+* [Jukka Kinnunen](https://github.com/resutoor) - Hardware, software debugging
+* [Joel Lehtonen](https://github.com/Zouppen/) - Effects, serial code
+* Lasse Saari - Management, pedestal fabrication
+* [Marko Silokunnas](https://github.com/marant) - Soldering
+* [Mio Taalas](https://github.com/mtaalas/) - LED driver interface, PCB design,
+  hardware
+* [Ilkka Turunen](https://github.com/ile2/) - Management, soldering, pedestal
+  tests and design
+* [Juho Vepsäläinen](https://github.com/bebraw/) - Simulator, effects, pedestal
+  design
+
 ## License
 
 Coming soon. We are moving to GPLv3 for software and Creative Commons
