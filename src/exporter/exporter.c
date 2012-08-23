@@ -46,7 +46,7 @@ void export_effect(const effect_t *effect) {
 	/* If not flipping buffers, front must equal to back to
 	 * support simultaneous drawing of front buffer */
 	uint8_t *old_front = NULL;
-	if (!effect->flip_buffers) {
+	if (!effect->flip_buffers || effect->draw == NULL) {
 		old_front = gs_buf_front;
 		gs_buf_front = gs_buf_back;
 	}
@@ -61,7 +61,7 @@ void export_effect(const effect_t *effect) {
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
 	for (ticks=0; ticks < effect->length; ticks += drawing_time) {
-		effect->draw();
+		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment
 		gs_buf_swap();
