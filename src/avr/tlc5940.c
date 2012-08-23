@@ -33,9 +33,8 @@ ISR(SPI_STC_vect, ISR_NAKED)
 	asm volatile(
 		// and and dec modify SREG, must store it
 		"in      r5, __SREG__"  NL // Put SREG to int_temp
-		"and     r4, r4"    NL // Is bytes left
-		"breq    spi_stc_last_byte"     NL
-		"dec     r4"        NL // layer_bytes_left--
+		"dec     r4"        NL // --layer_bytes_left
+		"breq    spi_stc_last_byte"     NL // Branch if layer_bytes_left reaches zero
 		// Next instructions do not change SREG, safe to reuse
 		"out     __SREG__, r5"  NL
 		"movw    r6, r30"   NL // Move Z to int_z_cache
@@ -90,5 +89,5 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	// Set up byte counter for SPI interrupt
-	layer_bytes_left = BYTES_PER_LAYER;
+	layer_bytes_left = BYTES_PER_LAYER + 1;
 }
