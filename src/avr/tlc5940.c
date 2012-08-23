@@ -20,15 +20,41 @@ register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
 volatile uint8_t may_flip = 0;
 
+#define NL "\n\t"
+
 /* SPI transmit interrupt vector SPIF is cleared when entering this
  * interrupt vector. This is called when byte transmission is
  * finished.
  */
-ISR(SPI_STC_vect)
+ISR(SPI_STC_vect, ISR_NAKED)
 {
-	if(!layer_bytes_left) return;
-	layer_bytes_left--;
-	SPDR = *send_ptr++;
+	asm volatile(
+		"push    r1"        NL
+		"push    r0"        NL
+		"in      r0, 0x3f"  NL
+		"push    r0"        NL
+		"eor     r1, r1"    NL
+		"push    r24"       NL
+		"push    r30"       NL
+		"push    r31"       NL
+		"and     r4, r4"    NL
+		"breq    .+14"      NL
+		"dec     r4"        NL
+		"movw    r30, r2"   NL
+		"ld      r24, Z"    NL
+		"out     0x2e, r24" NL
+		"ldi     r24, 0xFF" NL
+		"sub     r2, r24"   NL
+		"sbc     r3, r24"   NL
+		"pop     r31"       NL
+		"pop     r30"       NL
+		"pop     r24"       NL
+		"pop     r0"        NL
+		"out     0x3f, r0"  NL
+		"pop     r0"        NL
+		"pop     r1"        NL
+		"reti"              NL
+		);
 }
 
 /*
