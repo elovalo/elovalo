@@ -21,4 +21,6 @@
 #define PROGMEM
 #define PGM_P const char *
 
+#define pgm_get(var,type) var
+
 #endif

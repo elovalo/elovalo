@@ -29,7 +29,12 @@ void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset)
  */
 void render_character(uint8_t index, uint8_t x, uint16_t intensity, int16_t offset)
 {
-	uint8_t *bitmap = font8x8_basic[index];
+	uint8_t bitmap[8];
+
+	// Read character from the font in PROGMEM
+	for (uint8_t i=0; i<8; i++) {
+		bitmap[i] = pgm_get(font8x8_basic[index][i],byte);
+	}
 
 	for(uint8_t y = 0; y < 8; y++) {
 		for(uint8_t z = 0; z < 8; z++) {
