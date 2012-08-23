@@ -37,12 +37,10 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		"and     r4, r4"    NL
 		"breq    spi_stc_clean"     NL
 		"dec     r4"        NL
-		"movw    r30, r2"   NL
-		"ld      r24, Z"    NL
-		"out     0x2e, r24" NL
-		"ldi     r24, 0xFF" NL
-		"sub     r2, r24"   NL
-		"sbc     r3, r24"   NL
+		"movw    r30, r2"   NL // Load send_ptr to Z register
+		"ld      r24, Z+"   NL // Load byte and increment pointer
+		"out     0x2e, r24" NL // Write byte to SPDR
+		"movw    r2, r30"   NL // Write send_ptr back
 		"spi_stc_clean:"    NL
 		"pop     r31"       NL
 		"pop     r30"       NL
