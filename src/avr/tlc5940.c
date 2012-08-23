@@ -18,7 +18,7 @@
 
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
-register uint8_t int_sreg_cache asm ("r5");
+register uint8_t int_temp asm ("r5");
 register uint16_t int_z_cache asm ("r6");
 volatile uint8_t may_flip = 0;
 
@@ -31,19 +31,21 @@ volatile uint8_t may_flip = 0;
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
-		"in      r5, __SREG__"  NL // Put SREG to int_sreg_cache
+		// and and dec modify SREG, must store it
+		"in      r5, __SREG__"  NL // Put SREG to int_temp
 		"and     r4, r4"    NL // Is bytes left
-		"breq    spi_stc_clean"     NL
+		"breq    spi_stc_last_byte"     NL
 		"dec     r4"        NL // layer_bytes_left--
+		// Next instructions do not change SREG, safe to reuse
+		"out     __SREG__, r5"  NL
 		"movw    r6, r30"   NL // Move Z to int_z_cache
 		"movw    r30, r2"   NL // Load send_ptr to Z register
-		"push    r24"       NL // Free register for temp value
-		"ld      r24, Z+"   NL // Load byte and increment pointer
-		"out     0x2e, r24" NL // Write byte to SPDR
-		"pop     r24"       NL // Restore temp register
+		"ld      r5, Z+"   NL // Load byte and increment pointer
+		"out     0x2e, r5" NL // Write byte to SPDR
 		"movw    r2, r30"   NL // Write send_ptr back
 		"movw    r30,r6"    NL // Move Z to int_z_cache
-		"spi_stc_clean:"    NL
+		"reti"              NL
+		"spi_stc_last_byte:"    NL
 		"out     __SREG__, r5"  NL // Put SREG back
 		"reti"              NL
 		);
