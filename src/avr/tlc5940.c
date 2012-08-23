@@ -26,7 +26,9 @@ volatile uint8_t may_flip = 0;
  */
 ISR(SPI_STC_vect)
 {
-	if(--layer_bytes_left) SPDR = *send_ptr++;
+	if(!layer_bytes_left) return;
+	layer_bytes_left--;
+	SPDR = *send_ptr++;
 }
 
 /*
@@ -68,5 +70,5 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	// Set up byte counter for SPI interrupt
-	layer_bytes_left = BYTES_PER_LAYER + 1;	
+	layer_bytes_left = BYTES_PER_LAYER;
 }

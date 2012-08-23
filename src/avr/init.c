@@ -54,12 +54,12 @@ void init_spi(void)
 		(1<<PB5); // SCK: output
 
 	SPCR |=
-		(1<<SPIE)| // Enable interrupts
+		(1<<SPIE)| // Enable SPI interrupts
 		(1<<SPE)|  // Enable SPI
 		(1<<MSTR); // We want the to be a master
 
-	SPSR |= (1<<SPI2X); // Double the speed of the SPI clock
-
+	/* Leaving SPI2X, SPR1, and SPR0 to initial zero value. That
+	   runs SPI at f_osc / 4 = 4 MHz, when f_osc is 16 MHz */
 }
 
 /**
