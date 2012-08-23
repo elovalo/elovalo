@@ -18,6 +18,7 @@
 
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
+register uint8_t int_sreg_cache asm ("r5");
 volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
@@ -29,10 +30,7 @@ volatile uint8_t may_flip = 0;
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
-		"push    r0"        NL
-		"in      r0, 0x3f"  NL
-		"push    r0"        NL
-		"eor     r1, r1"    NL
+		"in      r5, __SREG__"  NL // Put SREG to int_sreg_cache
 		"push    r24"       NL
 		"push    r30"       NL
 		"push    r31"       NL
@@ -49,9 +47,7 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		"pop     r31"       NL
 		"pop     r30"       NL
 		"pop     r24"       NL
-		"pop     r0"        NL
-		"out     0x3f, r0"  NL
-		"pop     r0"        NL
+		"out     __SREG__, r5"  NL // Put SREG back
 		"reti"              NL
 		);
 }
