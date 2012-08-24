@@ -24,6 +24,12 @@ AddOption('--no-exporter',
           default=True,
           help='Do not build exporter')
 
+AddOption('--no-asm',
+          dest='use_asm',
+          action='store_false',
+          default=True,
+          help='Do not use optimized interrupt handlers')
+
 if GetOption('build_avr'):
     SConscript('debug.scons', variant_dir='build_debug', duplicate=0)
 

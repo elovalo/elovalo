@@ -18,8 +18,6 @@
 
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
-register uint8_t isr_temp asm ("r5");
-register uint16_t isr_z_cache asm ("r6");
 volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
@@ -28,6 +26,10 @@ volatile uint8_t may_flip = 0;
  * interrupt vector. This is called when byte transmission is
  * finished.
  */
+#ifdef ASM_ISRS
+// Some global registers reserved by this ISR
+register uint8_t isr_temp asm ("r5");
+register uint16_t isr_z_cache asm ("r6");
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
@@ -58,6 +60,13 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		NL "reti"
 		);
 }
+#else
+// This looks simpler but is much slower (41 cycles compared to 15)
+ISR(SPI_STC_vect)
+{
+	if(--layer_bytes_left) SPDR = *send_ptr++;
+}
+#endif
 
 /*
  * BLANK timer interrupt Timer0
