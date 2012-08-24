@@ -27,36 +27,37 @@ volatile uint8_t may_flip = 0;
  * finished.
  */
 #ifdef ASM_ISRS
-// Some global registers reserved by this ISR
-register uint8_t isr_temp asm ("r5");
+// Eliminating use of push and pop by using "cache register"
 register uint16_t isr_z_cache asm ("r6");
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
-		/* Put SREG to isr_temp (r5) */
-		NL "in r5, __SREG__"
+		/* "Cache" SREG to r6, using LSB of isr_z_cache */
+		NL "in r6,__SREG__"
 		/* Jump if --layer_bytes_left == 0 */
 		NL "dec r4"
 		NL "breq spi_stc_last_byte"
-		/* No instruction after DEC modifys SREG. So, return
-		   SREG from isr_temp (r5) to allow reusing of r5 */
-		NL "out __SREG__, r5"
-		/* Move Z to isr_z_cache (r7:r6) */
-		NL "movw r6, r30"
+		/* No instruction except DEC modifys SREG here. So, return
+		   SREG from "cache" register r6 */
+		NL "out __SREG__,r6"
+		/* Store Z to isr_z_cache (r7:r6) */
+		NL "movw r6,r30"
 		/* Load send_ptr (r3:r2) to Z register (r31:r30) */
-		NL "movw r30, r2"
-		/* Load byte pointed by Z while incrementing Z */
-		NL "ld r5, Z+"
+		NL "movw r30,r2"
+		/* Load byte pointed by Z while incrementing
+		   Z. Reusing LSB of send_ptr (r2) */
+		NL "ld r2,Z+"
 		/* Write byte to SPI bus (SPDR) */
-		NL "out 0x2e, r5"
-		/* Put updated send_ptr back */
-		NL "movw r2, r30"
+		NL "out 0x2e,r2"
+		/* Put incremented send_ptr back to its global
+		 * register */
+		NL "movw r2,r30"
 		/* Restore Z from isr_z_cache */
 		NL "movw r30,r6"
 		NL "reti"
 		/* When it is last byte, restore SREG and bail out */
 		NL "spi_stc_last_byte:"
-		NL "out __SREG__, r5" 
+		NL "out __SREG__,r6"
 		NL "reti"
 		);
 }
