@@ -43,7 +43,7 @@ ISR(SPI_STC_vect, ISR_NAKED)
 		NL "out __SREG__, r5"
 		/* Move Z to isr_z_cache (r7:r6) */
 		NL "movw r6, r30"
-		/* Load send_ptr (r2) to Z register (r31:r30) */
+		/* Load send_ptr (r3:r2) to Z register (r31:r30) */
 		NL "movw r30, r2"
 		/* Load byte pointed by Z while incrementing Z */
 		NL "ld r5, Z+"
