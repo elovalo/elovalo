@@ -18,8 +18,8 @@
 
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
-register uint8_t int_temp asm ("r5");
-register uint16_t int_z_cache asm ("r6");
+register uint8_t isr_temp asm ("r5");
+register uint16_t isr_z_cache asm ("r6");
 volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
@@ -31,22 +31,31 @@ volatile uint8_t may_flip = 0;
 ISR(SPI_STC_vect, ISR_NAKED)
 {
 	asm volatile(
-		// and and dec modify SREG, must store it
-		"in      r5, __SREG__"  NL // Put SREG to int_temp
-		"dec     r4"        NL // --layer_bytes_left
-		"breq    spi_stc_last_byte"     NL // Branch if layer_bytes_left reaches zero
-		// Next instructions do not change SREG, safe to reuse
-		"out     __SREG__, r5"  NL
-		"movw    r6, r30"   NL // Move Z to int_z_cache
-		"movw    r30, r2"   NL // Load send_ptr to Z register
-		"ld      r5, Z+"   NL // Load byte and increment pointer
-		"out     0x2e, r5" NL // Write byte to SPDR
-		"movw    r2, r30"   NL // Write send_ptr back
-		"movw    r30,r6"    NL // Move Z to int_z_cache
-		"reti"              NL
-		"spi_stc_last_byte:"    NL
-		"out     __SREG__, r5"  NL // Put SREG back
-		"reti"              NL
+		/* Put SREG to isr_temp (r5) */
+		NL "in r5, __SREG__"
+		/* Jump if --layer_bytes_left == 0 */
+		NL "dec r4"
+		NL "breq spi_stc_last_byte"
+		/* No instruction after DEC modifys SREG. So, return
+		   SREG from isr_temp (r5) to allow reusing of r5 */
+		NL "out __SREG__, r5"
+		/* Move Z to isr_z_cache (r7:r6) */
+		NL "movw r6, r30"
+		/* Load send_ptr (r2) to Z register (r31:r30) */
+		NL "movw r30, r2"
+		/* Load byte pointed by Z while incrementing Z */
+		NL "ld r5, Z+"
+		/* Write byte to SPI bus (SPDR) */
+		NL "out 0x2e, r5"
+		/* Put updated send_ptr back */
+		NL "movw r2, r30"
+		/* Restore Z from isr_z_cache */
+		NL "movw r30,r6"
+		NL "reti"
+		/* When it is last byte, restore SREG and bail out */
+		NL "spi_stc_last_byte:"
+		NL "out __SREG__, r5" 
+		NL "reti"
 		);
 }
 
