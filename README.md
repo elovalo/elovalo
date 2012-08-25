@@ -90,16 +90,16 @@ See file `simulator/README.md`.
 
 ## Credits
 
-* [Joni Katajamäki](https://github.com/katis) - Hardware, software debugging
-* [Jukka Kinnunen](https://github.com/resutoor) - Hardware, software debugging
-* [Joel Lehtonen](https://github.com/Zouppen/) - Effects, serial code
+* [Joni Katajamäki](https://github.com/katis) - Embedded programming, hardware design 
+* [Jukka Kinnunen](https://github.com/resutoor) - Hardware design and debugging
+* [Joel Lehtonen](https://github.com/Zouppen/) - Embedded programming, effect engine programming
 * Lasse Saari - Management, pedestal fabrication
 * [Marko Silokunnas](https://github.com/marant) - Soldering
-* [Mio Taalas](https://github.com/mtaalas/) - LED driver interface, PCB design,
-  hardware
+* [Mio Taalas](https://github.com/mtaalas/) - LED driver interface design, PCB design,
+  embedded programming
 * [Ilkka Turunen](https://github.com/ile2/) - Management, soldering, pedestal
-  tests and design
-* [Juho Vepsäläinen](https://github.com/bebraw/) - Simulator, effects, pedestal
+  tests and aesthetic design
+* [Juho Vepsäläinen](https://github.com/bebraw/) - 3D simulator, effect programming, pedestal
   design
 
 ## License
