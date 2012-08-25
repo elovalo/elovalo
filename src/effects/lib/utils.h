@@ -1,7 +1,7 @@
 #ifndef EFFECT_UTILS_H
 #define EFFECT_UTILS_H
 
-#include "env.h"
+#include "../../env.h"
 
 /* Defining set_led() as a macro which chooses the most efficient
  * implementation available */

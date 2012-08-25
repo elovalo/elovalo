@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "lib/font8x8_basic.h"
-#include "effect_utils.h"
+#include "font8x8_basic.h"
+#include "utils.h"
 #include "text.h"
 
 /**
