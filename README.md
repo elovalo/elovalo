@@ -6,7 +6,7 @@ Documentation TODO.
 
 ## Requirements
 
-To build in Eclipse, you are on your own. :) Good luck.
+These requirements are for building with SCons in Debian GNU/Linux or Ubuntu. This should compile with Windows and Eclipse. TODO add instructions for Windows.
 
 To build on Debian GNU/Linux or Ubuntu platform, install the following packages:
 
@@ -15,6 +15,8 @@ To build on Debian GNU/Linux or Ubuntu platform, install the following packages:
 If you want to generate animations, install the following packages as well:
 
     blender libav-tools
+
+To be able to program the microcontroller, you'll need the programmer hardware and `avrude` package.
 
 ## Building in Eclipse
 
