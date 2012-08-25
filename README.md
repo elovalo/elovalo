@@ -6,7 +6,7 @@ Documentation TODO.
 
 ## Requirements
 
-To build in Eclipse, you are on your own. :) Good luck.
+These requirements are for building with SCons in Debian GNU/Linux or Ubuntu. This should compile with Windows and Eclipse. TODO add instructions for Windows.
 
 To build on Debian GNU/Linux or Ubuntu platform, install the following packages:
 
@@ -15,6 +15,8 @@ To build on Debian GNU/Linux or Ubuntu platform, install the following packages:
 If you want to generate animations, install the following packages as well:
 
     blender libav-tools
+
+To be able to program the microcontroller, you'll need the programmer hardware and `avrude` package.
 
 ## Building in Eclipse
 
@@ -90,16 +92,16 @@ See file `simulator/README.md`.
 
 ## Credits
 
-* [Joni Katajamäki](https://github.com/katis) - Hardware, software debugging
-* [Jukka Kinnunen](https://github.com/resutoor) - Hardware, software debugging
-* [Joel Lehtonen](https://github.com/Zouppen/) - Effects, serial code
+* [Joni Katajamäki](https://github.com/katis) - Embedded programming, hardware design 
+* [Jukka Kinnunen](https://github.com/resutoor) - Hardware design and debugging
+* [Joel Lehtonen](https://github.com/Zouppen/) - Embedded programming, effect engine programming
 * Lasse Saari - Management, pedestal fabrication
 * [Marko Silokunnas](https://github.com/marant) - Soldering
-* [Mio Taalas](https://github.com/mtaalas/) - LED driver interface, PCB design,
-  hardware
+* [Mio Taalas](https://github.com/mtaalas/) - LED driver interface design, PCB design,
+  embedded programming
 * [Ilkka Turunen](https://github.com/ile2/) - Management, soldering, pedestal
-  tests and design
-* [Juho Vepsäläinen](https://github.com/bebraw/) - Simulator, effects, pedestal
+  tests and aesthetic design
+* [Juho Vepsäläinen](https://github.com/bebraw/) - 3D simulator, effect programming, pedestal
   design
 
 ## License

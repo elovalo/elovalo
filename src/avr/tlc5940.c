@@ -20,16 +20,54 @@ register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
 volatile uint8_t may_flip = 0;
 
+#define NL "\n\t"
+
 /* SPI transmit interrupt vector SPIF is cleared when entering this
  * interrupt vector. This is called when byte transmission is
  * finished.
  */
+#ifdef ASM_ISRS
+// Eliminating use of push and pop by using "cache register"
+register uint16_t isr_z_cache asm ("r6");
+ISR(SPI_STC_vect, ISR_NAKED)
+{
+	asm volatile(
+		/* "Cache" SREG to r6, using LSB of isr_z_cache */
+		NL "in r6,__SREG__"
+		/* Jump if --layer_bytes_left == 0 */
+		NL "dec r4"
+		NL "breq spi_stc_last_byte"
+		/* No instruction except DEC modifys SREG here. So, return
+		   SREG from "cache" register r6 */
+		NL "out __SREG__,r6"
+		/* Store Z to isr_z_cache (r7:r6) */
+		NL "movw r6,r30"
+		/* Load send_ptr (r3:r2) to Z register (r31:r30) */
+		NL "movw r30,r2"
+		/* Load byte pointed by Z while incrementing
+		   Z. Reusing LSB of send_ptr (r2) */
+		NL "ld r2,Z+"
+		/* Write byte to SPI bus (SPDR) */
+		NL "out 0x2e,r2"
+		/* Put incremented send_ptr back to its global
+		 * register */
+		NL "movw r2,r30"
+		/* Restore Z from isr_z_cache */
+		NL "movw r30,r6"
+		NL "reti"
+		/* When it is last byte, restore SREG and bail out */
+		NL "spi_stc_last_byte:"
+		NL "out __SREG__,r6"
+		NL "reti"
+		);
+}
+#else
+// This looks simpler but is much slower (41 cycles compared to 15)
 ISR(SPI_STC_vect)
 {
-	if(!layer_bytes_left) return;
-	layer_bytes_left--;
-	SPDR = *send_ptr++;
+	if(--layer_bytes_left) SPDR = *send_ptr++;
 }
+#endif
 
 /*
  * BLANK timer interrupt Timer0
@@ -70,5 +108,5 @@ ISR(TIMER0_COMPA_vect)
 	}
 
 	// Set up byte counter for SPI interrupt
-	layer_bytes_left = BYTES_PER_LAYER;
+	layer_bytes_left = BYTES_PER_LAYER + 1;
 }
