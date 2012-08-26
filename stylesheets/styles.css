@@ -849,3 +849,24 @@ section #title .credits.right {
     display: none;
   }
 }
+
+/* custom */
+footer {
+  background: #353535;
+  border-top: 4px solid #434343;
+}
+
+footer .wrapper {
+  text-align: center;
+}
+
+footer ul {
+  list-style-type: none;
+  display: table-row;
+}
+
+footer ul li {
+  display: table-cell;
+  padding: 2em;
+  vertical-align: middle;
+}
