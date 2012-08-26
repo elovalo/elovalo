@@ -106,7 +106,6 @@ See file `simulator/README.md`.
 
 ## License
 
-Coming soon. We are moving to GPLv3 for software and Creative Commons
-Attribution-ShareAlike for hardware. More details are coming later. In
-meantime, you must ask us before using or making derivate works based
-on this.
+We use GPLv3 for software. Create Commons Attribution-ShareAlike is used for hardware and accompanying documentation. See LICENSE files for more details.
+
+If you create a derivative, please let us know. It would be interesting to hear what you are doing.
