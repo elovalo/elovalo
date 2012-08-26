@@ -16,7 +16,7 @@ If you want to generate animations, install the following packages as well:
 
     blender libav-tools
 
-To be able to program the microcontroller, you'll need the programmer hardware and `avrude` package.
+To be able to program the microcontroller, you'll need the programmer hardware and `avrdude` package.
 
 ## Building in Eclipse
 
