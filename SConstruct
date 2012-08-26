@@ -1,4 +1,13 @@
 # -*- mode: python; coding: utf-8 -*-
+import os
+from generators import effects
+
+cwd = GetLaunchDir()
+
+effects.generate(
+    os.path.join(cwd, 'src', 'effects'),
+    os.path.join(cwd, 'src', 'effects_wip.c')
+)
 
 AddOption('--no-avr',
           dest='build_avr',
