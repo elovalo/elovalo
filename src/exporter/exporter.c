@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/stat.h>
-#include "../effect_utils.h"
+#include "../effects/lib/utils.h"
 #include "../effects.h"
 #include "../cube.h"
 

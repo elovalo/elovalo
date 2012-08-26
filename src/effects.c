@@ -10,8 +10,8 @@
 #include "pgmspace.h"
 #include "env.h"
 #include "effects.h"
-#include "effect_utils.h"
-#include "text.h"
+#include "effects/lib/utils.h"
+#include "effects/lib/text.h"
 
 // Private functions
 static void init_all_on(void);
