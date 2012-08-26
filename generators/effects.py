@@ -1,3 +1,4 @@
+import os
 from glob import glob
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
@@ -15,10 +16,24 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 '''
 
 
+def generate(source, target):
+    inp = SourceFiles(glob(source + '/*.c'))
+
+    with open(target, 'w') as t:
+        t.write(file_start)
+        t.write(inp.function_definitions)
+        t.write(inp.function_names)
+        t.write(inp.effects)
+        t.write(inp.functions)
+
+
 class SourceFiles(object):
 
     def __init__(self, files):
-        pass
+        self._files = self._read(files)
+
+    def _read(self, files):
+        return [SourceFile(f) for f in files]
 
     @property
     def function_definitions(self):
@@ -26,7 +41,9 @@ class SourceFiles(object):
 
     @property
     def function_names(self):
-        return 'names'  # TODO
+        name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
+
+        return '\n'.join([name(f.name) for f in self._files])
 
     @property
     def effects(self):
@@ -37,12 +54,10 @@ class SourceFiles(object):
         return 'functions'  # TODO
 
 
-def generate(source, target):
-    inp = SourceFiles(glob(source + '/*.c'))
+class SourceFile(object):
 
-    with open(target, 'w') as t:
-        t.write(file_start)
-        t.write(inp.function_definitions)
-        t.write(inp.function_names)
-        t.write(inp.effects)
-        t.write(inp.functions)
+    def __init__(self, path):
+        self.name = os.path.splitext(os.path.basename(path))[0]
+
+        with open(path, 'r') as f:
+            self._content = f.readlines()
