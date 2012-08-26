@@ -39,7 +39,9 @@ class SourceFiles(object):
         self._files = self._read(files)
 
     def _read(self, files):
-        return [SourceFile(f) for f in files]
+        return [
+            SourceFile(f) for f in files if SourceFile(f).name != 'template'
+        ]
 
     @property
     def init_definitions(self):
