@@ -40,7 +40,7 @@
 
 <p>Elovalo is a joint project between <a href="http://hacklabjkl.org/">Hacklab JKL</a>, <a href="http://koodilehto.fi/">Koodilehto Co-op</a>, and <a href="http://www.ihmemedia.fi/">IhmeMedia</a>. Financing, aesthetic support and mentoring have been provided by <a href="http://www.liveherring.org/">Live Herring</a>.</p>
 
-<p>The lighting system will be installed in Jyväskylä's central Church Park in Fall 2012. It consists of three lighting pedestals that house a red, green and blue 3D display. These low-resolution light displays play different effects that are influenced by ambient conditions, such as sound, light and proximity. The display's resolution is 512 <a href="http://en.wikipedia.org/wiki/Voxel">voxels</a> (3d "pixels").</p>
+<p>The lighting system will be installed in Jyväskylä's central Church Park in Fall 2012. It consists of three lighting pedestals that house a red, green and blue 3D display. These low-resolution light displays play various effects that are influenced by ambient conditions, such as sound, light and proximity. The display's resolution is 512 <a href="http://en.wikipedia.org/wiki/Voxel">voxels</a>.</p>
 
 <p>Elovalo is a custom design. We came up with our own hardware and software. The development kit also includes a <a href="http://www.blender.org/">Blender</a> based simulation tool that may be used to preview effects before actually uploading them on the device.</p>
 
@@ -49,28 +49,30 @@
 <h3>Hardware</h3>
 
 <ul>
-<li>Processor: ATMEGA328p 2kb SRAM 32kb FLASH @16MHZ</li>
+<li>Processor: ATmega328p 2kb SRAM 32kb FLASH @ 16MHZ</li>
 <li>Sensors: Proximity, Ambient sound, Ambient Light.</li>
 <li>Media: 8x8x8 voxel 512 LED 3D matrix with 12 bit grayscale.</li>
-<li>Communication: USART/RS232 bidirectional serial communications protocol for debugging and sending/receiving data to and from the processor.</li>
+<li>Communication: UART bidirectional serial communications protocol for debugging and sending/receiving data to and from the processor.</li>
 </ul><h3>Software</h3>
 
 <ul>
-<li>Effects simulator that is implemented with Blender3d, allowing to demo real time effects without the Elovalo hardware. After verifying the effects with the simulator, they can be uploaded to the firmware of the equipment. This helps development by allowing to separate effect and hardware development.</li>
-<li>A RS232 interface that abstracts the hexadecimal-form communication to the matrix to more developer friendly functions.</li>
+<li>Effects simulator that is implemented with Blender3d, allowing to develop real time effects without the Elovalo hardware. After verifying the effects with the simulator, they can be uploaded to the firmware of the equipment. This helps development by allowing to separate effect and hardware development.</li>
+<li>User interface which provides more user friendly view to the binary protocol used in UART communication.</li>
 </ul><h3>Firmware</h3>
 
 <ul>
 <li>Fully custom and bottom-up designed firmware that is extremely efficiently optimized to squeeze all the juice out of the 8 bit processor:</li>
 <li>768 byte double buffered display buffer that guarantees a stable and smooth interface for animating without pacing issues.</li>
-<li>Buffered USART communications.</li>
+<li>Buffered UART communications.</li>
 <li>Multitasking with interrupts and hardware peripheral modules.</li>
 <li>SLEEP and HIBERNATE modes with remote starting.</li>
 <li>Real time clock with scheduling (for timed turning on).</li>
-<li>Self test: Simple test protocol for detecting errors with the SPI-bus, RS232, faulty LEDs and other LED driver-related problems. Error codes are saved on the memory for later debugging.</li>
 </ul><h3>Features yet to be implemented</h3>
 
 <ul>
+<li>Self test: Simple test protocol for detecting errors with the SPI
+bus, UART, faulty LEDs and other LED driver related problems. Error
+codes are saved on the memory for later debugging.</li>
 <li>Zigbee support</li>
 <li>WLAN/LAN support</li>
 <li>DMX-support.</li>
