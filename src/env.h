@@ -5,7 +5,7 @@
  * register of Z layer switcher.
  * 
  * If you are changing LED count or GS_DEPTH, make sure you have
- * compatible implementation of set_led() in effect_utils.c */
+ * compatible implementation of set_led() in effects/lib/utils.c */
 
 #define LEDS_X 8
 #define LEDS_Y 8
