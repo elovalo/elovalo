@@ -31,11 +31,15 @@
 #define CMD_STOP            0x01
 #define CMD_CHANGE_EFFECT   0x02
 #define CMD_SERIAL_FRAME    0x03
+#define CMD_SET_TIME        0x04
+#define CMD_GET_TIME        0x05
 
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
 #define RESP_EFFECT_NAME    0x03
 #define RESP_EFFECT_END     0x04
+#define RESP_TIME_SET_OK    0x05
+#define RESP_TIME           0x06
 #define RESP_JUNK_CHAR      0xfd
 #define RESP_INVALID_CMD    0xfe
 #define RESP_INVALID_EFFECT 0xff
@@ -53,6 +57,7 @@ void process_cmd(void);
 void send_escaped(uint8_t byte);
 read_t read_escaped();
 void dislike(uint8_t error_code, uint8_t payload);
+void respond(uint8_t code);
 
 int main() {
 	cli();
@@ -68,8 +73,7 @@ int main() {
 	sei();
 
 	// Greet the serial user
-	serial_send(ESCAPE);
-	serial_send(RESP_REBOOT);
+	respond(RESP_REBOOT);
 
 	while(1) {
 		if(serial_available()) {
@@ -93,8 +97,7 @@ int main() {
 				mode = MODE_IDLE;
 
 				// Report to serial port
-				serial_send(ESCAPE);
-				serial_send(RESP_EFFECT_END);
+				respond(RESP_EFFECT_END);
 				
 				break;
 			}
@@ -122,7 +125,10 @@ int main() {
 void process_cmd(void)
 {
 	uint8_t cmd = serial_read_blocking();
+
+	// Some temporary variables
 	read_t x;
+	time_t tmp_time;
 
 	switch (cmd) {
 	case ESCAPE:
@@ -147,8 +153,7 @@ void process_cmd(void)
 		effect = effects + x.byte;
 
 		// Report new effect name to serial user
-		serial_send(ESCAPE);
-		serial_send(RESP_EFFECT_NAME);
+		respond(RESP_EFFECT_NAME);
 		uint8_t *text_pgm = (uint8_t*)pgm_get(effect->name,word);
 		uint8_t c;
 		do {
@@ -174,9 +179,29 @@ void process_cmd(void)
 		mode = MODE_IDLE;
 		// TODO read serial data
 		break;
+	case CMD_SET_TIME:
+		tmp_time = 0;
+		for (int8_t bit_pos=24; bit_pos>=0; bit_pos-=8) {
+			read_t x = read_escaped();
+			if (!x.good) return;
+			tmp_time |= (time_t)x.byte << bit_pos;
+		}
+		stime(&tmp_time);
+		respond(RESP_TIME_SET_OK);
+		break;
+	case CMD_GET_TIME:
+		respond(RESP_TIME);
+		tmp_time = time(NULL);
+		serial_send(tmp_time >> 24);
+		serial_send(tmp_time >> 16);
+		serial_send(tmp_time >> 8);
+		serial_send(tmp_time);
+
+		break;	     
 	default:
 		dislike(RESP_INVALID_CMD,cmd);
 	}
+	// Some cases return, do not write code here
 }
 
 /**
@@ -214,6 +239,14 @@ void dislike(uint8_t error_code, uint8_t payload) {
 	serial_send(ESCAPE);
 	serial_send(error_code);
 	send_escaped(payload);
+}
+
+/**
+ * Send response via serial port.
+ */
+void respond(uint8_t code) {
+	serial_send(ESCAPE);
+	serial_send(code);
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

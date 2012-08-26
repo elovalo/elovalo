@@ -82,8 +82,9 @@ void init_blank_timer(){
 void init_effect_timer(){
 	//CTC with OCRA as TOP
 	TCCR2A |= (1 << WGM21);
-	// Generate interrupt every 156x1024 cycles (9.984ms)
-	OCR2A = 156;
+	/* Generate interrupt every 125x1024 cycles, which gives clock
+	   granularity of 8ms @ 16MHz */
+	OCR2A = 124;
 	// Enable Timer Compare match A interrupt
 	TIMSK2 |= (1 << OCIE2A);
 	// Prescaler clk_io / 1024
