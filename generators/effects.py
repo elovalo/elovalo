@@ -64,7 +64,19 @@ class SourceFiles(object):
 
     @property
     def effects(self):
-        return 'effects'  # TODO
+        definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
+            effect(f) + ', 500, ' + flip(f) + ' },'
+        init = lambda f: '&init_' + f.name if f.init else 'NULL'
+        effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
+        flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
+
+        ret = ['const effect_t effects[] PROGMEM = {']
+
+        ret.extend([definition(f) for f in self._files])
+
+        ret.append('};')
+
+        return '\n'.join(ret) + '\n'
 
     @property
     def functions(self):
@@ -81,6 +93,7 @@ class SourceFile(object):
 
         self.init = self._init(content)
         self.effect = self._effect(content)
+        self.flip = self._flip(content)
 
     def _init(self, c):
         # TODO: find init() block
@@ -89,3 +102,6 @@ class SourceFile(object):
     def _effect(self, c):
         # TODO: find effect() block
         return len([True for line in c if line.find('void effect(') >= 0]) > 0
+
+    def _flip(self, c):
+        return len([True for line in c if line.find(' FLIP ') >= 0]) > 0
