@@ -1,4 +1,6 @@
-#include "common.h"
+#include <math.h>
+#include <stdint.h>
+#include "utils.h"
 
 static void heart_layer(uint8_t x, uint16_t intensity);
 

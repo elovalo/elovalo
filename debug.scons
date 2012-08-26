@@ -9,7 +9,7 @@ env.Append(LINKFLAGS = '-mmcu=atmega328p')
 Target = 'ledcube'
 
 # Make elf
-env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')], LIBS='m')
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/avr/*.c')], LIBS='m')
 
 # Dump assembly code
 env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
