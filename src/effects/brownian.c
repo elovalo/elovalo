@@ -4,10 +4,7 @@ uint8_t brown_x;
 uint8_t brown_y;
 uint8_t brown_z;
 
-/*
- * 100, NO_FLIP
- */
-void brownian_init(void)
+void init(void)
 {
 	brown_x = (uint8_t)(LEDS_X / 2); 
 	brown_y = (uint8_t)(LEDS_Y / 2); 
@@ -15,7 +12,7 @@ void brownian_init(void)
 
 	clear_buffer();
 }
-void brownian_effect(void)
+void effect(void)
 {
 	set_led(brown_x, brown_y, brown_z, MAX_INTENSITY);
 

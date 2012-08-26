@@ -4,10 +4,7 @@ uint16_t worm_pos[3];
 uint16_t worm_dir;
 int worm_speed;
 
-/*
- * 600, NO_FLIP
- */
-void worm_init(void)
+void init(void)
 {
 	worm_pos[0] = 4;
 	worm_pos[1] = 4;
@@ -17,7 +14,7 @@ void worm_init(void)
 
 	clear_buffer();
 }
-void worm_effect(void)
+void effect(void)
 {
 	set_led(worm_pos[0], worm_pos[1], worm_pos[2], MAX_INTENSITY);
 

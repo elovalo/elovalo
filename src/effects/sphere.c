@@ -1,9 +1,9 @@
 #include "common.h"
 
 /*
- * 100, FLIP
+ * FLIP
  */
-void sphere_effect(void)
+void effect(void)
 {
 	float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
 

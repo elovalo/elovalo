@@ -3,9 +3,9 @@
 static void set_intensity(uint8_t x, uint8_t y, uint8_t z);
 
 /*
- * 1000, FLIP
+ * FLIP
  */
-void all_on_init(void)
+void init(void)
 {
 	iterate_3d(set_intensity);
 }

@@ -1,19 +1,18 @@
 #include "common.h"
-#include "shapes.h"
 
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z); 
 static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z); 
 
 /*
- * 2000, FLIP
+ * FLIP
  */
-void game_of_life_init(void)
+void init(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
 	heart_shape();
 }
 
-void game_of_life_effect(void)
+void effect(void)
 {
 	iterate_3d(set_gol_intensity);
 }

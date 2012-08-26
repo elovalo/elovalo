@@ -1,13 +1,13 @@
 #include "common.h"
 
 /*
- * <length>, <FLIP|NO_FLIP>
+ * FLIP (optional. if not set, does not flip)
  */
-void template_init(void)
+void init(void)
 {
 
 }
-void template_effect(void)
+void effect(void)
 {
 
 }

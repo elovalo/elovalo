@@ -1,9 +1,9 @@
 #include "common.h"
 
 /*
- * 6000, FLIP
+ * FLIP
  */
-TWOD(wave_effect)
+TWOD(effect)
 {
 	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
 

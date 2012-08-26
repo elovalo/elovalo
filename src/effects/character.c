@@ -2,7 +2,7 @@
 #include "../text.h"
 
 /*
- * 100, NO_FLIP
+ * NO_FLIP
  */
 void character_effect(void)
 {

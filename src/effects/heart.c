@@ -1,8 +1,8 @@
 #include "common.h"
 
 /*
- * 100, FLIP
+ * FLIP
  */
-void heart_effect(void) {
+void effect(void) {
 	heart_shape();
 }

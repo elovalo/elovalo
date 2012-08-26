@@ -1,9 +1,9 @@
 #include "common.h"
 
 /*
- * 3000, FLIP
+ * FLIP
  */
-void layers_effect(void)
+void effect(void)
 {
 	clear_buffer();
 	uint8_t z = ((ticks >> 7) % LEDS_Z);

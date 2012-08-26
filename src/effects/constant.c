@@ -1,9 +1,9 @@
 #include "common.h"
 
 /*
- * 100, FLIP
+ * FLIP
  */
-TWOD(constant_effect)
+TWOD(effect)
 {
 	return 10000;
 }
