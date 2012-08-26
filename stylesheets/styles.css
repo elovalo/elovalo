@@ -856,17 +856,13 @@ footer {
   border-top: 4px solid #434343;
 }
 
-footer .wrapper {
+footer ul {
+  list-style-type: none;
   text-align: center;
 }
 
-footer ul {
-  list-style-type: none;
-  display: table-row;
-}
-
 footer ul li {
-  display: table-cell;
+  display: inline-block;
   padding: 2em;
-  vertical-align: middle;
+  vertical-align: top;
 }
