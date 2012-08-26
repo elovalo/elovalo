@@ -60,4 +60,13 @@ class SourceFile(object):
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
-            self._content = f.readlines()
+            content = f.readlines()
+
+        self.init = self._init(content)
+        self.draw = self._draw(content)
+
+    def _init(self, c):
+        pass  # TODO: find init() block
+
+    def _draw(self, c):
+        pass  # TODO: find draw() block
