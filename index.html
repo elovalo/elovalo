@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Elovalo by hacklab-jkl</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/hacklab-jkl/elovalo">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/hacklab-jkl/elovalo/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/hacklab-jkl/elovalo/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Elovalo</h1>
+          <p>Outdoor Pedestal with a LED Cube</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/hacklab-jkl">hacklab-jkl</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        
+
+<p>Elovalo is a joint project between <a href="http://hacklabjkl.org/">Hacklab JKL</a>, <a href="http://koodilehto.fi/">Koodilehto Co-op</a>, and <a href="http://www.ihmemedia.fi/">IhmeMedia</a>. Financing, aesthetic support and mentoring have been provided by <a href="http://www.liveherring.org/">Live Herring</a>.</p>
+
+<p>The lighting system will be installed in Jyväskylä's central Church Park in Fall 2012. It consists of three lighting pedestals that house a red, green and blue 3D display. These low-resolution light displays play different effects that are influenced by ambient conditions, such as sound, light and proximity. The display's resolution is 512 <a href="http://en.wikipedia.org/wiki/Voxel">voxels</a> (3d "pixels").</p>
+
+<p>Elovalo is a custom design. We came up with our own hardware and software. The development kit also includes a <a href="http://www.blender.org/">Blender</a> based simulation tool that may be used to preview effects before actually uploading them on the device.</p>
+
+<h2>Technical Details</h2>
+
+<h3>Hardware</h3>
+
+<ul>
+<li>Processor: ATMEGA328p 2kb SRAM 32kb FLASH @16MHZ</li>
+<li>Sensors: Proximity, Ambient sound, Ambient Light.</li>
+<li>Media: 8x8x8 voxel 512 LED 3D matrix with 12 bit grayscale.</li>
+<li>Communication: USART/RS232 bidirectional serial communications protocol for debugging and sending/receiving data to and from the processor.</li>
+</ul><h3>Software</h3>
+
+<ul>
+<li>Effects simulator that is implemented with Blender3d, allowing to demo real time effects without the Elovalo hardware. After verifying the effects with the simulator, they can be uploaded to the firmware of the equipment. This helps development by allowing to separate effect and hardware development.</li>
+<li>A RS232 interface that abstracts the hexadecimal-form communication to the matrix to more developer friendly functions.</li>
+</ul><h3>Firmware</h3>
+
+<ul>
+<li>Fully custom and bottom-up designed firmware that is extremely efficiently optimized to squeeze all the juice out of the 8 bit processor:</li>
+<li>768 byte double buffered display buffer that guarantees a stable and smooth interface for animating without pacing issues.</li>
+<li>Buffered USART communications.</li>
+<li>Multitasking with interrupts and hardware peripheral modules.</li>
+<li>SLEEP and HIBERNATE modes with remote starting.</li>
+<li>Real time clock with scheduling (for timed turning on).</li>
+<li>Self test: Simple test protocol for detecting errors with the SPI-bus, RS232, faulty LEDs and other LED driver-related problems. Error codes are saved on the memory for later debugging.</li>
+</ul><h3>Features yet to be implemented</h3>
+
+<ul>
+<li>Zigbee support</li>
+<li>WLAN/LAN support</li>
+<li>DMX-support.</li>
+</ul><h2>Credits</h2>
+
+<ul>
+<li>
+<a href="https://github.com/katis">Joni Katajamäki</a> - Embedded programming, hardware design </li>
+<li>
+<a href="https://github.com/resutoor">Jukka Kinnunen</a> - Hardware design and debugging</li>
+<li>
+<a href="https://github.com/Zouppen/">Joel Lehtonen</a> - Embedded programming, effect engine programming</li>
+<li>Lasse Saari - Management, pedestal fabrication</li>
+<li>
+<a href="https://github.com/marant">Marko Silokunnas</a> - Soldering</li>
+<li>
+<a href="https://github.com/mtaalas/">Mio Taalas</a> - LED driver interface design, PCB design,
+embedded programming</li>
+<li>
+<a href="https://github.com/ile2/">Ilkka Turunen</a> - Management, soldering, pedestal
+tests and aesthetic design</li>
+<li>
+<a href="https://github.com/bebraw/">Juho Vepsäläinen</a> - 3D simulator, effect programming, pedestal
+design</li>
+</ul><h2>License</h2>
+
+<p>We use GPLv3 for software. Create Commons Attribution-ShareAlike is used for hardware and accompanying documentation. See LICENSE files for more details.</p>
+
+<p>If you create a derivative, please let us know. It would be interesting to hear what you are doing.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
