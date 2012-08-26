@@ -20,12 +20,11 @@ ISR(TIMER2_COMPA_vect)
 	// Tick counter for effects
 	ticks_volatile++;
 
-	/* Count seconds by dividing 8 ms interval with 125 (refill
-	   value is 126 because of pre-decrement) */
-	static uint8_t div = 126;
+	/* Count seconds by dividing 8 ms interval with 125 */
+	static uint8_t div = 125;
 	if (posix_time && !--div) {
 		// Exactly one second has passed
-		div = 126;
+		div = 125;
 		posix_time++;
 	}
 }
