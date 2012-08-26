@@ -23,7 +23,16 @@ Byte length on wire is 8 times the SPI clock divider. We use divider of 4, which
 In short, optimization really matters. Before starting to optimize,
 the handler was consuming 41 cycles. In the far beginning, it was even
 longer (haven't counted that). To avoid blocking lower priority
-interrupts, we need to get lower than ̀cycles_per_byte`. Currently 41
-is bigger than that, so we are having problems.
+interrupts, we need to get lower than ̀cycles_per_byte`. 41
+is bigger than that, so we are having way too slow SPI bus without
+optimization and BLANK may occur before last byte.
 
-Optimization goes on.
+After optimization the instruction count is 15. That is achieved by
+reserving two global registers for storing the value of Z temporarily.
+Using 2 registers for storing 16 bit value is faster than using stack
+(2 instructions instead of 8).
+
+If you are having problems with the assembly code, you may turn it off
+by compiling the code with an extra option:
+
+    scons --no-asm
