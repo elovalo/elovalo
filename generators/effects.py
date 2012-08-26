@@ -21,9 +21,15 @@ def generate(source, target):
 
     with open(target, 'w') as t:
         t.write(file_start)
-        t.write(inp.function_definitions)
+        t.write('\n')
+        t.write(inp.init_definitions)
+        t.write('\n')
+        t.write(inp.effect_definitions)
+        t.write('\n')
         t.write(inp.function_names)
+        t.write('\n')
         t.write(inp.effects)
+        t.write('\n')
         t.write(inp.functions)
 
 
@@ -36,8 +42,14 @@ class SourceFiles(object):
         return [SourceFile(f) for f in files]
 
     @property
-    def function_definitions(self):
-        return 'defs'  # TODO
+    def init_definitions(self):
+        init = lambda n: 'static void init_' + n + '(void);'
+
+        return '\n'.join([init(f.name) for f in self._files if f.init])
+
+    @property
+    def effect_definitions(self):
+        return 'effects'  # TODO
 
     @property
     def function_names(self):
@@ -66,7 +78,8 @@ class SourceFile(object):
         self.draw = self._draw(content)
 
     def _init(self, c):
-        pass  # TODO: find init() block
+        # TODO: find init() block
+        return len([True for line in c if line.find('void init(') >= 0]) > 0
 
     def _draw(self, c):
         pass  # TODO: find draw() block
