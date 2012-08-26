@@ -43,19 +43,24 @@ class SourceFiles(object):
 
     @property
     def init_definitions(self):
-        init = lambda n: 'static void init_' + n + '(void);'
-
-        return '\n'.join([init(f.name) for f in self._files if f.init])
+        return self._definitions('init')
 
     @property
     def effect_definitions(self):
-        return 'effects'  # TODO
+        return self._definitions('effect')
+
+    def _definitions(self, k):
+        init = lambda n: 'static void ' + k + '_' + n + '(void);'
+
+        return '\n'.join([
+                init(f.name) for f in self._files if getattr(f, k)
+            ]) + '\n'
 
     @property
     def function_names(self):
         name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
 
-        return '\n'.join([name(f.name) for f in self._files])
+        return '\n'.join([name(f.name) for f in self._files]) + '\n'
 
     @property
     def effects(self):
@@ -75,11 +80,12 @@ class SourceFile(object):
             content = f.readlines()
 
         self.init = self._init(content)
-        self.draw = self._draw(content)
+        self.effect = self._effect(content)
 
     def _init(self, c):
         # TODO: find init() block
         return len([True for line in c if line.find('void init(') >= 0]) > 0
 
-    def _draw(self, c):
-        pass  # TODO: find draw() block
+    def _effect(self, c):
+        # TODO: find effect() block
+        return len([True for line in c if line.find('void effect(') >= 0]) > 0
