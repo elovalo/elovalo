@@ -1,11 +1,10 @@
+# pragma FLIP
+
 #include "common.h"
 
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z); 
 static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z); 
 
-/*
- * FLIP
- */
 void init(void)
 {
 	// TODO: might want to use some other seed. using heart for testing

@@ -1,8 +1,7 @@
+# pragma FLIP
+
 #include "common.h"
 
-/*
- * FLIP
- */
 TWOD(effect)
 {
 	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;

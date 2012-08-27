@@ -1,8 +1,7 @@
+# pragma FLIP /* optional. remove this if you don't want to flip */
+
 #include "common.h"
 
-/*
- * FLIP (optional. if not set, does not flip)
- */
 void init(void)
 {
 
