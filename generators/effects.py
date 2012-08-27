@@ -30,6 +30,9 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.effects)
         t.write('\n')
+        t.write('const uint8_t effects_len = sizeof(effects) / ' +
+                'sizeof(effect_t);\n')
+        t.write('\n')
         t.write(inp.functions)
 
 
