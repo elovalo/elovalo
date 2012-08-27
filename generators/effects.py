@@ -140,7 +140,7 @@ def analyze(name, content):
             ('init', 'void\s+init\s*[(]'),
             ('effect', 'void\s+effect\s*[(]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
-            ('assignment', '\s*' + types + '(\s+\w+)!\('),
+            ('assignment', '\s*' + types + '(\s+\w+)'),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
@@ -149,6 +149,10 @@ def analyze(name, content):
             'types': t,
             'index': i,
         }
+
+        # TODO: fix the regex. matches too much
+        if 'assignment' in ret['types'] and 'function' in ret['types']:
+            ret['types'].remove('assignment')
 
         block = parse_function(name, content, ret, i)
         if block:
