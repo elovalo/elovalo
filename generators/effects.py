@@ -97,7 +97,7 @@ class SourceFile(object):
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
-            content = analyze(f.readlines())
+            content = analyze(self.name, f.readlines())
 
         self.globs = self._globals(content)
         self.functions = self._functions(content)
@@ -106,61 +106,16 @@ class SourceFile(object):
         self.flip = self._block(content, 'flip')
 
     def _globals(self, c):
-        return ''
+        return ''  # assignments that are not inside blocks!
 
     def _functions(self, c):
         return ''
 
     def _block(self, c, name):
-        #  TODO: init, effect prefix
-        def parse(index):
-            ret = definition(c[index])
-            cc = c[index]['content']
-
-            if cc.startswith('#'):
-                return ret
-
-            begin_braces = cc.count('{')
-            end_braces = 0
-
-            offset = 0
-            if not begin_braces:
-                begin_braces, end_braces, offset = find_begin_braces(index + 1)
-
-            for i in range(index + 1 + offset, len(c)):
-                cc = c[i]['content']
-                ret += cc
-                begin_braces += cc.count('{')
-                end_braces += cc.count('}')
-
-                if begin_braces == end_braces:
-                    return ret
-
-            return ret
-
-        def definition(c):
-            if 'init' in c['types']:
-                return 'static void init_' + self.name + '(void)'
-
-            if 'effect' in c['types']:
-                return 'void effect_' + self.name + '(void)'
-
-            return c['content']
-
-        def find_begin_braces(i):
-            for j in range(i, len(c)):
-                b = c.count('{')
-
-                if b:
-                    return b, c.count('}'), j - i
-
-            return 0, 0, 0
-
-        return ''.join(parse(i) for i, line in enumerate(c)
-            if name in line['types'])
+        return ''.join(line['block'] for line in c if name in line['types'])
 
 
-def analyze(content):
+def analyze(name, content):
     def analyze(i, line):
         types = '(void|uint8_t|uint16_t|float|int)'
         patterns = (
@@ -172,10 +127,64 @@ def analyze(content):
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
-        return {
+        ret = {
             'content': line,
             'types': t,
             'index': i,
         }
 
+        block = parse_function(name, content, ret, i)
+        if block:
+            ret['block'] = block
+
+        return ret
+
     return [analyze(i, line) for i, line in enumerate(content)]
+
+
+def parse_function(name, lines, line, index):
+    ret = definition(name, line)
+    cc = line['content']
+
+    if cc.startswith('#'):
+        return ret
+
+    begin_braces = cc.count('{')
+    end_braces = 0
+
+    offset = 0
+    if not begin_braces:
+        begin_braces, end_braces, offset = find_begin_braces(
+            cc, index + 1
+        )
+
+    for i in range(index + 1 + offset, len(lines)):
+        cc = lines[i]
+        ret += cc
+        begin_braces += cc.count('{')
+        end_braces += cc.count('}')
+
+        if begin_braces == end_braces:
+            return ret
+
+    return ret
+
+
+def definition(name, line):
+    if 'init' in line['types']:
+        return 'static void init_' + name + '(void)'
+
+    if 'effect' in line['types']:
+        return 'void effect_' + name + '(void)'
+
+    return line['content']
+
+
+def find_begin_braces(content, i):
+    for j in range(i, len(content)):
+        b = content.count('{')
+
+        if b:
+            return b, content.count('}'), j - i
+
+    return 0, 0, 0
