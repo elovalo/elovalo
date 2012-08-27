@@ -106,7 +106,7 @@ class SourceFile(object):
         return len([True for line in c if line.find('void effect(') >= 0]) > 0
 
     def _flip(self, c):
-        return len([True for line in c if line.find(' FLIP ') >= 0]) > 0
+        return len([True for line in c if line.find('# pragma FLIP') >= 0]) > 0
 
 
 def analyze(content):
