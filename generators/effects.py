@@ -139,7 +139,7 @@ def analyze(name, content):
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
-            ('effect', 'void\s+effect\s*[(]'),
+            ('effect', '\s*effect\s*'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
             ('assignment', '\s*' + types + '(\s+\w+)'),
         )
@@ -147,7 +147,7 @@ def analyze(name, content):
 
         ret = {
             'content': line,  # TODO: remove in favor of block?
-            'types': t,
+            'types': t,  # TODO: might be nicer to use a set for this
             'index': i,
         }
 
@@ -155,7 +155,14 @@ def analyze(name, content):
         if 'assignment' in ret['types'] and 'function' in ret['types']:
             ret['types'].remove('assignment')
 
-        block = parse_function(name, content, ret, i)
+        block = None
+        # TODO: fix the regex. does not match enough
+        if 'effect' in ret['types'] and 'function' not in ret['types']:
+            ret['types'].append('function')
+            block = parse_twod(name, content, ret, i)
+        else:
+            block = parse_function(name, content, ret, i)
+
         if block:
             ret['block'] = block
 
@@ -164,7 +171,20 @@ def analyze(name, content):
     return [analyze(i, line) for i, line in enumerate(content)]
 
 
+def parse_twod(name, lines, line, index):
+    return _parse(name, lines, line, index, twod_definition)
+
+
+def twod_definition(name, line):
+    # XXX: fails if brace is on the same line
+    return 'TWOD(effect_' + name + ')'
+
+
 def parse_function(name, lines, line, index):
+    return _parse(name, lines, line, index, function_definition)
+
+
+def _parse(name, lines, line, index, definition):
     ret = definition(name, line)
     cc = line['content']
 
@@ -192,7 +212,7 @@ def parse_function(name, lines, line, index):
     return ret
 
 
-def definition(name, line):
+def function_definition(name, line):
     if 'init' in line['types']:
         return 'static void init_' + name + '(void)'
 
