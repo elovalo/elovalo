@@ -127,13 +127,15 @@ def find_globals(content):
     ret = []
 
     i = 0
-    for i in range(len(content)):
+    while i < len(content):
         c = content[i]
 
         if 'assignment' in c['types']:
             ret.append(c['content'])
         if 'function' in c['types']:
             i += len(c['block'].split('\n'))
+        else:
+            i += 1
 
     return ret
 
