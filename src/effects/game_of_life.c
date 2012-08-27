@@ -2,8 +2,8 @@
 
 #include "common.h"
 
-static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z); 
-static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z); 
+static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z);
+static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z);
 
 void init(void)
 {
@@ -20,7 +20,7 @@ static void set_gol_intensity(uint8_t x, uint8_t y, uint8_t z) {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
 	if(neighbours >= 9 && neighbours <= 17) set_led(x, y, z, MAX_INTENSITY);
-	else set_led(x, y, z, 0); 
+	else set_led(x, y, z, 0);
 }
 
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z) {
