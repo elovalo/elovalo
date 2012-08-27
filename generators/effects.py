@@ -44,9 +44,7 @@ class SourceFiles(object):
         self._files = self._read(files)
 
     def _read(self, files):
-        return [
-            SourceFile(f) for f in files if SourceFile(f).name != 'template'
-        ]
+        return [SourceFile(f) for f in files]
 
     @property
     def init_definitions(self):
@@ -141,7 +139,7 @@ def find_globals(content):
 
 
 def analyze(name, content):
-    def analyze(i, line):
+    def analyze_line(i, line):
         types = '(void|uint8_t|uint16_t|float|int)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
@@ -180,7 +178,7 @@ def analyze(name, content):
 
         return ret
 
-    return [analyze(i, line) for i, line in enumerate(content)]
+    return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
 def parse_twod(name, lines, line, index):
@@ -189,7 +187,7 @@ def parse_twod(name, lines, line, index):
 
 def twod_definition(name, line):
     # XXX: fails if brace is on the same line
-    return 'TWOD(effect_' + name + ')'
+    return 'TWOD(effect_' + name + ') '
 
 
 def parse_function(name, lines, line, index):
@@ -205,7 +203,6 @@ def _parse(name, lines, line, index, definition):
 
     begin_braces = cc.count('{')
     end_braces = 0
-
     offset = 0
     if not begin_braces:
         begin_braces, end_braces, offset = find_begin_braces(
@@ -225,13 +222,19 @@ def _parse(name, lines, line, index, definition):
 
 
 def function_definition(name, line):
+    ret = None
+
     if 'init' in line['types']:
-        return 'static void init_' + name + '(void)'
+        ret = 'static void init_' + name + '(void)'
+    elif 'effect' in line['types']:
+        ret = 'void effect_' + name + '(void)'
+    else:
+        return line['content']
 
-    if 'effect' in line['types']:
-        return 'void effect_' + name + '(void)'
+    if '{' in line['content']:
+        ret += ' {\n'
 
-    return line['content']
+    return ret
 
 
 def find_begin_braces(content, i):
