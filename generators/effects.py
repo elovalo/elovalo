@@ -1,3 +1,4 @@
+import itertools
 import os
 import re
 from glob import glob
@@ -86,11 +87,10 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        # globals
-        # utility funcs
-        # init (rename)
-        # effect (rename)
-        return 'functions'  # TODO
+        merge = lambda f: '\n'.join(f.globs + f.functions + f.init + f.effect)
+
+
+        return '\n'.join(merge(f) for f in self._files) + '\n'
 
 
 class SourceFile(object):
@@ -108,25 +108,25 @@ class SourceFile(object):
         self.flip = self._flip(content)
 
     def _globals(self, c):
-        pass
+        return []
 
     def _functions(self, c):
-        pass
+        return []
 
     def _init(self, c):
         # TODO: find init() block
-        return len([True for line in c if 'init' in line['type']]) > 0
+        return [line['content'] for line in c if 'init' in line['type']]
 
     def _effect(self, c):
         # TODO: find effect() block
-        return len([True for line in c if 'effect' in line['type']]) > 0
+        return [line['content'] for line in c if 'effect' in line['type']]
 
     def _flip(self, c):
-        return len([True for line in c if 'flip' in line['type']]) > 0
+        return [line['content'] for line in c if 'flip' in line['type']]
 
 
 def analyze(content):
-    def analyze(line):
+    def analyze(i, line):
         types = '(void|uint8_t|uint16_t|float|int)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
@@ -140,6 +140,7 @@ def analyze(content):
         return {
             'content': line,
             'type': t,
+            'index': i,
         }
 
-    return [analyze(line) for line in content]
+    return [analyze(i, line) for i, line in enumerate(content)]
