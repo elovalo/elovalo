@@ -86,6 +86,10 @@ class SourceFiles(object):
 
     @property
     def functions(self):
+        # globals
+        # utility funcs
+        # init (rename)
+        # effect (rename)
         return 'functions'  # TODO
 
 
@@ -97,9 +101,17 @@ class SourceFile(object):
         with open(path, 'r') as f:
             content = analyze(f.readlines())
 
+        self.globs = self._globals(content)
+        self.functions = self._functions(content)
         self.init = self._init(content)
         self.effect = self._effect(content)
         self.flip = self._flip(content)
+
+    def _globals(self, c):
+        pass
+
+    def _functions(self, c):
+        pass
 
     def _init(self, c):
         # TODO: find init() block
@@ -115,14 +127,19 @@ class SourceFile(object):
 
 def analyze(content):
     def analyze(line):
+        types = '(void|uint8_t|uint16_t|float|int)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', 'void\s+effect\s*[(]'),
-            ('function', '()(\s+\w+\s*[(])'),
+            ('function', '\s*' + types + '(\s+\w+\s*[(])'),
+            ('assignment', '\s*' + types + '(\s+\w+)'),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
-        return {'content': line, 'type': t}
+        return {
+            'content': line,
+            'type': t,
+        }
 
     return [analyze(line) for line in content]
