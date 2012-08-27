@@ -1,4 +1,3 @@
-import itertools
 import os
 import re
 from glob import glob
@@ -88,7 +87,6 @@ class SourceFiles(object):
     @property
     def functions(self):
         merge = lambda f: '\n'.join(f.globs + f.functions + f.init + f.effect)
-
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
 
