@@ -229,9 +229,9 @@ def function_definition(name, line):
     ret = None
 
     if 'init' in line['types']:
-        ret = 'static void init_' + name + '(void)\n'
+        ret = 'static void init_' + name + '(void)'
     elif 'effect' in line['types']:
-        ret = 'void effect_' + name + '(void)\n'
+        ret = 'void effect_' + name + '(void)'
     else:
         return line['content']
 
