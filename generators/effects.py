@@ -106,13 +106,28 @@ class SourceFile(object):
         self.flip = self._block(content, 'flip')
 
     def _globals(self, c):
-        return ''  # assignments that are not inside blocks!
+        return '\n'.join(find_globals(c))
 
     def _functions(self, c):
         return ''
 
     def _block(self, c, name):
         return ''.join(line['block'] for line in c if name in line['types'])
+
+
+def find_globals(content):
+    ret = []
+
+    i = 0
+    for i in range(len(content)):
+        c = content[i]
+
+        if 'assignment' in c['types']:
+            ret.append(c['content'])
+        if 'function' in c['types']:
+            i += len(c['block'].split('\n'))
+
+    return ret
 
 
 def analyze(name, content):
@@ -128,7 +143,7 @@ def analyze(name, content):
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
         ret = {
-            'content': line,
+            'content': line,  # TODO: remove in favor of block?
             'types': t,
             'index': i,
         }
