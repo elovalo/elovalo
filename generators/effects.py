@@ -145,8 +145,6 @@ def analyze(name, content):
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
-            ('function_declaration',
-                'static\s*' + types + '(\s+\w+\s*[(][a-zA-Z,]*[;]+)'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
             ('assignment', '\s*' + types + '(\s+\w+)'),
         )
@@ -168,11 +166,11 @@ def analyze(name, content):
             ret['types'].append('function')
             block = parse_twod(name, content, ret, i)
         elif 'function' in ret['types']:
-            block = parse_function(name, content, ret, i)
-
-        # TODO: fix the function regex. matches too much
-        if 'function_declaration' in ret['types']:
-            ret['types'].remove('function')
+            if line.strip()[-1] == ';':
+                ret['types'].remove('function')
+                ret['types'].append('function_declaration')
+            else:
+                block = parse_function(name, content, ret, i)
 
         ret['block'] = block
 
