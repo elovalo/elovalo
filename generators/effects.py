@@ -14,6 +14,7 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 #include "effects.h"
 #include "effects/lib/utils.h"
 #include "effects/lib/text.h"
+#include "effects/lib/shapes.h"
 '''
 
 
