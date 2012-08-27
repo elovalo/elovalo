@@ -142,7 +142,7 @@ def find_globals(content):
 
 def analyze(name, content):
     def analyze_line(i, line):
-        types = '(void|uint8_t|uint16_t|float|int)'
+        types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
