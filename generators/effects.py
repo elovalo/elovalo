@@ -1,4 +1,5 @@
 import os
+import re
 from glob import glob
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
@@ -102,16 +103,26 @@ class SourceFile(object):
 
     def _init(self, c):
         # TODO: find init() block
-        return len([True for line in c if line.find('void init(') >= 0]) > 0
+        return len([True for line in c if 'init' in line['type']]) > 0
 
     def _effect(self, c):
         # TODO: find effect() block
-        return len([True for line in c if line.find('void effect(') >= 0]) > 0
+        return len([True for line in c if 'effect' in line['type']]) > 0
 
     def _flip(self, c):
-        return len([True for line in c if line.find('# pragma FLIP') >= 0]) > 0
+        return len([True for line in c if 'flip' in line['type']]) > 0
 
 
 def analyze(content):
-    # TODO: mark init, effect, functions, braces
-    return content
+    def analyze(line):
+        patterns = (
+            ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('init', 'void\s+init\s*[(]'),
+            ('effect', 'void\s+effect\s*[(]'),
+            ('function', '()(\s+\w+\s*[(])'),
+        )
+        t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
+
+        return {'content': line, 'type': t}
+
+    return [analyze(line) for line in content]
