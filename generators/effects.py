@@ -101,9 +101,9 @@ class SourceFile(object):
 
         self.globs = self._globals(content)
         self.functions = self._functions(content)
-        self.init = self._init(content)
-        self.effect = self._effect(content)
-        self.flip = self._flip(content)
+        self.init = self._block(content, 'init')
+        self.effect = self._block(content, 'effect')
+        self.flip = self._block(content, 'flip')
 
     def _globals(self, c):
         return []
@@ -111,16 +111,8 @@ class SourceFile(object):
     def _functions(self, c):
         return []
 
-    def _init(self, c):
-        # TODO: find init() block
-        return [line['content'] for line in c if 'init' in line['type']]
-
-    def _effect(self, c):
-        # TODO: find effect() block
-        return [line['content'] for line in c if 'effect' in line['type']]
-
-    def _flip(self, c):
-        return [line['content'] for line in c if 'flip' in line['type']]
+    def _block(self, c, name):
+        return [line['content'] for line in c if name in line['type']]
 
 
 def analyze(content):
