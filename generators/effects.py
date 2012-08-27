@@ -87,7 +87,8 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        merge = lambda f: f.globs + f.functions + f.init + f.effect
+        merge = lambda f: f.globs + f.function_declarations + f.functions + \
+            f.init + f.effect
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
 
@@ -101,6 +102,7 @@ class SourceFile(object):
             content = analyze(self.name, f.readlines())
 
         self.globs = self._globals(content)
+        self.function_declarations = self._function_declarations(content)
         self.functions = self._functions(content)
         self.init = self._block(content, 'init')
         self.effect = self._block(content, 'effect')
@@ -108,6 +110,11 @@ class SourceFile(object):
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
+
+    def _function_declarations(self, c):
+        return ''.join(line['content'] for line in c
+            if 'function_declaration' in line['types']
+        )
 
     def _functions(self, c):
         return ''.join(line['block'] for line in c
@@ -140,13 +147,15 @@ def analyze(name, content):
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
+            ('function_declaration',
+                'static\s*' + types + '(\s+\w+\s*[(][a-zA-Z,]*[;]+)'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
             ('assignment', '\s*' + types + '(\s+\w+)'),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
         ret = {
-            'content': line,  # TODO: remove in favor of block?
+            'content': line,
             'types': t,  # TODO: might be nicer to use a set for this
             'index': i,
         }
@@ -155,16 +164,19 @@ def analyze(name, content):
         if 'assignment' in ret['types'] and 'function' in ret['types']:
             ret['types'].remove('assignment')
 
-        block = None
+        block = ''
         # TODO: fix the regex. does not match enough
         if 'effect' in ret['types'] and 'function' not in ret['types']:
             ret['types'].append('function')
             block = parse_twod(name, content, ret, i)
-        else:
+        elif 'function' in ret['types']:
             block = parse_function(name, content, ret, i)
 
-        if block:
-            ret['block'] = block
+        # TODO: fix the function regex. matches too much
+        if 'function_declaration' in ret['types']:
+            ret['types'].remove('function')
+
+        ret['block'] = block
 
         return ret
 
