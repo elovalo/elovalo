@@ -86,7 +86,7 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        merge = lambda f: '\n'.join(f.globs + f.functions + f.init + f.effect)
+        merge = lambda f: f.globs + f.functions + f.init + f.effect
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
 
@@ -106,13 +106,58 @@ class SourceFile(object):
         self.flip = self._block(content, 'flip')
 
     def _globals(self, c):
-        return []
+        return ''
 
     def _functions(self, c):
-        return []
+        return ''
 
     def _block(self, c, name):
-        return [line['content'] for line in c if name in line['type']]
+        #  TODO: init, effect prefix
+        def parse(index):
+            ret = definition(c[index])
+            cc = c[index]['content']
+
+            if cc.startswith('#'):
+                return ret
+
+            begin_braces = cc.count('{')
+            end_braces = 0
+
+            offset = 0
+            if not begin_braces:
+                begin_braces, end_braces, offset = find_begin_braces(index + 1)
+
+            for i in range(index + 1 + offset, len(c)):
+                cc = c[i]['content']
+                ret += cc
+                begin_braces += cc.count('{')
+                end_braces += cc.count('}')
+
+                if begin_braces == end_braces:
+                    return ret
+
+            return ret
+
+        def definition(c):
+            if 'init' in c['types']:
+                return 'static void init_' + self.name + '(void)'
+
+            if 'effect' in c['types']:
+                return 'void effect_' + self.name + '(void)'
+
+            return c['content']
+
+        def find_begin_braces(i):
+            for j in range(i, len(c)):
+                b = c.count('{')
+
+                if b:
+                    return b, c.count('}'), j - i
+
+            return 0, 0, 0
+
+        return ''.join(parse(i) for i, line in enumerate(c)
+            if name in line['types'])
 
 
 def analyze(content):
@@ -129,7 +174,7 @@ def analyze(content):
 
         return {
             'content': line,
-            'type': t,
+            'types': t,
             'index': i,
         }
 
