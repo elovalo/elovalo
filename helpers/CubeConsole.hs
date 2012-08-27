@@ -33,8 +33,13 @@ main = do
   case cmd of
     "-g" -> do
       BS.hPut h "\x7e\x05"
-      time <- A.parseWith (BS.hGetSome h 256) parseSecs BS.empty
-      print time
+      A.Done "" avrTime <- A.parseWith (BS.hGetSome h 256) parseSecs BS.empty
+      rightTime <- getCurrentTime
+      putStrLn $ "Date on hardware: " ++ show avrTime
+      putStrLn $ "Date on computer: " ++ show rightTime
+      putStrLn $ "Difference: " ++ 
+        (show $ round $ diffUTCTime rightTime avrTime) ++
+        " seconds"
     "-s" -> setTimeCmd >>= BL.hPutStr h
       
   hClose h
