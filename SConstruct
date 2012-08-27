@@ -6,7 +6,7 @@ cwd = GetLaunchDir()
 
 effects.generate(
     os.path.join(cwd, 'src', 'effects'),
-    os.path.join(cwd, 'src', 'effects_wip.c')
+    os.path.join(cwd, 'src', 'effects.c')
 )
 
 AddOption('--no-avr',
