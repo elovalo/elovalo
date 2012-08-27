@@ -109,7 +109,9 @@ class SourceFile(object):
         return '\n'.join(find_globals(c))
 
     def _functions(self, c):
-        return ''
+        return ''.join(line['block'] for line in c
+            if 'function' in line['types'] and len(line['types']) == 1
+        )
 
     def _block(self, c, name):
         return ''.join(line['block'] for line in c if name in line['types'])
@@ -138,7 +140,7 @@ def analyze(name, content):
             ('init', 'void\s+init\s*[(]'),
             ('effect', 'void\s+effect\s*[(]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
-            ('assignment', '\s*' + types + '(\s+\w+)'),
+            ('assignment', '\s*' + types + '(\s+\w+)!\('),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
