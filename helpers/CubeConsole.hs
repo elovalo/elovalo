@@ -33,14 +33,16 @@ main = do
   case cmd of
     "-g" -> do
       BS.hPut h "\x7e\x05"
-      A.Done "" avrTime <- A.parseWith (BS.hGetSome h 256) parseSecs BS.empty
+      avrTime <- parseFully h parseSecs
       rightTime <- getCurrentTime
       putStrLn $ "Date on hardware: " ++ show avrTime
       putStrLn $ "Date on computer: " ++ show rightTime
       putStrLn $ "Difference: " ++ 
         (show $ round $ diffUTCTime rightTime avrTime) ++
         " seconds"
-    "-s" -> setTimeCmd >>= BL.hPutStr h
+    "-s" -> do
+      setTimeCmd >>= BL.hPutStr h
+      parseFully h parseOk
       
   hClose h
 
@@ -49,6 +51,13 @@ configureSerialPort :: FilePath -> IO ()
 configureSerialPort devPath = do
   code <- rawSystem "stty" ["-F",devPath,"9600","cs8","cstopb","-parenb","raw"]
   unless (code==ExitSuccess) $ fail "Serial port configuration failed."
+
+parseFully h p = do
+   x <- A.parseWith (BS.hGetSome h 256) p BS.empty
+   case x of
+     A.Done _ a -> return a
+     A.Partial _ -> fail "Got EOF or other weird"
+     A.Fail _ _ e -> fail $ "Parse failed: " ++ e
 
 setTimeCmd = do
   now <- getPOSIXSecs
@@ -68,3 +77,9 @@ parseSecs = do
 escapeBS = BL.concatMap escaper
   where escaper '\x7e' = BL.pack "\x7e\x00"
         escaper x = BL.singleton x
+
+parseOk :: A.Parser ()
+parseOk = do
+  A.word8 0x7e
+  A.word8 0x05
+  return ()
