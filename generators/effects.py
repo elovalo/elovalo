@@ -91,7 +91,7 @@ class SourceFile(object):
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
-            content = f.readlines()
+            content = analyze(f.readlines())
 
         self.init = self._init(content)
         self.effect = self._effect(content)
@@ -107,3 +107,8 @@ class SourceFile(object):
 
     def _flip(self, c):
         return len([True for line in c if line.find(' FLIP ') >= 0]) > 0
+
+
+def analyze(content):
+    # TODO: mark init, effect, functions, braces
+    return content
