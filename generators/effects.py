@@ -186,8 +186,12 @@ def parse_twod(name, lines, line, index):
 
 
 def twod_definition(name, line):
-    # XXX: fails if brace is on the same line
-    return 'TWOD(effect_' + name + ') '
+    ret = 'TWOD(effect_' + name + ') '
+
+    if line['content'].strip()[-1] == '{':
+        ret += ' {\n}'
+
+    return ret
 
 
 def parse_function(name, lines, line, index):
