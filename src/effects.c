@@ -63,7 +63,7 @@ const effect_t effects[] PROGMEM = {
 	{ s_sphere, NULL, &effect_sphere, 100, FLIP },
 	{ s_worm, &init_worm, &effect_worm, 600, NO_FLIP },
 	{ s_const, NULL, &effect_constant, 100, FLIP },
-	{ s_layers, NULL, &effect_layers_tester, 3000, FLIP },
+	{ s_layers, NULL, &effect_layers_tester, 3100, FLIP },
 	{ s_all_on, &init_all_on, NULL, 1000, FLIP },
 	{ s_character, NULL, &effect_character, 100, NO_FLIP },
 	{ s_scroll_text, NULL, &effect_scroll_text, 100, FLIP }
