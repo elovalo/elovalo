@@ -269,10 +269,12 @@ static void effect_layers_tester(void)
 {
 	clear_buffer();
 	uint8_t z = ((ticks >> 7) % LEDS_Z);
+	const uint16_t val = sensors.debug_value > MAX_INTENSITY ?
+		MAX_INTENSITY : sensors.debug_value;
 
 	for (uint8_t x=0; x<LEDS_X; x++) {
 		for (uint8_t y=0; y<LEDS_Y; y++) {
-			set_led(x, y, z, MAX_INTENSITY);
+			set_led(x, y, z, val);
 		}
 	}
 }
