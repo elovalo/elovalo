@@ -66,10 +66,14 @@ void init_spi(void)
  * Initializes BLANK Timer / Timer0
  */
 void init_blank_timer(){
+	/* We have 12 bit PWM cycle on TLC5940, prescaler of 1024, and
+	 * TLC5940 clock divider of 4. So we need to have output
+	 * compare value (interrupt interval) of 2^12/1024*4-1 */
+
 	// CTC with OCRA as TOP
 	TCCR0A = (1 << WGM01);
-	// Generate interrupt every 8x1024 clock cycles
-	OCR0A = 7;
+	// Interrupt generation interval
+	OCR0A = 15;
 	// Enable Timer Compare match A interrupt
 	TIMSK0 |= (1 << OCIE0A);
 	// Prescaler clk_io / 1024
@@ -82,8 +86,9 @@ void init_blank_timer(){
 void init_effect_timer(){
 	//CTC with OCRA as TOP
 	TCCR2A |= (1 << WGM21);
-	// Generate interrupt every 156x1024 cycles (9.984ms)
-	OCR2A = 156;
+	/* Generate interrupt every 125x1024 cycles, which gives clock
+	   granularity of 8ms @ 16MHz */
+	OCR2A = 124;
 	// Enable Timer Compare match A interrupt
 	TIMSK2 |= (1 << OCIE2A);
 	// Prescaler clk_io / 1024
