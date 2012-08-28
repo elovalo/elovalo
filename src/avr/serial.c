@@ -42,6 +42,9 @@ ISR(USART_TX_vect)
 	// If no data in buffer, then we just bail out.
 	if (tx_in_i == tx_out_i) return;
 
+	// If it overflows, do not fill console with garbage.
+	if (tx_state == TXRX_OVERFLOW) return;
+
 	// Send the byte and wrap to start if needed
 	UDR0 = tx_buf[tx_out_i++];
 	if (tx_out_i == TX_BUF_SIZE) tx_out_i = 0;
@@ -51,6 +54,9 @@ ISR(USART_TX_vect)
  * Returns the number of bytes available in receive buffer
  */
 uint8_t serial_available(void) {
+	// If it overflows, do not let reads to happen
+	if (rx_state == TXRX_OVERFLOW) return 0;
+
 	uint8_t diff = rx_in_i - rx_out_i;
 	return (rx_in_i < rx_out_i) ? diff + RX_BUF_SIZE : diff;
 }
@@ -60,6 +66,7 @@ uint8_t serial_available(void) {
  */
 void serial_RX_empty(void) {
 	rx_out_i = rx_in_i;
+	rx_state = TXRX_OK;
 }
 
 /**
