@@ -48,6 +48,10 @@ typedef struct {
 #define NO_FLIP 0
 #define FLIP 1
 
+typedef struct {
+	uint8_t debug_value; // Settable via serial port only.
+} sensors_t;
+
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
@@ -70,6 +74,7 @@ uint8_t randint(uint8_t min, uint8_t max);
 uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
 
 extern uint16_t ticks;
+extern sensors_t sensors;
 
 #define MAX_INTENSITY ((1<<GS_DEPTH)-1)
 

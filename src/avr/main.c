@@ -33,16 +33,21 @@
 #define CMD_SERIAL_FRAME    0x03
 #define CMD_SET_TIME        0x04
 #define CMD_GET_TIME        0x05
+#define CMD_SET_SENSOR      0x06
 
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
 #define RESP_EFFECT_NAME    0x03
 #define RESP_EFFECT_END     0x04
-#define RESP_TIME_SET_OK    0x05
+#define RESP_COMMAND_OK     0x05
 #define RESP_TIME           0x06
-#define RESP_JUNK_CHAR      0xfd
-#define RESP_INVALID_CMD    0xfe
-#define RESP_INVALID_EFFECT 0xff
+#define RESP_INVALID_CMD    0xf0
+#define RESP_INVALID_ARG_A  0xfa
+#define RESP_INVALID_ARG_B  0xfb
+#define RESP_INVALID_ARG_C  0xfc
+#define RESP_INVALID_ARG_D  0xfd
+#define RESP_SHORT_PAYLOAD  0xfe
+#define RESP_JUNK_CHAR      0xff
 
 typedef struct {
 	uint8_t good;
@@ -144,7 +149,7 @@ void process_cmd(void)
 		if (!x.good) break;
 
 		if (x.byte >= effects_len) {
-			dislike(RESP_INVALID_EFFECT,cmd);
+			dislike(RESP_INVALID_ARG_A,cmd);
 			break;
 		}
 
@@ -182,12 +187,12 @@ void process_cmd(void)
 	case CMD_SET_TIME:
 		tmp_time = 0;
 		for (int8_t bit_pos=24; bit_pos>=0; bit_pos-=8) {
-			read_t x = read_escaped();
+			x = read_escaped();
 			if (!x.good) return;
 			tmp_time |= (time_t)x.byte << bit_pos;
 		}
 		stime(&tmp_time);
-		respond(RESP_TIME_SET_OK);
+		respond(RESP_COMMAND_OK);
 		break;
 	case CMD_GET_TIME:
 		respond(RESP_TIME);
@@ -197,7 +202,37 @@ void process_cmd(void)
 		serial_send(tmp_time >> 8);
 		serial_send(tmp_time);
 
-		break;	     
+		break;
+	case CMD_SET_SENSOR:; // Doesn't compile without a semicolon?!
+		read_t start = read_escaped();
+		read_t len = read_escaped();
+
+		// Check we get bytes and not escapes
+		if (!start.good || !len.good) break;
+
+		// Check boundaries
+		if (start.byte >= sizeof(sensors_t)) {
+			dislike(RESP_INVALID_ARG_A,start.byte);
+			break;
+		}
+		if (start.byte + len.byte > sizeof(sensors_t)) {
+			dislike(RESP_INVALID_ARG_B,len.byte);
+			break;
+		}
+
+		// Filling buffer byte by byte
+		uint8_t *p = (uint8_t*)&sensors;
+		for (uint8_t i=start.byte; i<start.byte+len.byte; i++) {
+			x = read_escaped();
+			if (!x.good) {
+				respond(RESP_SHORT_PAYLOAD);
+				return;
+			}
+			p[i] = x.byte;
+		}
+		
+		respond(RESP_COMMAND_OK);
+		break;
 	default:
 		dislike(RESP_INVALID_CMD,cmd);
 	}

@@ -23,6 +23,9 @@
  * started. This keeps ticks stable and removes tearing. */
 uint16_t ticks;
 
+/* Sensor values are stored in this struct */ 
+sensors_t sensors;
+
 /**
  * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
  */
