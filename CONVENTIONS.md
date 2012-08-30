@@ -19,6 +19,8 @@ Branches can be divided into two categories: public and private
     must start with "developer nick" + '_'
 
 ### Merging
+Github "pull requests" are not used internally in the project.
+
 Before merging commits from private branch to public branch, a convoluted commit tree
 should be cleaned e.g. with this command:
 
@@ -34,7 +36,6 @@ Separate release branches are not used. Code releases are just tagged in the mas
  * When writing C code, [Linux kernel coding style][id2] is used.
  * When writing Python code, [PEP 8 -- Style Guide for Python Code][id3] is used.
 
-## References
 
 [id1]: http://sandofsky.com/blog/git-workflow.html  "Understanding the Git workflow"
 [id2]: https://www.kernel.org/doc/Documentation/CodingStyle "Linux kernel coding style"
