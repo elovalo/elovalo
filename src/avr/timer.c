@@ -84,15 +84,12 @@ time_t time(time_t *t) {
 }
 
 /**
- * Calculates checksum using XOR and
- * seed value of 0x55.
+ * Calculates checksum using XOR and seed value of 0x55. Must be
+ * called with interrupts disabled.
  */
 static uint8_t calc_posix_time_cksum(void) {
-	return ((uint8_t)(posix_time >> 24) ^
-		(uint8_t)(posix_time >> 16) ^
-		(uint8_t)(posix_time >> 8) ^
-		(uint8_t)posix_time_div ^
-		(uint8_t)0x55);
+	uint8_t *p = (void*)&posix_time;
+	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ posix_time_div;
 }
 
 /**
