@@ -166,7 +166,11 @@ def analyze(name, content):
         # TODO: fix the regex. does not match enough
         if 'effect' in ret['types'] and 'function' not in ret['types']:
             ret['types'].append('function')
-            block = parse_twod(name, content, ret, i)
+
+            if 'TWOD(' in ret['content']:
+                block = parse_twod(name, content, ret, i)
+            if 'THREED(' in ret['content']:
+                block = parse_threed(name, content, ret, i)
         elif 'function' in ret['types']:
             if line.strip()[-1] == ';':
                 ret['types'].remove('function')
@@ -187,6 +191,19 @@ def parse_twod(name, lines, line, index):
 
 def twod_definition(name, line):
     ret = 'TWOD(effect_' + name + ') '
+
+    if line['content'].strip()[-1] == '{':
+        ret += ' {\n}'
+
+    return ret
+
+
+def parse_threed(name, lines, line, index):
+    return _parse(name, lines, line, index, threed_definition)
+
+
+def threed_definition(name, line):
+    ret = 'THREED(effect_' + name + ') '
 
     if line['content'].strip()[-1] == '{':
         ret += ' {\n}'
