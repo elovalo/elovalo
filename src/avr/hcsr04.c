@@ -15,17 +15,17 @@ volatile uint32_t pulse_count, pulse_time;
 //TODO: hmm, elovalo has a common init.c, move this into it
 void timer_init(void){
 	// Set up interrupt
-	TCCR0A |= (1<<WGM01);  // sets compare and reset to "top" mode
-	TCCR0B |= (1<<CS00);   // set clock divider to 1
-	//OCR0A = 74;            // set "top" for 5 usec
-	OCR0A = 148;            // set "top" for 10 usec
-	TIMSK0 |= (1<<OCIE0A); // turn interrupt on
+	TCCR1A |= (1<<WGM11);  // sets compare and reset to "top" mode
+	TCCR1B |= (1<<CS10);   // set clock divider to 1
+	//OCR0AL = 74;            // set "top" for 5 usec
+	OCR1A = 148;            // set "top" for 10 usec
+	TIMSK1 |= (1<<OCIE1A); // turn interrupt on
 
 	pulse_flag = 0;
 	timing_flag = 0;
 }
 
-ISR(TIMER0_COMPA_vect) {
+ISR(TIMER1_COMPA_vect) {
 
 	if (pulse_flag == 1){
 		PORTC &= ~(1<<PC5);    // stop pulse
@@ -67,7 +67,7 @@ void hcsr04_init(void){
 void hcsr04_send_pulse(void){
 	PORTC |= (1<<PC5);     // start pulse
 	pulse_flag = 1;
-	TCNT0 = 0;
+	TCNT1 = 0;
 }
 
 uint32_t hcsr04_get_pulse_time(void){
