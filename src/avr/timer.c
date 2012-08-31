@@ -10,9 +10,11 @@ static volatile uint16_t ticks_volatile = 0;
 /* Real time clock is 32 bit second counter starting from 1970-01-01
  * 00:00:00 +0000 (UTC). This counter is unsigned, so expect it to
  * work until 2016. */
-static volatile uint32_t posix_time __attribute__ ((section (".noinit")));
-static volatile uint8_t posix_time_div __attribute__ ((section (".noinit")));
-static volatile uint8_t posix_time_cksum __attribute__ ((section (".noinit")));
+static volatile struct {
+	uint32_t time;
+	uint8_t div;
+	uint8_t cksum;
+} rtc __attribute__ ((section (".noinit")));
 
 /* Private functions */
 static uint8_t is_time_valid(void);
@@ -22,7 +24,7 @@ static uint8_t calc_posix_time_cksum(void);
 #define POSIX_DIVIDER 125
 
 /**
- * Increments millisecond counter.
+ * Timer interrupt increments RTC and tick counter
  */
 ISR(TIMER2_COMPA_vect)
 {
@@ -31,12 +33,12 @@ ISR(TIMER2_COMPA_vect)
 
 	// Run real time clock if it is set
 	if (is_time_valid()) {
-		if (!--posix_time_div) {
-			posix_time_div = POSIX_DIVIDER;
-			posix_time++;
+		if (!--rtc.div) {
+			rtc.div = POSIX_DIVIDER;
+			rtc.time++;
 		}
 		// Update checksum
-		posix_time_cksum = calc_posix_time_cksum();		
+		rtc.cksum = calc_posix_time_cksum();
 	}
 }
 
@@ -62,9 +64,9 @@ void reset_time(void) {
  */
 int stime(time_t *t) {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		posix_time = *t;
-		posix_time_div = POSIX_DIVIDER;
-		posix_time_cksum = calc_posix_time_cksum();
+		rtc.time = *t;
+		rtc.div = POSIX_DIVIDER;
+		rtc.cksum = calc_posix_time_cksum();
 	}
 	return 0;
 }
@@ -77,7 +79,7 @@ time_t time(time_t *t) {
 	uint32_t time;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 		// Time is zero when it's not set
-		time = is_time_valid() ? posix_time : 0;
+		time = is_time_valid() ? rtc.time : 0;
  	}
 	if (t != NULL) *t = time;
 	return time;
@@ -88,8 +90,8 @@ time_t time(time_t *t) {
  * called with interrupts disabled.
  */
 static uint8_t calc_posix_time_cksum(void) {
-	uint8_t *p = (void*)&posix_time;
-	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ posix_time_div;
+	uint8_t *p = (void*)&(rtc.time);
+	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ rtc.div;
 }
 
 /**
@@ -97,5 +99,5 @@ static uint8_t calc_posix_time_cksum(void) {
  * disabled.
  */
 static uint8_t is_time_valid(void) {
-	return posix_time_cksum == calc_posix_time_cksum();
+	return calc_posix_time_cksum() == rtc.cksum;
 }
