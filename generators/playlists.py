@@ -11,10 +11,14 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 
 def generate(source, target):
     for f in SourceFiles(glob(source)):
-        target_path = os.path.join(target, f.name + '.c')
+        c_path = os.path.join(target, f.name + '.c')
+        h_path = os.path.join(target, f.name + '.h')
 
-        with open(target_path, 'w') as t:
-            t.write(f.lines)
+        with open(c_path, 'w') as t:
+            t.write(f.c_lines)
+
+        with open(h_path, 'w') as t:
+            t.write(f.h_lines)
 
 
 class SourceFiles(list):
@@ -35,11 +39,21 @@ class SourceFile(object):
             self._data = json.loads(f.read())
 
     @property
-    def lines(self):
+    def c_lines(self):
         return '\n'.join([
             file_start,
             self.function_names,
             self.playlist
+        ])
+
+    @property
+    def h_lines(self):
+        return '\n'.join([
+            "/* GENERATED FILE! DON'T MODIFY!!! */",
+            '#include "' + self.name  + '.h"',
+            '\n'
+            'extern const playlistitem_t playlist[];',
+            'extern const uint8_t playlist_len;',
         ])
 
     @property
