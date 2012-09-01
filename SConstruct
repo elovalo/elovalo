@@ -45,10 +45,10 @@ AddOption('--no-asm',
           help='Do not use optimized interrupt handlers')
 
 if GetOption('build_avr'):
-    SConscript('debug.scons', variant_dir='build_debug', duplicate=0)
+    SConscript('debug.scons', variant_dir='build/debug', duplicate=0)
 
 if GetOption('build_avr') and GetOption('build_release'):
-    SConscript('release.scons', variant_dir='build_release', duplicate=0)
+    SConscript('release.scons', variant_dir='build/release', duplicate=0)
 
 if GetOption('build_exporter'):
-    SConscript('exporter.scons', variant_dir='build_exporter', duplicate=0)
+    SConscript('exporter.scons', variant_dir='build/exporter', duplicate=0)
