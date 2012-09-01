@@ -1,0 +1,10 @@
+[
+    {
+        "name": "sine",
+        "length": 1000
+    },
+    {
+        "name": "wave",
+        "length": 2000
+    }
+]
