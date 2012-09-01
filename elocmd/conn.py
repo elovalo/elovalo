@@ -5,7 +5,7 @@ import sys
 
 import conf
 
-Response = collections.namedtuple('Response', 'kind body')
+Message = collections.namedtuple('Message', 'kind body')
 
 class Connection():
     def __init__(self):
@@ -38,14 +38,17 @@ class Connection():
     
     def _make_response(self, resp_data):
         if len(resp_data) == 1:
-            return Response(resp_data[0], '')
+            return Message(resp_data[0], '')
         elif len(resp_data) > 1:
-            return Response(resp_data[0], resp_data[1:])
+            return Message(resp_data[0], resp_data[1:])
         else:
-            return Response('', '')
+            return Message('', '')
 
-    def send_command(self, bytestr):
-        self.serial.write(conf.ESCAPE + bytestr)
+    def send(self, msg):
+        self.serial.write(conf.ESCAPE + msg.kind + msg.body)
+
+    def send_message(self, kind, body=''):
+        self.send(Message(kind, body))
     
     def close(self):
         self.serial.close()

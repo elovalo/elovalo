@@ -1,7 +1,7 @@
 import serial
 
 # Serial connection configuration
-PORT     = '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_6493633303735101B170-if00'
+PORT     = ''
 BAUDRATE = 9600
 TIMEOUT  = 1
 PARITY   = serial.PARITY_NONE

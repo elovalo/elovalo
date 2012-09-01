@@ -19,14 +19,15 @@ def ok(body):
 
 def time_(timestamp):
     if len(timestamp) >= 4:
-        devt = conv.longToInt(timestamp[:4])
+        dt = conv.longToInt(timestamp[:4])
+        dtstr = time.strftime('%a %d.%m.%Y - %H:%M:%S', time.localtime(dt))
         t = int(time.time())
-        print("device time off by {0} seconds".format(devt - t))
+        print("device time off by {0} seconds ({1})".format(dt - t, dtstr))
     else:
         print("Received incorrect timestamp value from the device")
 
 def effect_name(name):
-    print name
+    print 'Running effect "{0}"'.format(name)
 
 def do_nothing(body):
     pass

@@ -1,10 +1,10 @@
-#!/usr/bin/python
 import binascii
 import cmd
 import sys
 import time
 
 import conn
+from conn import Message
 import conf
 import conv
 import resp
@@ -27,20 +27,32 @@ class EloCmd(cmd.Cmd):
     intro  = 'Type help to see available commands'
     prompt = ' > '
 
+    conn = None
+
     def preloop(self):
-        self.conn = conn.Connection()
+        if not self.conn:
+            self.conn = conn.Connection()
+            self.conn.send_message(conf.CMD_GET_TIME)
+            self._process_resps(self.conn.read_responses())
 
     def postloop(self):
         self.conn.close()
 
+    def run_cmd(self, s):
+        self.precmd(s)
+        self.onecmd(s)
+        self.postcmd(False, s)
+
     def do_time(self, param):
         'Get the current time difference from the device'
-        self.conn.send_command(conf.CMD_GET_TIME)
+        self.conn.send_message(conf.CMD_GET_TIME)
+        return True
 
     def do_sync(self, line):
         'Sync the device time to your computer time'
         t = conv.intToLong(int(time.time()))
-        self.conn.send_command(conf.CMD_SET_TIME + t)
+        self.conn.send_message(conf.CMD_SET_TIME, t)
+        return True
 
     def do_effect(self, effect):
         "Runs an effect on the device, accepts either effect name, or a 'f1' formatted hexadecimal effect number"
@@ -55,7 +67,7 @@ class EloCmd(cmd.Cmd):
         else:
             print('No such effect')
             return
-        self.conn.send_command(conf.CMD_CHANGE_EFFECT + e)
+        self.conn.send_message(conf.CMD_CHANGE_EFFECT, e)
 
     def complete_effect(self, text, line, begidx, endidx):
         if not text:
@@ -69,7 +81,7 @@ class EloCmd(cmd.Cmd):
 
     def do_stop(self, line):
         'Sets the device to idle-mode'
-        self.conn.send_command(conf.CMD_STOP)
+        self.conn.send_message(conf.CMD_STOP)
 
     def do_quit(self, line):
         'Quits this prompt'
@@ -78,13 +90,17 @@ class EloCmd(cmd.Cmd):
     def do_EOF(self, line):
         return True
 
+    def precmd(self, line):
+        if not self.conn:
+            self.conn = conn.Connection()
+            self._process_resps(self.conn.read_responses())
+        return cmd.Cmd.precmd(self, line)
+
     def postcmd(self, stop, line):
         self._process_resps(self.conn.read_responses())
-        return cmd.Cmd.postcmd(self, stop, line)
+        return False
 
     def _process_resps(self, responses):
         for r in responses:
             resp.handle(r)
 
-if __name__ == '__main__':
-    EloCmd().cmdloop()
