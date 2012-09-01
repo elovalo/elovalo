@@ -1,0 +1,37 @@
+#!/usr/bin/python
+import argparse
+
+import conf
+import prompt
+
+def main():
+    parser = argparse.ArgumentParser(description='Elovalo command line client.')
+    parser.add_argument('-b', '--baudrate',
+                        type=int,
+                        action=BaudrateAction)
+    parser.add_argument('-p', '--port',
+                        action=PortAction,
+                        help='Serial port path',
+                        required=True)
+    parser.add_argument('command',
+                        nargs='*',
+                        help='Optional command and its parameters to execute')
+    args = parser.parse_args()
+
+    elo = prompt.EloCmd()
+    if len(args.command) > 0:
+        conf.TIMEOUT = 2 #FIXME: ugly, probably needed because of rebooting on connection
+        elo.run_cmd(' '.join(args.command))
+    else:
+        elo.cmdloop()
+
+class PortAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        conf.PORT = values
+
+class BaudrateAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        conf.BAUDRATE = values
+
+if __name__ == '__main__':
+    main()
