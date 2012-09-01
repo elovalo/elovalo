@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # ./anim <effect> <path>
 # renders starting from the first frame
-#
-# Known issues:
-# Blender's -s and -e flags that set start and end frame seem
-# broken atm.
+import os
 import sys
 from subprocess import Popen
 
 import init
 
 p = init.parser()
+p.add_argument('--length', help="Animation length in seconds", type=int)
+
 args = p.parse_args()
+
+os.environ['length'] = str(args.length)
+
 init.execute(args)
 
 sp = Popen(["/bin/bash", "-i", "-c", "blender -b simulator.blend -P sim.py -a"])
