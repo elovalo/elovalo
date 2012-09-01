@@ -15,7 +15,7 @@ volatile uint32_t pulse_count, pulse_time;
 //TODO: hmm, elovalo has a common init.c, move this into it
 void timer_init(void){
 	// Set up interrupt
-	TCCR1A |= (1<<WGM11);  // sets compare and reset to "top" mode
+	TCCR1B |= (1<<WGM12);  // sets compare and reset to "top" mode
 	TCCR1B |= (1<<CS10);   // set clock divider to 1
 	//OCR0AL = 74;            // set "top" for 5 usec
 	OCR1A = 148;            // set "top" for 10 usec
