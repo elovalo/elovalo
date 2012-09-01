@@ -48,7 +48,6 @@ typedef struct {
 	const char *name;     // Name for effect. Used in file dumps.
 	init_t init;          // Initializatior, may be NULL.
 	draw_t draw;          // Drawing function, run once per buffer swap.
-	uint16_t length;      // Effect duration in centiseconds.
 	uint8_t flip_buffers; // Flip buffers during execution.
 } effect_t;
 
