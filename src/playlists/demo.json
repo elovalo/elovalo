@@ -6,5 +6,9 @@
     {
         "name": "wave",
         "length": 2000
+    },
+    {
+        "name": "sine",
+        "length": 1500
     }
 ]

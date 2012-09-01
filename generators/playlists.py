@@ -44,9 +44,10 @@ class SourceFile(object):
 
     @property
     def function_names(self):
+        names = lambda d: set([f['name'] for f in d])
         name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
 
-        return '\n'.join([name(f['name']) for f in self._data]) + '\n'
+        return '\n'.join([name(n) for n in names(self._data)]) + '\n'
 
     @property
     def playlist(self):
