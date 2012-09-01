@@ -19,7 +19,7 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 
 def generate(source, target):
-    inp = SourceFiles(glob(source + '/*.c'))
+    inp = SourceFiles(glob(source))
 
     with open(target, 'w') as t:
         t.write(file_start)
