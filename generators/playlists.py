@@ -50,7 +50,7 @@ class SourceFile(object):
     def h_lines(self):
         return '\n'.join([
             "/* GENERATED FILE! DON'T MODIFY!!! */",
-            '#include "' + self.name  + '.h"',
+            '#include "../playlist.h"',
             '\n'
             'extern const playlistitem_t playlist[];',
             'extern const uint8_t playlist_len;',
