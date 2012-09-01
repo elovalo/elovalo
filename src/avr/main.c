@@ -92,12 +92,13 @@ int main() {
 		case MODE_IDLE:
 			// No operation
 			break;
-		case MODE_EFFECT:
+		case MODE_EFFECT: // TODO: playlist logic
 			// If a buffer is not yet flipped
 			if (may_flip) break;
 
+			// TODO: get length from playlist item
 			ticks = centisecs();
-			if (ticks > pgm_get(effect->length,word)) {
+			if (ticks > 1000) {
 				// Rendered too long, stop.
 				mode = MODE_IDLE;
 
