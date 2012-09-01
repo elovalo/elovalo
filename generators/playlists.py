@@ -53,7 +53,6 @@ class SourceFile(object):
             '#include "../playlist.h"',
             '\n'
             'extern const playlistitem_t playlist[];',
-            'extern const uint8_t playlist_len;',
         ])
 
     @property
@@ -71,8 +70,7 @@ class SourceFile(object):
 
         ret.extend([definition(f) for f in self._data])
 
+        ret.append('\t{ NULL, 0},')
         ret.append('};')
-        ret.append('const uint8_t playlist_len = sizeof(playlist) / ' +
-                'sizeof(playlistitem_t);\n')
 
         return '\n'.join(ret) + '\n'
