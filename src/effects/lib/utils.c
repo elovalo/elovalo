@@ -24,7 +24,7 @@
 uint16_t ticks;
 
 /* Sensor values are stored in this struct */ 
-sensors_t sensors;
+sensors_t sensors = {MAX_INTENSITY};
 
 /**
  * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.

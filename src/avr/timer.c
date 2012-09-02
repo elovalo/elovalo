@@ -10,22 +10,34 @@ static volatile uint16_t ticks_volatile = 0;
 /* Real time clock is 32 bit second counter starting from 1970-01-01
  * 00:00:00 +0000 (UTC). This counter is unsigned, so expect it to
  * work until 2016. */
-static volatile uint32_t posix_time = 0;
+static volatile struct {
+	uint32_t time;
+	uint8_t div;
+	uint8_t cksum;
+} rtc __attribute__ ((section (".noinit")));
+
+/* Private functions */
+static uint8_t is_time_valid(void);
+static uint8_t calc_posix_time_cksum(void);
+
+/* Dividing 8 ms interval with 125 to get exactly 1 second */
+#define POSIX_DIVIDER 125
 
 /**
- * Increments millisecond counter.
+ * Timer interrupt increments RTC and tick counter
  */
 ISR(TIMER2_COMPA_vect)
 {
 	// Tick counter for effects
 	ticks_volatile++;
 
-	/* Count seconds by dividing 8 ms interval with 125 */
-	static uint8_t div = 125;
-	if (posix_time && !--div) {
-		// Exactly one second has passed
-		div = 125;
-		posix_time++;
+	// Run real time clock if it is set
+	if (!--rtc.div && is_time_valid()) {
+		rtc.div = POSIX_DIVIDER;
+		rtc.time++;
+
+		// Update checksum
+		rtc.cksum = calc_posix_time_cksum();
 	}
 }
 
@@ -51,7 +63,9 @@ void reset_time(void) {
  */
 int stime(time_t *t) {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		posix_time = *t;
+		rtc.time = *t;
+		rtc.div = POSIX_DIVIDER;
+		rtc.cksum = calc_posix_time_cksum();
 	}
 	return 0;
 }
@@ -63,8 +77,26 @@ int stime(time_t *t) {
 time_t time(time_t *t) {
 	uint32_t time;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		time = posix_time;
+		// Time is zero when it's not set
+		time = is_time_valid() ? rtc.time : 0;
  	}
 	if (t != NULL) *t = time;
 	return time;
+}
+
+/**
+ * Calculates checksum using XOR and seed value of 0x55. Must be
+ * called with interrupts disabled.
+ */
+static uint8_t calc_posix_time_cksum(void) {
+	uint8_t *p = (void*)&(rtc.time);
+	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3];
+}
+
+/**
+ * Validates checksum. May be called only when interrupts are
+ * disabled.
+ */
+static uint8_t is_time_valid(void) {
+	return calc_posix_time_cksum() == rtc.cksum;
 }

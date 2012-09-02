@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define TX_BUF_SIZE 8
+#define TX_BUF_SIZE 16
 #define RX_BUF_SIZE 64
 #define TXRX_OK 0
 #define TXRX_OVERFLOW 1
