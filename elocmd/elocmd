@@ -6,6 +6,10 @@ import prompt
 
 def main():
     parser = argparse.ArgumentParser(description='Elovalo command line client.')
+    parser.add_argument('-d', '--debug',
+                        help='Set debugging on',
+                        nargs=0,
+                        action=DebugOnAction)
     parser.add_argument('-b', '--baudrate',
                         type=int,
                         action=BaudrateAction)
@@ -24,6 +28,10 @@ def main():
         elo.run_cmd(' '.join(args.command))
     else:
         elo.cmdloop()
+
+class DebugOnAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        conf.DEBUG = True
 
 class PortAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
