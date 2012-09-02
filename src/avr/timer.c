@@ -32,11 +32,10 @@ ISR(TIMER2_COMPA_vect)
 	ticks_volatile++;
 
 	// Run real time clock if it is set
-	if (is_time_valid()) {
-		if (!--rtc.div) {
-			rtc.div = POSIX_DIVIDER;
-			rtc.time++;
-		}
+	if (!--rtc.div && is_time_valid()) {
+		rtc.div = POSIX_DIVIDER;
+		rtc.time++;
+
 		// Update checksum
 		rtc.cksum = calc_posix_time_cksum();
 	}
@@ -91,7 +90,7 @@ time_t time(time_t *t) {
  */
 static uint8_t calc_posix_time_cksum(void) {
 	uint8_t *p = (void*)&(rtc.time);
-	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3] ^ rtc.div;
+	return 0x55 ^ p[0] ^ p[1] ^ p[2] ^ p[3];
 }
 
 /**
