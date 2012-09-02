@@ -5,7 +5,7 @@ easiest way to get started is just to copy template.c. That will give you a
 nice base to build your effect upon. By examining the file, you can see there
 are a few conventions you should follow.
 
-## Structure of an Effect
+## Structure
 
 Each effect is structured rougly similarly:
 
