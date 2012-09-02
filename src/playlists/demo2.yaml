@@ -1,0 +1,4 @@
+- name: game_of_life
+  length: 1000
+- name: sine
+  length: 5000

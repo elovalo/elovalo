@@ -5,23 +5,26 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/stat.h>
-#include "../effect_utils.h"
+#include "../effects/lib/utils.h"
 #include "../effects.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect);
+void export_effect(const effect_t *effect, char length);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
+	// TODO @zouppen: make sure length is passed (or set it
+	// to some nice value)
 	for (int i=0; i<effects_len; i++) {
 		clear_buffer();
-		export_effect(&effects[i]);
+		export_effect(&effects[i], atoi(argv[1]));
 	}
 }
 
-void export_effect(const effect_t *effect) {
+void export_effect(const effect_t *effect, char length) {
 	const int size = 50;
 	char filename[size];
 
@@ -33,7 +36,7 @@ void export_effect(const effect_t *effect) {
 	assert(bytes <= size);
 
 	printf("Exporting %f seconds of %s to file %s\n",
-	       (double)effect->length/100,
+	       (double)length/100,
 	       effect->name,
 	       filename);
 
@@ -60,7 +63,7 @@ void export_effect(const effect_t *effect) {
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
-	for (ticks=0; ticks < effect->length; ticks += drawing_time) {
+	for (ticks=0; ticks < length; ticks += drawing_time) {
 		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment

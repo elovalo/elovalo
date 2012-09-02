@@ -36,6 +36,11 @@ fps = os.getenv('fps')
 if fps:
     render.fps = int(fps)
 
+length = os.getenv('length')
+
+if length:
+    bpy.context.scene.frame_end = int(length) * render.fps
+
 # exec on frame change
 while len(bpy.app.handlers.frame_change_pre):
     bpy.app.handlers.frame_change_pre.pop()
