@@ -1,6 +1,7 @@
 import os
 import json
 import yaml
+import xml.etree.ElementTree as ET
 from glob import glob
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
@@ -11,7 +12,8 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 
 
 def generate(source, target):
-    for fmt, reader in (('json', json.loads), ('yaml', yaml.load)):
+    for fmt, reader in (('json', json.loads), ('yaml', yaml.load),
+            ('xml', load_xml)):
         for f in SourceFiles(glob(os.path.join(source, '*.' + fmt)), reader):
             c_path = os.path.join(target, f.name + '.c')
             h_path = os.path.join(target, f.name + '.h')
@@ -21,6 +23,19 @@ def generate(source, target):
 
             with open(h_path, 'w') as t:
                 t.write(f.h_lines)
+
+
+def load_xml(src):
+    ret = []
+    root = ET.fromstring(src)
+
+    for effect in root.getchildren():
+        ret.append({
+            "name": effect.attrib["name"],
+            "length": effect.findall('length')[0].text
+        })
+
+    return ret
 
 
 class SourceFiles(list):
