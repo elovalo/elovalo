@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-TWOD(effect)
+XZ(effect)
 {
 	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
 

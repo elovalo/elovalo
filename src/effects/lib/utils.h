@@ -17,7 +17,7 @@
 
 /* Generates wrapper function for two dimensional plots to make the
  * implementations much simpler */
-#define TWOD(wrap)						\
+#define XZ(wrap)						\
   static uint16_t wrap##_kernel(uint8_t x, uint8_t y);		\
   static void wrap(void){effect_2d_plot(&wrap##_kernel);}	\
   static uint16_t wrap##_kernel(uint8_t x, uint8_t y)

@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-TWOD(effect)
+XZ(effect)
 {
 	return 10000;
 }

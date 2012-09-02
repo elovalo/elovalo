@@ -167,8 +167,8 @@ def analyze(name, content):
         if 'effect' in ret['types'] and 'function' not in ret['types']:
             ret['types'].append('function')
 
-            if 'TWOD(' in ret['content']:
-                block = parse_twod(name, content, ret, i)
+            if 'XZ(' in ret['content']:
+                block = parse_xz(name, content, ret, i)
             if 'XYZ(' in ret['content']:
                 block = parse_xyz(name, content, ret, i)
         elif 'function' in ret['types']:
@@ -185,12 +185,12 @@ def analyze(name, content):
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
-def parse_twod(name, lines, line, index):
-    return _parse(name, lines, line, index, twod_definition)
+def parse_xz(name, lines, line, index):
+    return _parse(name, lines, line, index, xz_definition)
 
 
-def twod_definition(name, line):
-    ret = 'TWOD(effect_' + name + ') '
+def xz_definition(name, line):
+    ret = 'XZ(effect_' + name + ') '
 
     if line['content'].strip()[-1] == '{':
         ret += ' {\n}'
