@@ -27,7 +27,7 @@ class Connection():
 
     def _split_responses(self, raw_resps):
         if conf.DEBUG:
-            print(binascii.hexlify(raw_resps))
+            print("Received: {0}".format(binascii.hexlify(raw_resps)))
         resps_data = filter(None, raw_resps.split(conf.ESCAPE))
         responses = []
         for resp_data in resps_data:
@@ -45,7 +45,10 @@ class Connection():
             return Message('', '')
 
     def send(self, msg):
-        self.serial.write(conf.ESCAPE + msg.kind + msg.body)
+        snd = conf.ESCAPE + msg.kind + msg.body
+        self.serial.write(snd)
+        if conf.DEBUG:
+            print("Sent: {0}".format(binascii.hexlify(snd)))
 
     def send_message(self, kind, body=''):
         self.send(Message(kind, body))
