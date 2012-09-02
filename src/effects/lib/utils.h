@@ -19,14 +19,14 @@
  * implementations much simpler */
 #define XY(wrap)						\
   static void wrap##_kernel(uint8_t x, uint8_t y);		\
-  static void wrap(void){iterate_xy(&wrap##_kernel);}	\
+  static void wrap(void){clear_buffer();iterate_xy(&wrap##_kernel);}	\
   static void wrap##_kernel(uint8_t x, uint8_t y)
 
 /* Generates wrapper function for three dimensional plots to make
  * the implementations much simpler */
 #define XYZ(wrap)						\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z);		\
-  static void wrap(void){iterate_xyz(&wrap##_kernel);}	\
+  static void wrap(void){clear_buffer();iterate_xyz(&wrap##_kernel);}	\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z)
 
 /* Arbitary drawing function. The implementation is responsible to set

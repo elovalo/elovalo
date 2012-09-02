@@ -77,6 +77,8 @@ XYZ is a kernel that gives access to each xyz triad on the coordinate
 system. As XY, this kernel does not expect a return value. Instead you
 can set intensity of the led you want.
 
+Note that both kernels clear buffer before iterating.
+
 ## Coordinate System
 
 The origin of the cube has been set on top-left corner (front view) just like
