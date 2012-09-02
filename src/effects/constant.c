@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-XZ(effect)
+XY(effect)
 {
-	return 10000;
+	set_led(x, y, 3, MAX_INTENSITY);
 }

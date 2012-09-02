@@ -36,6 +36,19 @@ void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
 	}
 }
 
+void set_z(uint8_t x, uint8_t y, uint16_t intensity)
+{
+	assert(intensity <= MAX_2D_PLOT_INTENSITY);
+
+	// Do linear interpolation (two voxels per x-y pair)
+	uint8_t lower_z = intensity >> GS_DEPTH;
+	uint16_t upper_i = intensity & MAX_INTENSITY;
+	uint16_t lower_i = MAX_INTENSITY - upper_i;
+	
+	set_led_8_8_12(x,y,lower_z,lower_i);
+	set_led_8_8_12(x,y,lower_z + 1,upper_i);
+}
+
 /**
  * Sets led intensity. i is the intensity of the LED in range
  * 0..4095. This implementation is AVR optimized and handles only
@@ -133,27 +146,13 @@ uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z)
 }
 
 /**
- * This function plots a 2-dimensional plot of a given function
+ * Iterates x, y voxels
  */
-void effect_2d_plot(plot_2d_t f)
+void iterate_xy(iterate_two_t f)
 {
-	const uint16_t gs_mask = (1<<GS_DEPTH) - 1;
-	clear_buffer();
-
-	for (uint8_t x=0; x < LEDS_X; x++) {
-		for (uint8_t y=0; y < LEDS_Y; y++) {
-			// Get the intensity.
-			uint16_t i = (*f)(x,y);
-
-			// Check we receive correct intensity
-			assert(i <= MAX_2D_PLOT_INTENSITY);
-
-			// Do linear interpolation (two voxels per x-y pair)
-			uint8_t lower_z = i >> GS_DEPTH;
-			uint16_t upper_i = i & gs_mask;
-			uint16_t lower_i = gs_mask - upper_i;
-			set_led(x,y,lower_z,lower_i);
-			set_led(x,y,lower_z+1,upper_i);
+	for(uint8_t x = 0; x < LEDS_X; x++) {
+		for(uint8_t y = 0; y < LEDS_Y; y++) {
+			f(x, y);
 		}
 	}
 }
@@ -161,7 +160,7 @@ void effect_2d_plot(plot_2d_t f)
 /**
  * Iterates all voxels
  */
-void iterate_3d(iterate_3d_t f)
+void iterate_xyz(iterate_xyz_t f)
 {
 	for(uint8_t x = 0; x < LEDS_X; x++) {
 		for(uint8_t y = 0; y < LEDS_Y; y++) {

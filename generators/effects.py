@@ -167,8 +167,8 @@ def analyze(name, content):
         if 'effect' in ret['types'] and 'function' not in ret['types']:
             ret['types'].append('function')
 
-            if 'XZ(' in ret['content']:
-                block = parse_xz(name, content, ret, i)
+            if 'XY(' in ret['content']:
+                block = parse_xy(name, content, ret, i)
             if 'XYZ(' in ret['content']:
                 block = parse_xyz(name, content, ret, i)
         elif 'function' in ret['types']:
@@ -185,12 +185,12 @@ def analyze(name, content):
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
-def parse_xz(name, lines, line, index):
-    return _parse(name, lines, line, index, xz_definition)
+def parse_xy(name, lines, line, index):
+    return _parse(name, lines, line, index, xy_definition)
 
 
-def xz_definition(name, line):
-    ret = 'XZ(effect_' + name + ') '
+def xy_definition(name, line):
+    ret = 'XY(effect_' + name + ') '
 
     if line['content'].strip()[-1] == '{':
         ret += ' {\n}'

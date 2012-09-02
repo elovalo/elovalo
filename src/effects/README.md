@@ -65,32 +65,30 @@ want here.
 
 As writing in vanilla C can be somewhat boring and arduous at times, we have
 developed specific kernel macros that make it easier to define effects.
-Currently there are two of these: XZ and XYZ.
+Currently there are two of these: XY and XYZ.
 
-### XZ
+### XY
 
-XZ is a kernel that applies given function for each xy pair on the coordinate
-system. The kernel expects you to return z value. It will then toggle that
-particular coordinate on.
+XY is a kernel that iterates each xy pair.
 
 ### XYZ
 
 XYZ is a kernel that gives access to each xyz triad on the coordinate
-system. Unlike XZ, this kernel does not expect a return value. Instead you
+system. As XY, this kernel does not expect a return value. Instead you
 can set intensity of the led you want.
 
 ## Coordinate System
 
 The origin of the cube has been set on top-left corner (front view) just like
-for regular displays. x increments towards right in this case while y towards
-bottom. The remaining z axis increments towards depth.
+for regular displays. x increments towards right in this case while z towards
+bottom. The remaining y axis increments towards depth.
 
 If you want to understand how this works in a visual way, write an effect that
 sets the origin visible and render that through the simulator.
 
 ## Utilities
 
-Besides XZ and XYZ, there are certain functions you may find useful.
+Besides XY and XYZ, there are certain functions you may find useful.
 There is a simple text API, shape library and voxel manipulation utilities.
 
 ### Text
