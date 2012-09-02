@@ -24,7 +24,7 @@
 
 /* Generates wrapper function for three dimensional plots to make
  * the implementations much simpler */
-#define THREED(wrap)						\
+#define XYZ(wrap)						\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z);		\
   static void wrap(void){iterate_3d(&wrap##_kernel);}	\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z)

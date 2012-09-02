@@ -10,7 +10,7 @@ void init(void)
 	heart_shape();
 }
 
-THREED(effect)
+XYZ(effect)
 {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 

@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-THREED(effect)
+XYZ(effect)
 {
 	set_led(x, y, z, MAX_INTENSITY);
 }

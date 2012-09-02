@@ -65,7 +65,7 @@ want here.
 
 As writing in vanilla C can be somewhat boring and arduous at times, we have
 developed specific kernel macros that make it easier to define effects.
-Currently there are two of these: TWOD and THREED.
+Currently there are two of these: TWOD and XYZ.
 
 ### TWOD
 
@@ -73,14 +73,11 @@ TWOD is a kernel that applies given function for each xy pair on the coordinate
 system. The kernel expects you to return z value. It will then toggle that
 particular coordinate on.
 
-### THREED
+### XYZ
 
-THREED is a kernel that gives access to each xyz triad on the coordinate
+XYZ is a kernel that gives access to each xyz triad on the coordinate
 system. Unlike TWOD, this kernel does not expect a return value. Instead you
 can set intensity of the led you want.
-
-Author's note: It might make sense to make TWOD behave more like THREED to make
-the API easier to understand. @zouppen: Thoughts?
 
 ## Coordinate System
 
