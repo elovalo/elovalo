@@ -59,7 +59,9 @@ void reset_time(void) {
 }
 
 /**
- * Sets POSIX time to this device. Always succeedes and returns 0.
+ * Sets POSIX time to this device. Always succeedes and returns 0. Do
+ * NOT call this from interrupts because this turns toggles
+ * interrupts.
  */
 int stime(time_t *t) {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -72,7 +74,8 @@ int stime(time_t *t) {
 
 /**
  * Returns POSIX time. If the clock is not running (never set by
- * stime) it returns 0. (this part doesn't conform POSIX)
+ * stime) it returns 0. (this part doesn't conform POSIX). Do NOT call
+ * this from interrupts because this turns toggles interrupts.
  */
 time_t time(time_t *t) {
 	uint32_t time;
@@ -82,6 +85,16 @@ time_t time(time_t *t) {
  	}
 	if (t != NULL) *t = time;
 	return time;
+}
+
+/**
+ * This returns the time WITHOUT any validation. This is quick but
+ * MUST be called only with certainty that the time is okay and with
+ * interrupts disabled.
+ */
+time_t unsafe_time(time_t *t) {
+	if (t != NULL) *t = rtc.time;
+	return rtc.time;
 }
 
 /**
