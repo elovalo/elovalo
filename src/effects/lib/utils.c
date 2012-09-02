@@ -148,7 +148,7 @@ uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z)
 /**
  * Iterates x, y voxels
  */
-void iterate_xy(iterate_two_t f)
+void iterate_xy(iterate_xy_t f)
 {
 	for(uint8_t x = 0; x < LEDS_X; x++) {
 		for(uint8_t y = 0; y < LEDS_Y; y++) {

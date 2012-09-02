@@ -66,8 +66,8 @@ uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
 
 uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z);
 
-typedef void(*iterate_two_t)(uint8_t,uint8_t);
-void iterate_xy(iterate_two_t f);
+typedef void(*iterate_xy_t)(uint8_t,uint8_t);
+void iterate_xy(iterate_xy_t f);
 
 typedef void(*iterate_xyz_t)(uint8_t,uint8_t,uint8_t);
 void iterate_xyz(iterate_xyz_t f);
