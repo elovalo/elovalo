@@ -103,4 +103,3 @@ class EloCmd(cmd.Cmd):
     def _process_resps(self, responses):
         for r in responses:
             resp.handle(r)
-
