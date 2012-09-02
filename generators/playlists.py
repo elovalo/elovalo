@@ -1,5 +1,6 @@
 import os
 import json
+import yaml
 from glob import glob
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
@@ -10,33 +11,34 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 
 
 def generate(source, target):
-    for f in SourceFiles(glob(source)):
-        c_path = os.path.join(target, f.name + '.c')
-        h_path = os.path.join(target, f.name + '.h')
+    for fmt, reader in (('json', json.loads), ('yaml', yaml.load)):
+        for f in SourceFiles(glob(os.path.join(source, '*.' + fmt)), reader):
+            c_path = os.path.join(target, f.name + '.c')
+            h_path = os.path.join(target, f.name + '.h')
 
-        with open(c_path, 'w') as t:
-            t.write(f.c_lines)
+            with open(c_path, 'w') as t:
+                t.write(f.c_lines)
 
-        with open(h_path, 'w') as t:
-            t.write(f.h_lines)
+            with open(h_path, 'w') as t:
+                t.write(f.h_lines)
 
 
 class SourceFiles(list):
 
-    def __init__(self, files):
-        super(SourceFiles, self).__init__(self._read(files))
+    def __init__(self, files, reader):
+        super(SourceFiles, self).__init__(self._read(files, reader))
 
-    def _read(self, files):
-        return [SourceFile(f) for f in files]
+    def _read(self, files, fmt):
+        return [SourceFile(f, fmt) for f in files]
 
 
 class SourceFile(object):
 
-    def __init__(self, path):
+    def __init__(self, path, reader):
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
-            self._data = json.loads(f.read())
+            self._data = reader(f.read())
 
     @property
     def c_lines(self):

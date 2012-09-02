@@ -10,7 +10,7 @@ effects.generate(
 )
 
 playlists.generate(
-    os.path.join(cwd, 'src/playlists/') + '/*.json',
+    os.path.join(cwd, 'src/playlists/'),
     os.path.join(cwd, 'src/playlists/')
 )
 
