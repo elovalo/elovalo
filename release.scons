@@ -25,4 +25,8 @@ env.Command(None, Target+".elf", "avr-size -C --mcu=atmega328p $SOURCE")
 
 # Program the thing
 if GetOption('program'):
-    env.Command(None, Target+".hex", 'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a -Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m -Ulock:w:0xf:m')
+    pgm = env.Command('pgm', Target+".hex",
+                      'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a '+
+                      '-Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m '+
+                      '-Ulock:w:0xf:m')
+    env.AlwaysBuild(pgm)
