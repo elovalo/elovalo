@@ -38,5 +38,5 @@ def execute(args):
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
-    call(['../build_exporter/exporter', os.environ.get('length', '100')], shell=True)
+    call(['../build/exporter/exporter ' + os.environ.get('length', '100')], shell=True)
     write_fps(args.effect, args.path)
