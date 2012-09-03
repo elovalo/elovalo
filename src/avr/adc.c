@@ -26,7 +26,7 @@ void adc_init()
 	DIDR0 = DIDR0_MASK;
 
 	// AREF = AVcc
-	ADMUX = (1<<REFS0);
+	ADMUX = (1 << REFS0);
 
 	// Enable ADC and set prescaler
 	ADCSRA = _BV(ADEN) | ADC_PRESCALER;
@@ -35,26 +35,27 @@ void adc_init()
 #if 0
 uint16_t adc_read(uint8_t ch)
 {
-    // select the corresponding channel 0~7
-    // ANDing with '7' will always keep the value
-    // of 'ch' between 0 and 7
-    ch &= 0b00000111;  // AND operation with 7
-    ADMUX = (ADMUX & 0xF8)|ch;     // clears the bottom 3 bits before ORing
+	// select the corresponding channel 0~7
+	// ANDing with '7' will always keep the value
+	// of 'ch' between 0 and 7
+	ch &= 0 b00000111;	// AND operation with 7
+	ADMUX = (ADMUX & 0xF8) | ch;	// clears the bottom 3 bits before ORing
 
-    // start single convertion
-    // write '1' to ADSC
-    ADCSRA |= (1<<ADSC);
+	// start single convertion
+	// write '1' to ADSC
+	ADCSRA |= (1 << ADSC);
 
-    // wait for conversion to complete
-    // ADSC becomes '0' again
-    // till then, run loop continuously
-    while(ADCSRA & (1<<ADSC));
+	// wait for conversion to complete
+	// ADSC becomes '0' again
+	// till then, run loop continuously
+	while (ADCSRA & (1 << ADSC)) ;
 
-    return READ_ADC_RESULT;
+	return READ_ADC_RESULT;
 }
 #endif
 
-uint16_t adc_get(uint8_t channel) {
+uint16_t adc_get(uint8_t channel)
+{
 	uint16_t ret_val;
 
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -63,18 +64,21 @@ uint16_t adc_get(uint8_t channel) {
 	return ret_val;
 }
 
-void adc_start(void) {
+void adc_start(void)
+{
 	adc_init();
 
 	curr_channel = 0;
 	ADCSRA |= _BV(ADSC) | _BV(ADIE);
 }
 
-void adc_stop(void) {
+void adc_stop(void)
+{
 	ADCSRA &= ~(_BV(ADSC) | _BV(ADIE));
 }
 
-ISR(ADC_vect) {
+ISR(ADC_vect)
+{
 	latest_conv_results[curr_channel] = READ_ADC_RESULT;
 
 	curr_channel++;
