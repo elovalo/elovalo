@@ -21,17 +21,18 @@ uint16_t latest_conv_results[CHANNEL_COUNT];
 
 void adc_init()
 {
-	// disable digital inputs of ADC0 ... ADC5
+	// disable digital inputs of ADC0 ... ADCn
 	// see e.g. http://www.openmusiclabs.com/learning/digital/atmega-adc/
 	DIDR0 = DIDR0_MASK;
 
-    // AREF = AVcc
-    ADMUX = (1<<REFS0);
+	// AREF = AVcc
+	ADMUX = (1<<REFS0);
 
-    // Enable ADC and set prescaler
+	// Enable ADC and set prescaler
 	ADCSRA = _BV(ADEN) | ADC_PRESCALER;
 }
 
+#if 0
 uint16_t adc_read(uint8_t ch)
 {
     // select the corresponding channel 0~7
@@ -51,6 +52,7 @@ uint16_t adc_read(uint8_t ch)
 
     return READ_ADC_RESULT;
 }
+#endif
 
 uint16_t adc_get(uint8_t channel) {
 	uint16_t ret_val;
@@ -62,6 +64,8 @@ uint16_t adc_get(uint8_t channel) {
 }
 
 void adc_start(void) {
+	adc_init();
+
 	curr_channel = 0;
 	ADCSRA |= _BV(ADSC) | _BV(ADIE);
 }
@@ -79,5 +83,6 @@ ISR(ADC_vect) {
 
 	ADMUX = (ADMUX & 0xe0) | curr_channel;
 
+	//start the next conversion
 	ADCSRA |= _BV(ADSC);
 }
