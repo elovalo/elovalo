@@ -11,7 +11,7 @@
 extern volatile uint8_t tx_state;
 extern volatile uint8_t rx_state;
 
-void serial_send(uint8_t data);
+void serial_send_nonblocking(uint8_t data);
 uint8_t serial_available(void);
 uint8_t serial_send_available(void);
 void serial_RX_empty(void);
@@ -19,3 +19,4 @@ void serial_TX_empty(void);
 uint8_t serial_read(void);
 uint8_t serial_read_blocking(void);
 void serial_ungetc(uint8_t x);
+void serial_send(uint8_t data);

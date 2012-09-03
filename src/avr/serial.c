@@ -122,7 +122,7 @@ uint8_t serial_send_available(void) {
  * user is responsible to check serial_send_available() before calling
  * this.
  */
-void serial_send(uint8_t data)
+void serial_send_nonblocking(uint8_t data)
 {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 
@@ -152,4 +152,14 @@ void serial_send(uint8_t data)
 uint8_t serial_read_blocking(void) {
 	while(!serial_available());
 	return serial_read();
+}
+
+/**
+ * Send a byte to serial port. Checks overflow condition and blocks if
+ * the buffer is full. Do not call from interrupts!
+ */
+void serial_send(uint8_t data) {
+	while ((tx_in_i+1 == tx_out_i) ||
+	       (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
+	serial_send_nonblocking(data);
 }
