@@ -14,7 +14,7 @@
 #define ST_MEASURING_RESPONSE_PULSE 3
 #define ST_WAITING_ECHO_FADING_AWAY 4
 
-volatile uint8_t state;
+volatile uint8_t state = ST_IDLE;
 
 volatile uint16_t resp_pulse_length;
 
@@ -25,11 +25,12 @@ void timer_init(void){
 	//TCCR1B &= ~(1<<WGM13 | 1<<WGM12); //no need to do this, bits are cleared by default
 	TCCR1B |= (1<<WGM12);  // sets compare and reset to "top" mode
 	TCCR1B |= (1<<CS10);   // set clock divider to 1
+
 	OCR1A = 160;           // set "top" for 10 us (16 MHz sysclock in use)
+							// TODO: the actual pulse length is 10 ms! Why?										
+
 	TIFR1 |= (1<<OCF1A);   // clear possible pending int
 	TIMSK1 |= (1<<OCIE1A); // enable int
-
-	state = ST_IDLE;
 }
 
 ISR(TIMER1_COMPA_vect) {
@@ -64,21 +65,33 @@ ISR(TIMER1_COMPA_vect) {
 
 ISR(PCINT1_vect){
 
+	register uint8_t leading_edge = PINC & (1<<PINC4);
 	if (state == ST_WAITING_RESPONSE_PULSE){
-		resp_pulse_length = 0 - TCNT1; //underflow on purpose
-		state = ST_MEASURING_RESPONSE_PULSE;
+		if (leading_edge){
+			//underflow on purpose =>
+			//substract beforehand the current counter value from the result
+			resp_pulse_length = 0 - TCNT1;
+			state = ST_MEASURING_RESPONSE_PULSE;
+		}
+		//else{
+			//trailing edge, just fall through
+		//}
 	}
 	else if (state == ST_MEASURING_RESPONSE_PULSE){
-		resp_pulse_length += TCNT1;
-		PCICR &= ~(1<<PCIE1); //Disable PIN Change Interrupt 1
-		state = ST_WAITING_ECHO_FADING_AWAY;
+		if (!leading_edge){
+			resp_pulse_length += TCNT1;
+			PCICR &= ~(1<<PCIE1); //Disable PIN Change Interrupt 1
+			state = ST_WAITING_ECHO_FADING_AWAY;
+		}
+		//else{
+			//leading edge, just fall through
+		//}
 	}
 	//else{
 		//should not happen
 	//}
 }
 
-//TODO: hmm, elovalo has a common init.c, move this into it
 void pin_init(void){
 	DDRC |= (1<<PC5); //output
 	DDRC &= ~(1<<PC4); //input
@@ -102,7 +115,7 @@ int hcsr04_send_pulse(void){
 		return 0;
 
 	pin_init();
-	PORTC |= (1<<PC5);     // start initiate pulse
+	PORTC |= (1<<PC5);  // the leading edge of the pulse
 	timer_init();
 
 	state = ST_SENDING_START_PULSE;
