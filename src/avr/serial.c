@@ -120,7 +120,7 @@ uint8_t serial_send_available(void) {
 /**
  * Send a byte to serial port. Does not check overflow condition; the
  * user is responsible to check serial_send_available() before calling
- * this.
+ * this. Do not use from interrupts (or manipulate atomic block)
  */
 void serial_send_nonblocking(uint8_t data)
 {
