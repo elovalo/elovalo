@@ -1,6 +1,7 @@
 # -*- mode: python; coding: utf-8 -*-
+import os
 
-env = Environment()
+env = Environment(ENV=os.environ)
 
 env['CC'] = 'avr-gcc'
 env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -O2 -Wall -std=gnu99 -fpack-struct -flto')
@@ -11,7 +12,7 @@ if GetOption('use_asm'):
 Target = 'ledcube'
 
 # Make elf
-env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/avr/*.c')], LIBS='m')
+env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/avr/*.c')], LIBS='m')
 
 # Make hex
 env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
@@ -24,4 +25,8 @@ env.Command(None, Target+".elf", "avr-size -C --mcu=atmega328p $SOURCE")
 
 # Program the thing
 if GetOption('program'):
-    env.Command(None, Target+".hex", 'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a -Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m -Ulock:w:0xf:m')
+    pgm = env.Command('pgm', Target+".hex",
+                      'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a '+
+                      '-Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m '+
+                      '-Ulock:w:0xf:m')
+    env.AlwaysBuild(pgm)

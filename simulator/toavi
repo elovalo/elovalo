@@ -12,13 +12,14 @@ def get_fps():
         with open(p, 'r') as f:
             return json.load(f)['fps']
 
-    return 25
+    return '25'
 
 if len(sys.argv) > 2:
-    fps = get_fps()
-    print fps
+    #fps = get_fps()
+
     subprocess.call([
-        'ffmpeg', '-i', sys.argv[1] + '/%04d.png',
-        '-r', fps,
+        'ffmpeg',
+        '-i', sys.argv[1] + '/%04d.png',
+        #'-r', fps,
         sys.argv[2] + '.avi',
     ])

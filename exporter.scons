@@ -5,4 +5,4 @@ env = Environment()
 env.Append(CCFLAGS = "-O2 -Wall -std=gnu99")
 
 # Make just common code and exporter source, not the AVR code
-env.Program('exporter', [Glob('src/*.c'), Glob('src/exporter/*.c')], LIBS='m')
+env.Program('exporter', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/exporter/*.c')], LIBS='m')
