@@ -14,9 +14,6 @@ def handle(resp):
 def reboot(body):
     print('device rebooted')
 
-def ok(body):
-    print('OK')
-
 def time_(timestamp):
     if len(timestamp) >= 4:
         dt = conv.longToInt(timestamp[:4])
@@ -29,13 +26,17 @@ def time_(timestamp):
 def effect_name(name):
     print 'Running effect "{0}"'.format(name)
 
+def invalid_cmd(body):
+    print('Received an invalid command, msg: {0}'.format(body))
+
 def do_nothing(body):
     pass
 
 _responses = {
     conf.RESP_REBOOT:      reboot,
-    conf.RESP_COMMAND_OK:  ok,
     conf.RESP_TIME:        time_,
     conf.RESP_EFFECT_NAME: effect_name,
-    conf.RESP_EFFECT_END:  do_nothing
+    conf.RESP_INVALID_CMD: invalid_cmd,
+    conf.RESP_EFFECT_END:  do_nothing,
+    conf.RESP_COMMAND_OK:  do_nothing
 }

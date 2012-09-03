@@ -9,17 +9,13 @@ Message = collections.namedtuple('Message', 'kind body')
 
 class Connection():
     def __init__(self):
-        try:
-            self.serial = serial.Serial(
-                port=conf.PORT,
-                baudrate=conf.BAUDRATE,
-                timeout=conf.TIMEOUT,
-                parity=conf.PARITY,
-                bytesize=conf.BYTESIZE
-            )
-        except serial.SerialException:
-            print("Could not open serial port connection, verify conf.py")
-            sys.exit()
+        self.serial = serial.Serial(
+            port=conf.PORT,
+            baudrate=conf.BAUDRATE,
+            timeout=conf.TIMEOUT,
+            parity=conf.PARITY,
+            bytesize=conf.BYTESIZE
+        )
 
     def read_responses(self):
         resps = self._split_responses(self.serial.readline())
@@ -44,14 +40,23 @@ class Connection():
         else:
             return Message('', '')
 
-    def send(self, msg):
-        snd = conf.ESCAPE + msg.kind + msg.body
-        self.serial.write(snd)
-        if conf.DEBUG:
-            print("Sent: {0}".format(binascii.hexlify(snd)))
-
     def send_message(self, kind, body=''):
         self.send(Message(kind, body))
+
+    def send(self, msg):
+        bytes_ = bytearray(conf.ESCAPE)
+        bytes_.append(msg.kind)
+        for i in range(0, len(msg.body)):
+            bytes_.append(msg.body[i])
+            if msg.body[i] == conf.ESCAPE:
+                bytes_.append(conf.LITERAL_ESCAPE)
+
+        self.send_raw(bytes_)
+
+    def send_raw(self, raw):
+        if conf.DEBUG:
+            print("Sent: {0}".format(binascii.hexlify(raw)))
+        self.serial.write(raw)
     
     def close(self):
         self.serial.close()
