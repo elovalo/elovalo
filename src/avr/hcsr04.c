@@ -69,13 +69,13 @@ ISR(PCINT1_vect){
 void pin_init(void){
 	DDRC |= (1<<PC5); //output
 	DDRC &= ~(1<<PC4); //input
-	//PORTC |= (1<<PC4);
+
 	//Enable PIN Change Interrupt 1 - This enables interrupts on pins
-	//PCINT14...8 see p70 of datasheet
+	//PCINT14...8, see doc8161.pdf Rev. 8161D – 10/09, ch 12
 	PCICR |= (1<<PCIE1);
 
 	//Set the mask on Pin change interrupt 1 so that only PCINT12 (PC4) triggers
-	//the interrupt. see p71 of datasheet
+	//the interrupt. see doc8161.pdf Rev. 8161D – 10/09, ch 12.2.1
 	PCMSK1 |= (1<<PCINT12);
 	return;
 }
