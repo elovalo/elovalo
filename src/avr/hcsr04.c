@@ -24,6 +24,7 @@ void timer_init(void){
 	TCCR1B |= (1<<WGM12);  // sets compare and reset to "top" mode
 	TCCR1B |= (1<<CS10);   // set clock divider to 1
 	OCR1A = 160;           // set "top" for 10 us (16 MHz sysclock in use)
+	TIFR1 |= (1<<OCF1A);   // clear possible pending int
 	TIMSK1 |= (1<<OCIE1A); // enable int
 
 	state = ST_IDLE;
