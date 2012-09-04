@@ -27,6 +27,7 @@
 
 #define MODE_IDLE           0x00
 #define MODE_EFFECT         0x01
+#define MODE_PLAYLIST       0X02
 
 #define CMD_STOP            0x01
 #define CMD_CHANGE_EFFECT   0x02
@@ -42,6 +43,7 @@
 #define RESP_EFFECT_END     0x04
 #define RESP_COMMAND_OK     0x05
 #define RESP_TIME           0x06
+#define RESP_NEXT_EFFECT    0x07
 #define RESP_COMMAND_NOT_AVAILABLE 0xef // When command is correct but cannot be answered 
 #define RESP_INVALID_CMD    0xf0
 #define RESP_INVALID_ARG_A  0xfa
@@ -59,12 +61,17 @@ typedef struct {
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
+uint16_t effect_length; // Length of the current effect. Used for playlist
+// It might be nice to use this for single effect too (set via serial).
+
 // Private functions
 void process_cmd(void);
 void send_escaped(uint8_t byte);
 read_t read_escaped();
 void dislike(uint8_t error_code, uint8_t payload);
 void respond(uint8_t code);
+
+effect_t *next_effect(effect_t *effect);
 
 int main() {
 	cli();
@@ -94,11 +101,10 @@ int main() {
 		case MODE_IDLE:
 			// No operation
 			break;
-		case MODE_EFFECT: // TODO: playlist logic
+		case MODE_EFFECT:
 			// If a buffer is not yet flipped
 			if (may_flip) break;
 
-			// TODO: get length from playlist item
 			ticks = centisecs();
 			if (ticks > 1000) {
 				// Rendered too long, stop.
@@ -120,6 +126,19 @@ int main() {
 
 			break;
 		}
+		case MODE_PLAYLIST:
+			if (may_flip) break;
+
+			ticks = centisecs();
+			if (ticks > effect_length) {
+				// TODO: figure out how to fetch the next effect from the
+				// playlist
+				effect = next_effect(effect);
+
+				respond(RESP_NEXT_EFFECT);
+
+				break;
+			}
 	}
 
 	return 0;
@@ -250,6 +269,10 @@ void process_cmd(void)
 		dislike(RESP_INVALID_CMD,cmd);
 	}
 	// Some cases return, do not write code here
+}
+
+effect_t *next_effect(effect_t *effect) {
+	// TODO
 }
 
 /**
