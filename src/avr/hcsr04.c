@@ -18,7 +18,16 @@
 
 volatile uint8_t state = ST_IDLE;
 
+//values for oper_mode
+#define SINGLE_SHOT 0
+#define CONTINUOUS 1
+
+volatile uint8_t oper_mode = SINGLE_SHOT;
+
+//the result of the latest measurement
 volatile uint16_t resp_pulse_length;
+
+int send_pulse(void);
 
 /**
  * Initialize the timer for a new measurement cycle
@@ -69,6 +78,9 @@ ISR(TIMER1_COMPA_vect)
 		TIMSK1 &= ~(1 << OCIE1A);	// disable timer int
 		PCICR &= ~(1 << PCIE1);	// disable PIN Change int
 		state = ST_IDLE;
+
+		if (oper_mode == CONTINUOUS)
+			send_pulse();
 	}
 }
 
@@ -101,9 +113,7 @@ ISR(PCINT1_vect)
 	register uint8_t leading_edge = PINC & (1 << PINC4);
 	if (state == ST_WAITING_RESPONSE_PULSE) {
 		if (leading_edge) {
-			//underflow on purpose =>
-			//substract beforehand the current counter value from the result
-			resp_pulse_length = 0 - TCNT1;
+			TCNT1 = 0; //restart counting
 			state = ST_MEASURING_RESPONSE_PULSE;
 		}
 		//else{
@@ -111,7 +121,7 @@ ISR(PCINT1_vect)
 		//}
 	} else if (state == ST_MEASURING_RESPONSE_PULSE) {
 		if (!leading_edge) {
-			resp_pulse_length += TCNT1;
+			resp_pulse_length = TCNT1;
 			PCICR &= ~(1 << PCIE1);	//Disable PIN Change Interrupt 1
 			state = ST_WAITING_ECHO_FADING_AWAY;
 		}
@@ -124,12 +134,7 @@ ISR(PCINT1_vect)
 	//}
 }
 
-void hcsr04_init(void)
-{
-	state = ST_IDLE;
-}
-
-int hcsr04_send_pulse(void)
+int send_pulse(void)
 {
 	if (state != ST_IDLE)
 		return 0;
@@ -141,6 +146,29 @@ int hcsr04_send_pulse(void)
 	state = ST_SENDING_START_PULSE;
 
 	return 1;
+}
+
+int hcsr04_send_pulse(void)
+{
+	if (oper_mode == CONTINUOUS)
+		return 0;
+
+	return send_pulse();
+}
+
+int hcsr04_start_continuous_meas(void)
+{
+	int ret_val = send_pulse();
+
+	if (ret_val)
+		oper_mode = CONTINUOUS;
+
+	return ret_val;
+}
+
+void hcsr04_stop_continuous_meas(void)
+{
+	oper_mode = SINGLE_SHOT;
 }
 
 uint16_t hcsr04_get_pulse_length(void)
