@@ -167,10 +167,10 @@ def analyze(name, content):
         if 'effect' in ret['types'] and 'function' not in ret['types']:
             ret['types'].append('function')
 
-            if 'TWOD(' in ret['content']:
-                block = parse_twod(name, content, ret, i)
-            if 'THREED(' in ret['content']:
-                block = parse_threed(name, content, ret, i)
+            if 'XY(' in ret['content']:
+                block = parse_xy(name, content, ret, i)
+            if 'XYZ(' in ret['content']:
+                block = parse_xyz(name, content, ret, i)
         elif 'function' in ret['types']:
             if line.strip()[-1] == ';':
                 ret['types'].remove('function')
@@ -185,12 +185,12 @@ def analyze(name, content):
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
-def parse_twod(name, lines, line, index):
-    return _parse(name, lines, line, index, twod_definition)
+def parse_xy(name, lines, line, index):
+    return _parse(name, lines, line, index, xy_definition)
 
 
-def twod_definition(name, line):
-    ret = 'TWOD(effect_' + name + ') '
+def xy_definition(name, line):
+    ret = 'XY(effect_' + name + ') '
 
     if line['content'].strip()[-1] == '{':
         ret += ' {\n}'
@@ -198,12 +198,12 @@ def twod_definition(name, line):
     return ret
 
 
-def parse_threed(name, lines, line, index):
-    return _parse(name, lines, line, index, threed_definition)
+def parse_xyz(name, lines, line, index):
+    return _parse(name, lines, line, index, xyz_definition)
 
 
-def threed_definition(name, line):
-    ret = 'THREED(effect_' + name + ') '
+def xyz_definition(name, line):
+    ret = 'XYZ(effect_' + name + ') '
 
     if line['content'].strip()[-1] == '{':
         ret += ' {\n}'

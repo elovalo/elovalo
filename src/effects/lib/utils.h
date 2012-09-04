@@ -17,22 +17,17 @@
 
 /* Generates wrapper function for two dimensional plots to make the
  * implementations much simpler */
-#define TWOD(wrap)						\
-  static uint16_t wrap##_kernel(uint8_t x, uint8_t y);		\
-  static void wrap(void){effect_2d_plot(&wrap##_kernel);}	\
-  static uint16_t wrap##_kernel(uint8_t x, uint8_t y)
+#define XY(wrap)						\
+  static void wrap##_kernel(uint8_t x, uint8_t y);		\
+  static void wrap(void){clear_buffer();iterate_xy(&wrap##_kernel);}	\
+  static void wrap##_kernel(uint8_t x, uint8_t y)
 
 /* Generates wrapper function for three dimensional plots to make
  * the implementations much simpler */
-#define THREED(wrap)						\
+#define XYZ(wrap)						\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z);		\
-  static void wrap(void){iterate_3d(&wrap##_kernel);}	\
+  static void wrap(void){clear_buffer();iterate_xyz(&wrap##_kernel);}	\
   static void wrap##_kernel(uint8_t x, uint8_t y, uint8_t z)
-
-/* 2D plotting function. Takes frame number, x coordinate, y
- * coordinate, and returns intensity value from 0 to
- * max_intensity. May have multiple definitions. */
-typedef uint16_t(*plot_2d_t)(uint8_t,uint8_t);
 
 /* Arbitary drawing function. The implementation is responsible to set
  * pixels by itself. Buffer flipping is done outside this function. */
@@ -63,16 +58,19 @@ typedef struct {
 
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 
+void set_z(uint8_t x, uint8_t y, uint16_t intensity);
+
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
 uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
 
 uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z);
 
-void effect_2d_plot(plot_2d_t f);
+typedef void(*iterate_xy_t)(uint8_t,uint8_t);
+void iterate_xy(iterate_xy_t f);
 
-typedef void(*iterate_3d_t)(uint8_t,uint8_t,uint8_t);
-void iterate_3d(iterate_3d_t f);
+typedef void(*iterate_xyz_t)(uint8_t,uint8_t,uint8_t);
+void iterate_xyz(iterate_xyz_t f);
 
 void clear_buffer(void);
 
