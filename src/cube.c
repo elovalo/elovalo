@@ -18,6 +18,19 @@ void gs_buf_swap(void) {
 	gs_buf_back = tmp;
 }
 
+/**
+ * Restore buffers after NO_FLIP effect. May be safely run even if the
+ * last effect was FLIP effect. Must be called when there is no
+ * possibility of gs_buf_swap happening the same time.
+ */
+void gs_restore_bufs(void) {
+	if (gs_buf_front == gs_buf_a) {
+		gs_buf_back = gs_buf_b;
+	} else {
+		gs_buf_back = gs_buf_a;
+	}
+}
+
 // Some sanity checks
 #if (LEDS_X * LEDS_Y * GS_DEPTH) > (8 * BYTES_PER_LAYER)
 #error "There are more LED data on X-Y layer than there is BYTES_PER_LAYER"

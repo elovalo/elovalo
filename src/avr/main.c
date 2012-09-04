@@ -170,8 +170,16 @@ void process_cmd(void)
 		if (init != NULL) init();
 
 		// Swap buffer to bring back buffer to front
-		gs_buf_swap(); 
+		gs_buf_swap();
 		
+		/* Support NO_FLIP. Restore buffers to "normal state"
+		   (pointing to different locations) and then "broke"
+		   flipping if required by flip_buffers */
+		gs_restore_bufs();
+		if (pgm_get(effect->flip_buffers, byte) == NO_FLIP) {
+			gs_buf_back = gs_buf_front;
+		}
+
 		// Restart tick counter
 		reset_time();
 
