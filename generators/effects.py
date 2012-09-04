@@ -104,7 +104,7 @@ class SourceFile(object):
         self.functions = self._functions(content)
         self.init = self._block(content, 'init')
         self.effect = self._block(content, 'effect')
-        self.flip = self._block(content, 'flip')
+        self.flip = self._flip(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -121,6 +121,9 @@ class SourceFile(object):
 
     def _block(self, c, name):
         return ''.join(line['block'] for line in c if name in line['types'])
+
+    def _flip(self, c):
+        return filter(lambda line: 'flip' in line['types'], c)
 
 
 def find_globals(content):
