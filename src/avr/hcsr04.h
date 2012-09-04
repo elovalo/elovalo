@@ -31,4 +31,10 @@ void hcsr04_stop_continuous_meas(void);
 #define HCSR04_MEAS_FAIL 0xFFFF
 uint16_t hcsr04_get_pulse_length(void);
 
+/**
+ * Returns the result of the latest measurement cycle in cm,
+ * or HCSR04_MEAS_FAIL on failure.
+ */
+uint16_t hcsr04_get_distance_in_cm(void);
+
 #endif /* HCSR04_H_ */

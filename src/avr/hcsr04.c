@@ -175,3 +175,12 @@ uint16_t hcsr04_get_pulse_length(void)
 {
 	return resp_pulse_length;
 }
+
+uint16_t hcsr04_get_distance_in_cm(void)
+{
+	if (resp_pulse_length == HCSR04_MEAS_FAIL)
+		return resp_pulse_length;
+
+	// 36 pulses per 10 cm, when clock divider is 256 in TCCR1B
+	return (10 * resp_pulse_length) / 36;
+}
