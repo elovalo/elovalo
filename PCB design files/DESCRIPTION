@@ -1,0 +1,5 @@
+<language fi>
+Elovalo led cube
+
+This design has 64 led channels with 8 layer multiplexing. The processor uses SPI to draw data to the display and to multiplex the layers.
+</language fi>
