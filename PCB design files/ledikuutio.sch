@@ -15163,7 +15163,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="V2" gate="1" pin="!LOAD"/>
 </segment>
 </net>
-<net name="+5V" class="0">
+<net name="+5V" class="4">
 <segment>
 <wire x1="185.42" y1="58.42" x2="185.42" y2="68.58" width="0.1524" layer="91"/>
 <wire x1="185.42" y1="58.42" x2="172.72" y2="58.42" width="0.1524" layer="91"/>
@@ -15768,7 +15768,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="IC3" gate="A" pin="SER"/>
 </segment>
 </net>
-<net name="+5V" class="0">
+<net name="+5V" class="4">
 <segment>
 <wire x1="167.64" y1="147.32" x2="167.64" y2="142.24" width="0.1524" layer="91"/>
 <pinref part="T1" gate="1" pin="E"/>
@@ -15985,7 +15985,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="+3V1" gate="G$1" pin="+3V3"/>
 </segment>
 </net>
-<net name="+5V" class="0">
+<net name="+5V" class="4">
 <segment>
 <pinref part="P+7" gate="1" pin="+5V"/>
 <wire x1="134.62" y1="86.36" x2="134.62" y2="88.9" width="0.1524" layer="91"/>
