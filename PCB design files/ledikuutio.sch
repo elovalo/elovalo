@@ -820,29 +820,45 @@
 <text x="-0.889" y="1.778" size="0.4064" layer="25">&gt;NAME</text>
 <text x="-0.889" y="-2.032" size="0.4064" layer="27">&gt;Value</text>
 </package>
-<package name="TACTILE_SWITCH_SMD-2">
-<wire x1="1.905" y1="1.27" x2="1.905" y2="0.445" width="0.127" layer="51"/>
-<wire x1="1.905" y1="0.445" x2="2.16" y2="-0.01" width="0.127" layer="51"/>
-<wire x1="1.905" y1="-0.23" x2="1.905" y2="-1.115" width="0.127" layer="51"/>
-<wire x1="-2.25" y1="2.25" x2="2.25" y2="2.25" width="0.127" layer="51"/>
-<wire x1="2.25" y1="2.25" x2="2.25" y2="-2.25" width="0.127" layer="51"/>
-<wire x1="2.25" y1="-2.25" x2="-2.25" y2="-2.25" width="0.127" layer="51"/>
-<wire x1="-2.25" y1="-2.25" x2="-2.25" y2="2.25" width="0.127" layer="51"/>
-<wire x1="-2.2" y1="0.8" x2="-2.2" y2="-0.8" width="0.2032" layer="21"/>
-<wire x1="1.3" y1="2.2" x2="-1.3" y2="2.2" width="0.2032" layer="21"/>
-<wire x1="2.2" y1="-0.8" x2="2.2" y2="0.8" width="0.2032" layer="21"/>
-<wire x1="-1.3" y1="-2.2" x2="1.3" y2="-2.2" width="0.2032" layer="21"/>
-<wire x1="2.2" y1="0.8" x2="1.8" y2="0.8" width="0.2032" layer="21"/>
-<wire x1="2.2" y1="-0.8" x2="1.8" y2="-0.8" width="0.2032" layer="21"/>
-<wire x1="-1.8" y1="0.8" x2="-2.2" y2="0.8" width="0.2032" layer="21"/>
-<wire x1="-1.8" y1="-0.8" x2="-2.2" y2="-0.8" width="0.2032" layer="21"/>
-<circle x="0" y="0" radius="1.27" width="0.2032" layer="21"/>
-<smd name="1" x="2.225" y="1.75" dx="1.1" dy="0.7" layer="1" rot="R90"/>
-<smd name="2" x="2.225" y="-1.75" dx="1.1" dy="0.7" layer="1" rot="R90"/>
-<smd name="3" x="-2.225" y="-1.75" dx="1.1" dy="0.7" layer="1" rot="R90"/>
-<smd name="4" x="-2.225" y="1.75" dx="1.1" dy="0.7" layer="1" rot="R90"/>
-<text x="-0.889" y="1.778" size="0.4064" layer="25">&gt;NAME</text>
-<text x="-0.889" y="-2.032" size="0.4064" layer="27">&gt;Value</text>
+<package name="KSA_SEALED_TAC_SWITCH">
+<wire x1="0" y1="1.27" x2="0" y2="-1.27" width="0.127" layer="21"/>
+<wire x1="-1.27" y1="0" x2="1.27" y2="0" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="3.81" x2="5.08" y2="3.81" width="0.127" layer="21"/>
+<wire x1="5.08" y1="3.81" x2="5.08" y2="-3.81" width="0.127" layer="21"/>
+<wire x1="5.08" y1="-3.81" x2="-5.08" y2="-3.81" width="0.127" layer="21"/>
+<wire x1="-5.08" y1="-3.81" x2="-5.08" y2="3.81" width="0.127" layer="21"/>
+<pad name="P$1" x="-3.81" y="2.54" drill="1" shape="square"/>
+<pad name="P$2" x="3.81" y="2.54" drill="1" shape="square"/>
+<pad name="P$3" x="-3.81" y="-2.54" drill="1" shape="square"/>
+<pad name="P$4" x="3.81" y="-2.54" drill="1" shape="square"/>
+</package>
+<package name="TACTILE-PTH-12MM">
+<description>&lt;b&gt;OMRON SWITCH&lt;/b&gt;</description>
+<wire x1="5.588" y1="1.016" x2="5.588" y2="5.08" width="0.2032" layer="51"/>
+<wire x1="5.588" y1="5.08" x2="5.08" y2="5.588" width="0.2032" layer="51"/>
+<wire x1="5.08" y1="-5.588" x2="5.588" y2="-5.08" width="0.2032" layer="51"/>
+<wire x1="5.588" y1="-5.08" x2="5.588" y2="-1.016" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="5.588" x2="-5.588" y2="5.08" width="0.2032" layer="51"/>
+<wire x1="-5.588" y1="5.08" x2="-5.588" y2="1.016" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="-5.588" x2="-5.588" y2="-5.08" width="0.2032" layer="51"/>
+<wire x1="-5.588" y1="-5.08" x2="-5.588" y2="-1.016" width="0.2032" layer="51"/>
+<wire x1="5.08" y1="-5.588" x2="4.699" y2="-5.588" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="-5.588" x2="-4.699" y2="-5.588" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="5.588" x2="-4.699" y2="5.588" width="0.2032" layer="51"/>
+<wire x1="5.08" y1="5.588" x2="4.699" y2="5.588" width="0.2032" layer="51"/>
+<wire x1="4.699" y1="5.588" x2="-4.699" y2="5.588" width="0.2032" layer="21"/>
+<wire x1="-4.699" y1="-5.588" x2="4.699" y2="-5.588" width="0.2032" layer="21"/>
+<wire x1="5.588" y1="0.998" x2="5.588" y2="-1.016" width="0.2032" layer="21"/>
+<wire x1="-5.588" y1="1.028" x2="-5.588" y2="-1.016" width="0.2032" layer="21"/>
+<wire x1="-5.08" y1="1.27" x2="-5.08" y2="0.508" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="-0.508" x2="-5.08" y2="-1.27" width="0.2032" layer="51"/>
+<wire x1="-5.08" y1="0.508" x2="-4.699" y2="-0.381" width="0.2032" layer="51"/>
+<circle x="0" y="0" radius="4.4901" width="0.127" layer="21"/>
+<pad name="1" x="-5.7912" y="2.2606" drill="1.143" diameter="1.8796"/>
+<pad name="2" x="5.7912" y="2.2606" drill="1.143" diameter="1.8796"/>
+<pad name="3" x="-5.7912" y="-2.2606" drill="1.143" diameter="1.8796"/>
+<pad name="4" x="5.7912" y="-2.2606" drill="1.143" diameter="1.8796"/>
+<text x="-5.08" y="6.35" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 </package>
 </packages>
 <symbols>
@@ -908,15 +924,26 @@
 <text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="GND" x="0" y="2.54" visible="off" length="short" direction="sup" rot="R270"/>
 </symbol>
-<symbol name="SWITCH-MOMENTARY-2">
+<symbol name="SWITCH-MOMENTARY">
 <wire x1="1.905" y1="0" x2="2.54" y2="0" width="0.254" layer="94"/>
+<wire x1="1.905" y1="4.445" x2="1.905" y2="3.175" width="0.254" layer="94"/>
+<wire x1="-1.905" y1="4.445" x2="-1.905" y2="3.175" width="0.254" layer="94"/>
+<wire x1="1.905" y1="4.445" x2="0" y2="4.445" width="0.254" layer="94"/>
+<wire x1="0" y1="4.445" x2="-1.905" y2="4.445" width="0.254" layer="94"/>
+<wire x1="0" y1="2.54" x2="0" y2="1.905" width="0.1524" layer="94"/>
+<wire x1="0" y1="1.27" x2="0" y2="0.635" width="0.1524" layer="94"/>
+<wire x1="0" y1="4.445" x2="0" y2="3.175" width="0.1524" layer="94"/>
+<wire x1="2.54" y1="-2.54" x2="2.54" y2="0" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="-2.54" x2="-2.54" y2="0" width="0.1524" layer="94"/>
 <wire x1="-2.54" y1="0" x2="1.905" y2="1.27" width="0.254" layer="94"/>
 <circle x="-2.54" y="0" radius="0.127" width="0.4064" layer="94"/>
 <circle x="2.54" y="0" radius="0.127" width="0.4064" layer="94"/>
-<text x="-2.54" y="2.54" size="1.778" layer="95">&gt;NAME</text>
-<text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
-<pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="2"/>
-<pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<text x="-2.54" y="6.35" size="1.778" layer="95">&gt;NAME</text>
+<text x="-2.54" y="-6.35" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="1" x="-5.08" y="0" visible="pad" length="short" direction="pas" swaplevel="2"/>
+<pin name="3" x="5.08" y="0" visible="pad" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="4" x="5.08" y="-2.54" visible="pad" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="2" x="-5.08" y="-2.54" visible="pad" length="short" direction="pas" swaplevel="2"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -1050,33 +1077,52 @@ Various standard crystals. Proven footprints. Spark Fun Electronics SKU : COM-00
 </device>
 </devices>
 </deviceset>
-<deviceset name="SWITCH-MOMENTARY-2" prefix="S">
+<deviceset name="TAC_SWITCH" prefix="S" uservalue="yes">
+<description>&lt;b&gt;Momentary Switch&lt;/b&gt;
+Button commonly used for reset or general input. Spark Fun Electronics SKU : COM-00097</description>
 <gates>
-<gate name="G$1" symbol="SWITCH-MOMENTARY-2" x="0" y="0"/>
+<gate name="S" symbol="SWITCH-MOMENTARY" x="0" y="0"/>
 </gates>
 <devices>
-<device name="PTH" package="TACTILE-PTH">
-<connects>
-<connect gate="G$1" pin="1" pad="1"/>
-<connect gate="G$1" pin="2" pad="3"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
 <device name="SMD" package="TACTILE_SWITCH_SMD">
 <connects>
-<connect gate="G$1" pin="1" pad="1"/>
-<connect gate="G$1" pin="2" pad="3"/>
+<connect gate="S" pin="1" pad="1"/>
+<connect gate="S" pin="2" pad="2"/>
+<connect gate="S" pin="3" pad="3"/>
+<connect gate="S" pin="4" pad="4"/>
 </connects>
 <technologies>
 <technology name=""/>
 </technologies>
 </device>
-<device name="SMD-2" package="TACTILE_SWITCH_SMD-2">
+<device name="PTH" package="TACTILE-PTH">
 <connects>
-<connect gate="G$1" pin="1" pad="2"/>
-<connect gate="G$1" pin="2" pad="1"/>
+<connect gate="S" pin="1" pad="1"/>
+<connect gate="S" pin="2" pad="2"/>
+<connect gate="S" pin="3" pad="3"/>
+<connect gate="S" pin="4" pad="4"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="KSA_SEALED" package="KSA_SEALED_TAC_SWITCH">
+<connects>
+<connect gate="S" pin="1" pad="P$1"/>
+<connect gate="S" pin="2" pad="P$2"/>
+<connect gate="S" pin="3" pad="P$3"/>
+<connect gate="S" pin="4" pad="P$4"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="12MM" package="TACTILE-PTH-12MM">
+<connects>
+<connect gate="S" pin="1" pad="1"/>
+<connect gate="S" pin="2" pad="2"/>
+<connect gate="S" pin="3" pad="3"/>
+<connect gate="S" pin="4" pad="4"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -13915,7 +13961,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <part name="SUPPLY24" library="supply2" deviceset="GND" device=""/>
 <part name="C22" library="rcl" deviceset="C-EU" device="C0805" value="10nF"/>
 <part name="C23" library="rcl" deviceset="C-EU" device="C0805" value="100nF"/>
-<part name="S1" library="SparkFun" deviceset="SWITCH-MOMENTARY-2" device="SMD" value="RESET"/>
+<part name="S1" library="SparkFun" deviceset="TAC_SWITCH" device="SMD" value="RESET"/>
 <part name="VCC_SB12" library="supply2" deviceset="VCC" device="" value="VCC_SB"/>
 <part name="SUPPLY25" library="supply2" deviceset="GND" device=""/>
 <part name="R20" library="rcl" deviceset="R-EU_" device="M0805" value="10k"/>
@@ -13925,7 +13971,6 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <plain>
 <text x="81.28" y="106.68" size="1.778" layer="97">MCU decoupling</text>
 <text x="327.66" y="233.68" size="1.778" layer="91">Clock Divider</text>
-<text x="30.48" y="87.63" size="1.778" layer="91">Kysy joelilta oikea pinijärjestys...</text>
 <text x="43.18" y="99.06" size="1.778" layer="97">AVCC decoupling</text>
 </plain>
 <instances>
@@ -14118,19 +14163,19 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <instance part="VCC_SB10" gate="G$1" x="45.72" y="127" smashed="yes">
 <attribute name="VALUE" x="43.18" y="121.92" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="VCC_SB11" gate="G$1" x="35.56" y="106.68" smashed="yes" rot="R270">
-<attribute name="VALUE" x="30.48" y="109.22" size="1.778" layer="96"/>
+<instance part="VCC_SB11" gate="G$1" x="40.64" y="106.68" smashed="yes" rot="R270">
+<attribute name="VALUE" x="27.94" y="106.68" size="1.778" layer="96"/>
 </instance>
 <instance part="SUPPLY23" gate="GND" x="35.56" y="104.14" rot="R90"/>
-<instance part="R19" gate="G$1" x="114.3" y="172.72" rot="R90"/>
-<instance part="SUPPLY24" gate="GND" x="114.3" y="180.34" rot="R180"/>
+<instance part="R19" gate="G$1" x="111.76" y="172.72" rot="R90"/>
+<instance part="SUPPLY24" gate="GND" x="111.76" y="180.34" rot="R180"/>
 <instance part="C22" gate="G$1" x="53.34" y="109.22" rot="R90"/>
 <instance part="C23" gate="G$1" x="53.34" y="119.38" rot="R90"/>
-<instance part="S1" gate="G$1" x="25.4" y="193.04" rot="R180"/>
+<instance part="S1" gate="S" x="25.4" y="208.28"/>
 <instance part="VCC_SB12" gate="G$1" x="38.1" y="213.36" smashed="yes">
 <attribute name="VALUE" x="35.56" y="209.55" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="SUPPLY25" gate="GND" x="20.32" y="190.5"/>
+<instance part="SUPPLY25" gate="GND" x="20.32" y="203.2"/>
 <instance part="R20" gate="G$1" x="38.1" y="205.74" rot="R90"/>
 </instances>
 <busses>
@@ -14336,13 +14381,14 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="X7" gate="-10" pin="KL"/>
 <wire x1="27.94" y1="104.14" x2="33.02" y2="104.14" width="0.1524" layer="91"/>
 <pinref part="SUPPLY23" gate="GND" pin="GND"/>
+<label x="27.94" y="104.14" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="R19" gate="G$1" pin="2"/>
 <pinref part="SUPPLY24" gate="GND" pin="GND"/>
 </segment>
 <segment>
-<pinref part="S1" gate="G$1" pin="2"/>
+<pinref part="S1" gate="S" pin="2"/>
 <pinref part="SUPPLY25" gate="GND" pin="GND"/>
 </segment>
 </net>
@@ -14562,7 +14608,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 </segment>
 <segment>
 <pinref part="X7" gate="-9" pin="KL"/>
-<wire x1="27.94" y1="106.68" x2="33.02" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="106.68" x2="38.1" y2="106.68" width="0.1524" layer="91"/>
 <pinref part="VCC_SB11" gate="G$1" pin="VCC"/>
 </segment>
 <segment>
@@ -14607,16 +14653,17 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <net name="RESET" class="0">
 <segment>
 <label x="40.64" y="198.12" size="1.778" layer="95"/>
-<pinref part="S1" gate="G$1" pin="1"/>
-<wire x1="38.1" y1="198.12" x2="30.48" y2="198.12" width="0.1524" layer="91"/>
-<wire x1="30.48" y1="198.12" x2="30.48" y2="193.04" width="0.1524" layer="91"/>
+<pinref part="S1" gate="S" pin="1"/>
+<wire x1="38.1" y1="198.12" x2="17.78" y2="198.12" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="198.12" x2="17.78" y2="208.28" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="208.28" x2="20.32" y2="208.28" width="0.1524" layer="91"/>
 <pinref part="R20" gate="G$1" pin="1"/>
 <wire x1="38.1" y1="200.66" x2="38.1" y2="198.12" width="0.1524" layer="91"/>
 <pinref part="IC1" gate="G$1" pin="PC6(/RESET)"/>
 <wire x1="38.1" y1="198.12" x2="50.8" y2="198.12" width="0.1524" layer="91"/>
 <junction x="38.1" y="198.12"/>
-<wire x1="30.48" y1="198.12" x2="25.4" y2="198.12" width="0.1524" layer="91"/>
-<junction x="30.48" y="198.12"/>
+<wire x1="17.78" y1="198.12" x2="15.24" y2="198.12" width="0.1524" layer="91"/>
+<junction x="17.78" y="198.12"/>
 </segment>
 <segment>
 <wire x1="63.5" y1="238.76" x2="63.5" y2="233.68" width="0.1524" layer="91"/>
@@ -15298,7 +15345,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 </net>
 <net name="PS_ON" class="1">
 <segment>
-<wire x1="99.06" y1="167.64" x2="114.3" y2="167.64" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="167.64" x2="111.76" y2="167.64" width="0.1524" layer="91"/>
 <pinref part="IC1" gate="G$1" pin="PD3(INT1)"/>
 <label x="100.33" y="167.64" size="1.778" layer="95"/>
 <pinref part="R19" gate="G$1" pin="1"/>
@@ -15321,6 +15368,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="X7" gate="-2" pin="KL"/>
 <wire x1="33.02" y1="124.46" x2="27.94" y2="124.46" width="0.1524" layer="91"/>
 <label x="99.06" y="195.58" size="1.778" layer="95"/>
+<label x="27.94" y="124.46" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC2" class="0">
@@ -15330,6 +15378,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <wire x1="27.94" y1="121.92" x2="33.02" y2="121.92" width="0.1524" layer="91"/>
 <pinref part="X7" gate="-3" pin="KL"/>
 <label x="99.06" y="193.04" size="1.778" layer="95"/>
+<label x="27.94" y="121.92" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC3" class="0">
@@ -15341,6 +15390,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="X7" gate="-4" pin="KL"/>
 <wire x1="27.94" y1="119.38" x2="33.02" y2="119.38" width="0.1524" layer="91"/>
+<label x="27.94" y="119.38" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC4" class="0">
@@ -15352,6 +15402,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="X7" gate="-5" pin="KL"/>
 <wire x1="27.94" y1="116.84" x2="33.02" y2="116.84" width="0.1524" layer="91"/>
+<label x="27.94" y="116.84" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC5" class="0">
@@ -15363,6 +15414,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="X7" gate="-6" pin="KL"/>
 <wire x1="27.94" y1="114.3" x2="33.02" y2="114.3" width="0.1524" layer="91"/>
+<label x="27.94" y="114.3" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC6" class="0">
@@ -15374,6 +15426,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="X7" gate="-7" pin="KL"/>
 <wire x1="27.94" y1="111.76" x2="33.02" y2="111.76" width="0.1524" layer="91"/>
+<label x="27.94" y="111.76" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC7" class="0">
@@ -15385,6 +15438,7 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="X7" gate="-8" pin="KL"/>
 <wire x1="27.94" y1="109.22" x2="33.02" y2="109.22" width="0.1524" layer="91"/>
+<label x="27.94" y="109.22" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
