@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<!--
+  Slide System:
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+  <head>
+    <title>Elovalo Effect Challenge</title>
+
+    <meta charset='utf-8'>
+    <script
+      src='http://html5slides.googlecode.com/svn/trunk/slides.js'></script>
+  </head>
+
+  <style>
+    /* Your individual styles here, or just use inline styles if that’s
+       what you want. */
+    article {
+      background-color: white;
+      background: url(http://koti.kapsi.fi/~zipola/tmp/elovalo_logo_paths.svg) 820px 580px no-repeat;
+      background-size: 6% auto;
+    }
+
+    .source {
+      background-color: white;
+      padding: 0.5em;
+      opacity: 0.9;
+    }
+
+    section {
+      padding-top: 1em;
+    }
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular'>
+
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+
+     <article>
+        <h1>
+          <a href="http://elovalo.org">Elovalo</a> Effect Challenge
+        </h1>
+       <p>
+          Juho Vepsäläinen
+          <br>
+          Sept 5, 2012
+        </p>
+      </article>
+
+      <article>
+        <h2>
+          Elovalo, not El Ovalo!
+        </h2>
+        <section>
+        <ul>
+          <li>Valon Kaupunki (City of Light), Jyväskylä</li>
+          <li>Project proposal at Spring</li>
+          <li>Led cube thingy got through</li>
+          <li>Live Herring as a sponsor</li>
+          <li>Design, concepting done</li>
+          <li>Assembly (3x) + fx left</li>
+        </ul>
+        </section>
+      </article>
+
+      <article>
+        <h3>
+          Technical Specifications
+        </h3>
+        <section>
+        <ul>
+          <li>512 voxels (8x8x8 LEDs), double-buffered display</li>
+          <li>AVR ATMega328 @ 16MHz (2k SRAM (0.5k for you guys), 32k FLASH)</li>
+          <li>Sensors: proximity (x2), ambient sound, ambient light</li>
+          <li>Bidirectional UART interface</li>
+          <li>RTC for scheduling</li>
+        </ul>
+        </section>
+      </article>
+
+      <article>
+        <h3>
+          Software Specifications
+        </h3>
+        <section>
+        <ul>
+          <li>C (yay!) + some magic</li>
+          <li>Previz using Blender (got scripts for that)</li>
+          <li>Memory (that 0.5k) an issue</li>
+          <li>Procedural fx + buffer tricks ftw</li>
+        </ul>
+        </section>
+      </article>
+
+      <article>
+        <h3>
+          Demo Time!
+        </h3>
+        <ul>
+          <li>(Show the cube and simulator now, mkay?)</li>
+        </ul>
+      </article>
+
+     <article>
+        <p>
+          <img class='centered' style='height: 400px' src='http://i2.kym-cdn.com/photos/images/original/000/266/158/d8b.png'>
+        </p>
+        <div class='source'>
+          <a href="http://knowyourmeme.com/memes/challenge-accepted">http://knowyourmeme.com/memes/challenge-accepted</a>
+        </div>
+      </article>
+
+      <article>
+        <h3>
+          Challenge Accepted?
+        </h3>
+        <section>
+        <ul>
+          <li>Create playlists/effects</li>
+          <li><a href="https://github.com/hacklab-jkl/elovalo">Fork</a> and send us pull requests</li>
+          <li><a href="https://github.com/hacklab-jkl/elovalo/issues">Possible ideas and discussion</a></li>
+          <li>Rewards: fame and no fortune (at least you get to the credits + the effect will run on the real thing for a week)</li>
+          <li>Deadline: 19.9 (within two weeks)</li>
+        </ul>
+        </section>
+      </article>
+
+      <article>
+        <h3>
+          Thank you!
+        </h3>
+        <ul>
+          <li><a href='http://www.elovalo.org'>elovalo.org</a></li>
+        </ul>
+      </article>
+
+    </section>
+
+  </body>
+</html>
