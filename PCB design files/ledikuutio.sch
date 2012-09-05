@@ -13965,6 +13965,14 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <part name="VCC_SB12" library="supply2" deviceset="VCC" device="" value="VCC_SB"/>
 <part name="SUPPLY25" library="supply2" deviceset="GND" device=""/>
 <part name="R20" library="rcl" deviceset="R-EU_" device="M0805" value="10k"/>
+<part name="R21" library="rcl" deviceset="R-EU_" device="M0805" value="1920ohm"/>
+<part name="SUPPLY26" library="supply2" deviceset="GND" device=""/>
+<part name="R22" library="rcl" deviceset="R-EU_" device="M0805" value="1920ohm"/>
+<part name="R23" library="rcl" deviceset="R-EU_" device="M0805" value="1920ohm"/>
+<part name="R24" library="rcl" deviceset="R-EU_" device="M0805" value="1920ohm"/>
+<part name="SUPPLY27" library="supply2" deviceset="GND" device=""/>
+<part name="SUPPLY28" library="supply2" deviceset="GND" device=""/>
+<part name="SUPPLY29" library="supply2" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -14177,6 +14185,14 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 </instance>
 <instance part="SUPPLY25" gate="GND" x="20.32" y="203.2"/>
 <instance part="R20" gate="G$1" x="38.1" y="205.74" rot="R90"/>
+<instance part="R21" gate="G$1" x="149.86" y="213.36" rot="R180"/>
+<instance part="SUPPLY26" gate="GND" x="142.24" y="208.28"/>
+<instance part="R22" gate="G$1" x="149.86" y="170.18" rot="R180"/>
+<instance part="R23" gate="G$1" x="149.86" y="127" rot="R180"/>
+<instance part="R24" gate="G$1" x="149.86" y="83.82" rot="R180"/>
+<instance part="SUPPLY27" gate="GND" x="142.24" y="165.1"/>
+<instance part="SUPPLY28" gate="GND" x="142.24" y="121.92"/>
+<instance part="SUPPLY29" gate="GND" x="142.24" y="78.74"/>
 </instances>
 <busses>
 <bus name="MOSI,MISO,XLAT,BLANK,DCPRG,VPRG,GSCLK,SCLK,GSCLK/4">
@@ -14390,6 +14406,30 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <segment>
 <pinref part="S1" gate="S" pin="2"/>
 <pinref part="SUPPLY25" gate="GND" pin="GND"/>
+</segment>
+<segment>
+<pinref part="SUPPLY26" gate="GND" pin="GND"/>
+<pinref part="R21" gate="G$1" pin="2"/>
+<wire x1="142.24" y1="210.82" x2="142.24" y2="213.36" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="213.36" x2="144.78" y2="213.36" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="SUPPLY29" gate="GND" pin="GND"/>
+<pinref part="R24" gate="G$1" pin="2"/>
+<wire x1="142.24" y1="81.28" x2="142.24" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="83.82" x2="144.78" y2="83.82" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="SUPPLY28" gate="GND" pin="GND"/>
+<pinref part="R23" gate="G$1" pin="2"/>
+<wire x1="142.24" y1="124.46" x2="142.24" y2="127" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="127" x2="144.78" y2="127" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="SUPPLY27" gate="GND" pin="GND"/>
+<pinref part="R22" gate="G$1" pin="2"/>
+<wire x1="142.24" y1="167.64" x2="142.24" y2="170.18" width="0.1524" layer="91"/>
+<wire x1="142.24" y1="170.18" x2="144.78" y2="170.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MOSI" class="1">
@@ -15439,6 +15479,34 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="X7" gate="-8" pin="KL"/>
 <wire x1="27.94" y1="109.22" x2="33.02" y2="109.22" width="0.1524" layer="91"/>
 <label x="27.94" y="109.22" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$5" class="0">
+<segment>
+<pinref part="R21" gate="G$1" pin="1"/>
+<pinref part="U$4" gate="TLC5940" pin="IREF"/>
+<wire x1="154.94" y1="213.36" x2="157.48" y2="213.36" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="R23" gate="G$1" pin="1"/>
+<pinref part="U$2" gate="TLC5940" pin="IREF"/>
+<wire x1="154.94" y1="127" x2="157.48" y2="127" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$48" class="0">
+<segment>
+<pinref part="R24" gate="G$1" pin="1"/>
+<pinref part="U$1" gate="TLC5940" pin="IREF"/>
+<wire x1="154.94" y1="83.82" x2="157.48" y2="83.82" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$99" class="0">
+<segment>
+<pinref part="R22" gate="G$1" pin="1"/>
+<pinref part="U$3" gate="TLC5940" pin="IREF"/>
+<wire x1="154.94" y1="170.18" x2="157.48" y2="170.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
