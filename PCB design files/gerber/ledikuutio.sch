@@ -14681,12 +14681,6 @@ Source: http://focus.ti.com/lit/ds/symlink/iso7221a.pdf</description>
 <pinref part="ISP2" gate="-9" pin="KL"/>
 <label x="53.34" y="228.6" size="1.778" layer="95" rot="R90"/>
 </segment>
-<segment>
-<pinref part="IC1" gate="G$1" pin="PB4(MISO)"/>
-<wire x1="116.84" y1="139.7" x2="114.3" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="114.3" y1="142.24" x2="99.06" y2="142.24" width="0.1524" layer="91"/>
-<label x="99.06" y="142.24" size="1.778" layer="95"/>
-</segment>
 </net>
 <net name="RESET" class="0">
 <segment>
