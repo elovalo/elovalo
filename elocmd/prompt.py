@@ -1,6 +1,9 @@
 import binascii
 import cmd
+import json
+import os
 import sys
+import struct
 import time
 
 import conn
@@ -79,6 +82,33 @@ class EloCmd(cmd.Cmd):
                            ]
         return completions
 
+    def do_sensor(self, sensor_file):
+        f = open(sensor_file)
+        sensor_data = json.load(f)
+        f.close()
+        self._send_sensor_data(sensor_data["frames"][0])
+
+    def _send_sensor_data(self, data):
+        sdata = conv.sensor_data(data)
+        start = '\x00'
+        ln = '\x02'
+
+        for i in range(0, len(sdata), 2):
+            try:
+                d1 = sdata[i]
+                d2 = sdata[i+1]
+                self.conn.send_message(conf.CMD_SET_SENSOR,
+                    start + ln + d1 + d2)
+            except IndexError:
+                if conf.DEBUG:
+                    print("Error: Sensor data not dividable by 2")
+
+    def complete_sensor(self, text, line, begidx, endidx):
+        if not text:
+            return os.listdir(os.curdir)
+        else:
+            return [f for f in os.listdir(os.curdir) if f.startswith(text)]
+    
     def do_stop(self, line):
         'Sets the device to idle-mode'
         self.conn.send_message(conf.CMD_STOP)

@@ -34,13 +34,15 @@
 #define CMD_SET_TIME        0x04
 #define CMD_GET_TIME        0x05
 #define CMD_SET_SENSOR      0x06
+#define CMD_LIST_EFFECTS    0x07
 
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
-#define RESP_EFFECT_NAME    0x03
+#define RESP_EFFECT_NAMES   0x03
 #define RESP_EFFECT_END     0x04
 #define RESP_COMMAND_OK     0x05
 #define RESP_TIME           0x06
+#define RESP_COMMAND_NOT_AVAILABLE 0xef // When command is correct but cannot be answered 
 #define RESP_INVALID_CMD    0xf0
 #define RESP_INVALID_ARG_A  0xfa
 #define RESP_INVALID_ARG_B  0xfb
@@ -158,14 +160,7 @@ void process_cmd(void)
 		mode = MODE_EFFECT;
 		effect = effects + x.byte;
 
-		// Report new effect name to serial user
-		respond(RESP_EFFECT_NAME);
-		uint8_t *text_pgm = (uint8_t*)pgm_get(effect->name,word);
-		uint8_t c;
-		do {
-			c = pgm_read_byte(text_pgm++);
-			send_escaped(c);
-		} while (c != '\0');
+		respond(RESP_COMMAND_OK);
 
 		// Prevent flipping
 		may_flip = 0;
@@ -175,8 +170,16 @@ void process_cmd(void)
 		if (init != NULL) init();
 
 		// Swap buffer to bring back buffer to front
-		gs_buf_swap(); 
+		gs_buf_swap();
 		
+		/* Support NO_FLIP. Restore buffers to "normal state"
+		   (pointing to different locations) and then "broke"
+		   flipping if required by flip_buffers */
+		gs_restore_bufs();
+		if (pgm_get(effect->flip_buffers, byte) == NO_FLIP) {
+			gs_buf_back = gs_buf_front;
+		}
+
 		// Restart tick counter
 		reset_time();
 
@@ -233,6 +236,23 @@ void process_cmd(void)
 		}
 		
 		respond(RESP_COMMAND_OK);
+		break;
+	case CMD_LIST_EFFECTS:
+		// Report new effect name to serial user
+		if (effects_len == 0) {
+			respond(RESP_COMMAND_NOT_AVAILABLE);
+			break;
+		}
+		respond(RESP_EFFECT_NAMES);
+		for (uint8_t i=0; i<effects_len; i++) {
+			uint8_t *text_pgm = (uint8_t*)pgm_get(effects[i].name,word);
+			uint8_t c;
+			do {
+				c = pgm_read_byte(text_pgm++);
+				send_escaped(c);
+			} while (c != '\0');
+		}
+		send_escaped('\0');
 		break;
 	default:
 		dislike(RESP_INVALID_CMD,cmd);

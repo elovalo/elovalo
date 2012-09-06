@@ -14,5 +14,6 @@ extern uint8_t *gs_buf_front;
 extern uint8_t *gs_buf_back;
 
 void gs_buf_swap(void);
+void gs_restore_bufs(void);
 
 #endif /* CUBE_H_ */
