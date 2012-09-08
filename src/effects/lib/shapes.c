@@ -41,19 +41,24 @@ void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, fl
 	}
 }
 
-static void swap(uint8_t *a, uint8_t *b);
+static void swap(int8_t *a, int8_t *b);
 
 /*
  * Bresenham's algorithm in 3D.
  *
  * Reference: http://www.cobrabytes.com/index.php?topic=1150.0
  */
-void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
+void line(int8_t x1, int8_t y1, int8_t z1, int8_t x2, int8_t y2, int8_t z2,
 		uint16_t intensity)
 {
-	uint8_t delta_x, delta_y, delta_z, cx, cy, cz, x, y, z, swap_xy, swap_xz;
-	int8_t step_x, step_y, step_z, drift_xy, drift_xz;
-	float fac;
+	uint8_t delta_x, delta_y, delta_z, x, y, z, swap_xy, swap_xz;
+	int8_t drift_xy, drift_xz, cx, cy, cz;
+
+	if(x1 > x2) {
+		swap(&x1, &x2);
+		swap(&y1, &y2);
+		swap(&z1, &z2);
+	}
 
 	swap_xy = abs(y2 - y1) > abs(x2 - x1);
 	if(swap_xy) {
@@ -73,14 +78,11 @@ void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2
 
 	drift_xy = drift_xz = delta_x / 2;
 
-	step_x = x1 > x2? -1: 1;
-	step_y = y1 > y2? -1: 1;
-	step_z = z1 > z2? -1: 1;
-
 	y = y1;
 	z = z1;
 
-	for(x = x1; x < x2; x += step_x) {
+	// problematic if x1 == x2
+	for(x = x1; x < x2; x++) {
 		cx = x;
 		cy = y;
 		cz = z;
@@ -94,19 +96,31 @@ void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2
 		drift_xz -= delta_z;
 
 		if(drift_xy < 0) {
-			y += step_y;
+			y++;;
 			drift_xy += delta_x;
 		}
 
 		if(drift_xz < 0) {
-			z += step_z;
+			z++;
 			drift_xz += delta_x;
 		}
 	}
 }
 
-static void swap(uint8_t *a, uint8_t *b) {
-	uint8_t tmp = *a;
+static void swap(int8_t *a, int8_t *b) {
+	int8_t tmp = *a;
 	*a = *b;
 	*b = tmp;
+}
+
+void cube_shape(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
+		uint16_t intensity)
+{
+	line(x1, y1, z1, x1, y1, z2, intensity);
+	line(x1, y1, z1, x2, y1, z1, intensity);
+	line(x1, y1, z1, x1, y2, z1, intensity);
+
+	line(x2, y2, z2, x2, y2, z1, intensity);
+	line(x2, y2, z2, x2, y1, z2, intensity);
+	line(x2, y2, z2, x1, y2, z2, intensity);
 }
