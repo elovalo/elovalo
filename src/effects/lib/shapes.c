@@ -60,13 +60,13 @@ void line(int8_t x1, int8_t y1, int8_t z1, int8_t x2, int8_t y2, int8_t z2,
 		swap(&z1, &z2);
 	}
 
-	swap_xy = abs(y2 - y1) > abs(x2 - x1);
+	swap_xy = abs(y2 - y1) >= abs(x2 - x1);
 	if(swap_xy) {
 		swap(&x1, &y1);
 		swap(&x2, &y2);
 	}
 
-	swap_xz = abs(z2 - z1) > abs(x2 - x1);
+	swap_xz = abs(z2 - z1) >= abs(x2 - x1);
 	if(swap_xz) {
 		swap(&x1, &z1);
 		swap(&x2, &z2);
@@ -81,22 +81,21 @@ void line(int8_t x1, int8_t y1, int8_t z1, int8_t x2, int8_t y2, int8_t z2,
 	y = y1;
 	z = z1;
 
-	// problematic if x1 == x2
-	for(x = x1; x < x2; x++) {
+	for(x = x1; x <= x2; x++) {
 		cx = x;
 		cy = y;
 		cz = z;
 
-		set_led(cx, cy, cz, intensity);
-
 		if(swap_xz) swap(&cx, &cz);
 		if(swap_xy) swap(&cx, &cy);
+
+		set_led(cx, cy, cz, intensity);
 
 		drift_xy -= delta_y;
 		drift_xz -= delta_z;
 
 		if(drift_xy < 0) {
-			y++;;
+			y++;
 			drift_xy += delta_x;
 		}
 
@@ -120,7 +119,9 @@ void cube_shape(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint
 	line(x1, y1, z1, x2, y1, z1, intensity);
 	line(x1, y1, z1, x1, y2, z1, intensity);
 
-	line(x2, y2, z2, x2, y2, z1, intensity);
-	line(x2, y2, z2, x2, y1, z2, intensity);
+	line(x2, y2, z2, x2, y2, z1, intensity); // XXX: does not show up
+	line(x2, y2, z2, x2, y1, z2, intensity); // XXX: does not show up
 	line(x2, y2, z2, x1, y2, z2, intensity);
+
+	//line(0, 0, 7, 7, 7, 6, intensity); // XXX: fails!!!
 }
