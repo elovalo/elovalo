@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "utils.h"
 
 static void heart_layer(uint8_t x, uint16_t intensity);
@@ -38,4 +39,74 @@ void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, fl
 			}
 		}
 	}
+}
+
+static void swap(uint8_t *a, uint8_t *b);
+
+/*
+ * Bresenham's algorithm in 3D.
+ *
+ * Reference: http://www.cobrabytes.com/index.php?topic=1150.0
+ */
+void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
+		uint16_t intensity)
+{
+	uint8_t delta_x, delta_y, delta_z, cx, cy, cz, x, y, z, swap_xy, swap_xz;
+	int8_t step_x, step_y, step_z, drift_xy, drift_xz;
+	float fac;
+
+	swap_xy = abs(y2 - y1) > abs(x2 - x1);
+	if(swap_xy) {
+		swap(&x1, &y1);
+		swap(&x2, &y2);
+	}
+
+	swap_xz = abs(z2 - z1) > abs(x2 - x1);
+	if(swap_xz) {
+		swap(&x1, &z1);
+		swap(&x2, &z2);
+	}
+
+	delta_x = abs(x2 - x1);
+	delta_y = abs(y2 - y1);
+	delta_z = abs(z2 - z1);
+
+	drift_xy = drift_xz = delta_x / 2;
+
+	step_x = x1 > x2? -1: 1;
+	step_y = y1 > y2? -1: 1;
+	step_z = z1 > z2? -1: 1;
+
+	y = y1;
+	z = z1;
+
+	for(x = x1; x < x2; x += step_x) {
+		cx = x;
+		cy = y;
+		cz = z;
+
+		set_led(cx, cy, cz, intensity);
+
+		if(swap_xz) swap(&cx, &cz);
+		if(swap_xy) swap(&cx, &cy);
+
+		drift_xy -= delta_y;
+		drift_xz -= delta_z;
+
+		if(drift_xy < 0) {
+			y += step_y;
+			drift_xy += delta_x;
+		}
+
+		if(drift_xz < 0) {
+			z += step_z;
+			drift_xz += delta_x;
+		}
+	}
+}
+
+static void swap(uint8_t *a, uint8_t *b) {
+	uint8_t tmp = *a;
+	*a = *b;
+	*b = tmp;
 }
