@@ -29,7 +29,7 @@ const struct action_info cron_actions[] PROGMEM = {
  * arbitary intervals, though running it once per minute is a wise
  * choice. NB. Interrupts should be enabled when calling this!
  */ 
-void run_cron_check(const time_t now) {
+void run_cron(const time_t now) {
 	static time_t last_time = 0;
 
 	time_t start_of_day = now / SECS_IN_DAY * SECS_IN_DAY;

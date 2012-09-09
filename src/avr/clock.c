@@ -1,6 +1,7 @@
 #include <util/atomic.h>
 #include <stdlib.h>
 #include "clock.h"
+#include "cron.h"
 
 /* ticks_volatile is incremented roughly every 1 millisecond and
  * overflows every 64th second. The tick counter is in effect_utils.c,
@@ -19,6 +20,7 @@ static volatile struct {
 /* Private functions */
 static uint8_t is_time_valid(void);
 static uint8_t calc_posix_time_cksum(void);
+static void enable_interrupts_and_run_cron(void);
 
 /* Dividing 8 ms interval with 125 to get exactly 1 second */
 #define POSIX_DIVIDER 125
@@ -38,6 +40,10 @@ ISR(TIMER2_COMPA_vect)
 
 		// Update checksum
 		rtc.cksum = calc_posix_time_cksum();
+
+		/* ATTENTION! Running of cron enables interrupts. This
+		 * must be last line of interrupt handler! */
+		enable_interrupts_and_run_cron();
 	}
 }
 
@@ -112,4 +118,19 @@ static uint8_t calc_posix_time_cksum(void) {
  */
 static uint8_t is_time_valid(void) {
 	return calc_posix_time_cksum() == rtc.cksum;
+}
+
+void enable_interrupts_and_run_cron(void) {
+	static uint8_t cron_running = 0;
+
+	if (cron_running) {
+		// TODO light up debug LED
+		return;
+	}
+	
+	cron_running = 1;
+	const time_t now = rtc.time; // Storing over sei()
+	sei();
+	run_cron(now);
+	cron_running = 0;
 }

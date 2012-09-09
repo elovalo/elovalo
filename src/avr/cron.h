@@ -34,7 +34,7 @@ struct action_info {
 	const char *arg_name; // Name of the argument. NULL if not used.
 };
 
-void run_cron_check(const time_t now);
+void run_cron(const time_t now);
 void serial_hello(uint8_t x);
 
 #endif /* CRON_H_ */
