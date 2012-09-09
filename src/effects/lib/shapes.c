@@ -158,4 +158,5 @@ void cube_shape(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint
 	line(x2, y1, z1, x2, y1, z2, intensity);
 	line(x2, y1, z1, x2, y2, z1, intensity);
 	line(x1, y1, z2, x1, y2, z2, intensity);
+	line(x1, y1, z2, x2, x1, z2, intensity);
 }
