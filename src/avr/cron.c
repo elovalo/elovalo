@@ -3,7 +3,6 @@
  */
 
 #include <stdlib.h>
-#include <avr/eeprom.h>
 #include "../pgmspace.h"
 #include "timer.h"
 #include "cron.h"
@@ -43,7 +42,7 @@ void run_cron_check(const time_t now) {
 
 	for (int i=0; i<CRONTAB_SIZE; i++) {
 		struct event e;
-		eeprom_read_block(&e,eeprom_crontab+i,sizeof(struct event));
+		get_crontab_entry(&e,i);
 		
 		// Doing the checks
 		if (e.kind == END) break;

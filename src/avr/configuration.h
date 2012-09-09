@@ -1,5 +1,3 @@
-#include "cron.h"
-
 #define CRONTAB_SIZE 10
 
-extern struct event eeprom_crontab[];
+void get_crontab_entry(struct event *e,uint8_t i);
