@@ -1,2 +1,5 @@
 *.blend*
 !*.blend
+*.avi
+exports/
+tmp/
