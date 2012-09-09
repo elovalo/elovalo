@@ -120,6 +120,10 @@ static uint8_t is_time_valid(void) {
 	return calc_posix_time_cksum() == rtc.cksum;
 }
 
+/**
+ * Runs cron with enabled interrupts. Detects if a cron run has been
+ * running too long.
+ */
 void enable_interrupts_and_run_cron(void) {
 	static uint8_t cron_running = 0;
 
