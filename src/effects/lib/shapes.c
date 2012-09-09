@@ -41,87 +41,115 @@ void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, fl
 	}
 }
 
-static void swap(int8_t *a, int8_t *b);
-
 /*
  * Bresenham's algorithm in 3D.
  *
- * Reference: http://www.cobrabytes.com/index.php?topic=1150.0
+ * Reference: ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
  */
-void line(int8_t x1, int8_t y1, int8_t z1, int8_t x2, int8_t y2, int8_t z2,
-		uint16_t intensity)
+void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
+	uint16_t intensity)
 {
-	uint8_t delta_x, delta_y, delta_z, x, y, z, swap_xy, swap_xz;
-	int8_t drift_xy, drift_xz, cx, cy, cz;
+	uint8_t x, y, z, ax, ay, az;
+	int8_t xd, yd, zd, dx, dy, dz, sx, sy, sz;
 
-	if(x1 > x2) {
-		swap(&x1, &x2);
-		swap(&y1, &y2);
-		swap(&z1, &z2);
-	}
+	dx = x2 - x1;
+	dy = y2 - y1;
+	dz = z2 - z1;
 
-	swap_xy = abs(y2 - y1) >= abs(x2 - x1);
-	if(swap_xy) {
-		swap(&x1, &y1);
-		swap(&x2, &y2);
-	}
+	ax = ABS(dx) << 1;
+	ay = ABS(dy) << 1;
+	az = ABS(dz) << 1;
 
-	swap_xz = abs(z2 - z1) >= abs(x2 - x1);
-	if(swap_xz) {
-		swap(&x1, &z1);
-		swap(&x2, &z2);
-	}
+	sx = ZSGN(dx);
+	sy = ZSGN(dy);
+	sz = ZSGN(dz);
 
-	delta_x = abs(x2 - x1);
-	delta_y = abs(y2 - y1);
-	delta_z = abs(z2 - z1);
-
-	drift_xy = drift_xz = delta_x / 2;
-
+	x = x1;
 	y = y1;
 	z = z1;
 
-	for(x = x1; x <= x2; x++) {
-		cx = x;
-		cy = y;
-		cz = z;
+	if(ax >= MAX(ay, az)) { /* x dominant */
+		yd = ay - (ax >> 1);
+		zd = az - (ax >> 1);
 
-		if(swap_xz) swap(&cx, &cz);
-		if(swap_xy) swap(&cx, &cy);
+		for(;;) {
+			set_led(x, y, z, intensity);
 
-		set_led(cx, cy, cz, intensity);
+			if(x == x2) return;
 
-		drift_xy -= delta_y;
-		drift_xz -= delta_z;
+			if(yd >= 0) {
+				y += sy;
+				yd -= ax;
+			}
 
-		if(drift_xy < 0) {
-			y++;
-			drift_xy += delta_x;
+			if(zd >= 0) {
+				z += sz;
+				zd -= ax;
+			}
+
+			x += sx;
+			yd += ay;
+			zd += az;
 		}
+	}
+	else if(ay >= MAX(ax, az)) { /* y dominant */
+		xd = ax - (ay >> 1);
+		zd = az - (ay >> 1);
 
-		if(drift_xz < 0) {
-			z++;
-			drift_xz += delta_x;
+		for(;;) {
+			set_led(x, y, z, intensity);
+
+			if(y == y2) return;
+
+			if(xd >= 0) {
+				x += sx;
+				xd -= ay;
+			}
+
+			if(zd >= 0) {
+				z += sz;
+				zd -= ay;
+			}
+
+			y += sy;
+			xd += ax;
+			zd += az;
+		}
+	}
+	else if(az >= MAX(ax, ay)) { /* z dominant */
+		xd = ax - (az >> 1);
+		yd = ay - (az >> 1);
+
+		for(;;) {
+			set_led(x, y, z, intensity);
+
+			if(z == z2) return;
+
+			if(xd >= 0) {
+				x += sx;
+				xd -= az;
+			}
+
+			if(yd >= 0) {
+				y += sy;
+				yd -= az;
+			}
+
+			z += sz;
+			xd += ax;
+			yd += ay;
 		}
 	}
 }
 
-static void swap(int8_t *a, int8_t *b) {
-	int8_t tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-
 void cube_shape(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
-		uint16_t intensity)
+	uint16_t intensity)
 {
 	line(x1, y1, z1, x1, y1, z2, intensity);
 	line(x1, y1, z1, x2, y1, z1, intensity);
 	line(x1, y1, z1, x1, y2, z1, intensity);
 
-	line(x2, y2, z2, x2, y2, z1, intensity); // XXX: does not show up
-	line(x2, y2, z2, x2, y1, z2, intensity); // XXX: does not show up
+	line(x2, y2, z2, x2, y2, z1, intensity);
+	line(x2, y2, z2, x2, y1, z2, intensity);
 	line(x2, y2, z2, x1, y2, z2, intensity);
-
-	//line(0, 0, 7, 7, 7, 6, intensity); // XXX: fails!!!
 }
