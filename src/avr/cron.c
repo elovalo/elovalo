@@ -39,7 +39,7 @@ void run_cron(const time_t now) {
 	int16_t now_min = (now - start_of_day)/60;
 	uint8_t weekday = (uint8_t)(now / SECS_IN_DAY % 7);
 
-	for (int i=0; i<CRONTAB_SIZE; i++) {
+	for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
 		struct event e;
 		get_crontab_entry(&e,i);
 		
@@ -52,10 +52,12 @@ void run_cron(const time_t now) {
 			// If haven't happened, skip
 			if (e.u.weekly.minutes <= last_min) continue;
 			if (e.u.weekly.minutes > now_min) continue;
-		}
-		else if (e.kind == ONETIME) {
+		} else if (e.kind == ONETIME) {
 			if (e.u.onetime.ts <= last_time) continue;
 			if (e.u.onetime.ts > now) continue;
+		} else {
+			// Unknown code. TODO light up DEBUG led
+			break;
 		}
 		
 		// We got a match, run the action.

@@ -30,7 +30,7 @@ struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 /**
  * Gets single crontab entry from crontab (stored on EEPROM).
  */
-void get_crontab_entry(struct event *e,uint8_t i)
+void get_crontab_entry(struct event *p,uint8_t i)
 {
-	eeprom_read_block(&e,eeprom_crontab+i,sizeof(struct event));
+	eeprom_read_block(p,eeprom_crontab+i,sizeof(struct event));
 }
