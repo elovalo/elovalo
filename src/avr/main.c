@@ -17,7 +17,7 @@
 #include "init.h"
 #include "tlc5940.h"
 #include "serial.h"
-#include "timer.h"
+#include "clock.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"

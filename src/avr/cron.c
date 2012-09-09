@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include "../pgmspace.h"
-#include "timer.h"
 #include "cron.h"
 #include "powersave.h"
 #include "configuration.h"

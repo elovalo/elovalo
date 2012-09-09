@@ -1,6 +1,6 @@
 #include <util/atomic.h>
 #include <stdlib.h>
-#include "timer.h"
+#include "clock.h"
 
 /* ticks_volatile is incremented roughly every 1 millisecond and
  * overflows every 64th second. The tick counter is in effect_utils.c,

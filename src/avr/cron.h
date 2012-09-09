@@ -1,7 +1,7 @@
 #ifndef CRON_H_
 #define CRON_H_
 
-#include "timer.h"
+#include "clock.h"
 
 typedef void(*action_t)(uint8_t);
 
