@@ -3,7 +3,7 @@
 
 #include "timer.h"
 
-typedef void(*action_t)(void);
+typedef void(*action_t)(uint8_t);
 
 enum event_kind {
 	WEEKLY  = 0x00, // Weekly caledar
@@ -14,7 +14,8 @@ enum event_kind {
 
 struct event {
 	enum event_kind kind;
-	uint8_t act; // Action to run
+	action_t act; // Function to run
+	uint8_t arg;  // Argument for the action
 	union {
 		struct {
 			uint8_t weekdays; // Thursday is LSB
@@ -26,10 +27,14 @@ struct event {
 	} u;
 };
 
-// Define these things more portable way
-#define CUBE_SHUTDOWN 0
-#define CUBE_START 1
-#define	SERIAL_HELLO 2
+/* This structure holds information about the cron actions */
+struct action_info {
+	action_t act;         // Action function pointer
+	const char *act_name; // Name for action
+	const char *arg_name; // Name of the argument. NULL if not used.
+};
 
+void run_cron_check(const time_t now);
+void serial_hello(uint8_t x);
 
 #endif /* SCHEDULE_H_ */

@@ -1,2 +1,2 @@
-void cube_start(void);
-void cube_shutdown(void);
+void cube_start(uint8_t unused);
+void cube_shutdown(uint8_t unused);

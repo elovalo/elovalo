@@ -13,29 +13,37 @@
 
 #define SECS_IN_DAY ((time_t)60*60*24)
 
-void serial_hello(void);
+// The info table for serial port access
 
-const action_t actions[] PROGMEM = { 
-	cube_shutdown,
-	cube_start,
-	serial_hello
+PROGMEM const char s_cube_shutdown[] = "Power-off the cube part";
+PROGMEM const char s_cube_start[] = "Power-on the cube part";
+PROGMEM const char s_serial_hello[] = "Say \"hello\" to serial console";
+PROGMEM const char s_serial_hello_arg[] = "Number to write after \"hello\"";
+
+const struct action_info cron_actions[] PROGMEM = { 
+	{ &cube_shutdown, s_cube_shutdown, NULL },
+	{ &cube_start, s_cube_start, NULL },
+	{ &serial_hello, s_serial_hello, s_serial_hello_arg}
 };
 
-void periodic_check() {
+/**
+ * Checks if it any actions are needed to be run. May be run at
+ * arbitary intervals, though running it once per minute is a wise
+ * choice. NB. Interrupts should be enabled when calling this!
+ */ 
+void run_cron_check(const time_t now) {
 	static time_t last_time = 0;
 
-	// Some calculations. TODO if interrupts are enabled, do not use this unsafe thingy
-	time_t start_of_day = unsafe_time(NULL) / SECS_IN_DAY * SECS_IN_DAY;
+	time_t start_of_day = now / SECS_IN_DAY * SECS_IN_DAY;
 	int16_t last_min = (last_time < start_of_day)
 		? -1
 		: (last_time-start_of_day)/60;
-	int16_t now_min = (unsafe_time(NULL) - start_of_day)/60;
-	uint8_t weekday = (uint8_t)(unsafe_time(NULL) / SECS_IN_DAY % 7);
+	int16_t now_min = (now - start_of_day)/60;
+	uint8_t weekday = (uint8_t)(now / SECS_IN_DAY % 7);
 
-	struct event *eeprom_p = &eeprom_schedule;
-	while (eeprom_p++) {
+	for (int i=0; i<CRONTAB_SIZE; i++) {
 		struct event e;
-		eeprom_read_block(&e,eeprom_p,sizeof(struct event));
+		eeprom_read_block(&e,eeprom_crontab+i,sizeof(struct event));
 		
 		// Doing the checks
 		if (e.kind == END) break;
@@ -49,21 +57,21 @@ void periodic_check() {
 		}
 		else if (e.kind == ONETIME) {
 			if (e.u.onetime.ts <= last_time) continue;
-			if (e.u.onetime.ts > unsafe_time(NULL)) continue;
+			if (e.u.onetime.ts > now) continue;
 		}
 		
 		// We got a match, run the action.
-		action_t act = (action_t)pgm_get(actions[e.act],word);
-		act();
+		e.act(e.arg);
 	}
 
-	last_time = unsafe_time(NULL);
+	last_time = now;
 }
 
-void serial_hello(void) {
+void serial_hello(uint8_t x) {
 	serial_send('h');
 	serial_send('e');
 	serial_send('l');
 	serial_send('l');
 	serial_send('o');
+	serial_send('0'+x);
 }

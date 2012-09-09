@@ -1,5 +1,5 @@
 #include "schedule.h"
 
-#define SCHEDULE_SIZE 10
+#define CRONTAB_SIZE 10
 
-extern struct event eeprom_schedule[];
+extern struct event eeprom_crontab[];

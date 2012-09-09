@@ -1,25 +1,29 @@
 #include <avr/eeprom.h>
 #include "schedule.h"
 #include "initial_eeprom.h"
+#include "powersave.h"
 
 #define EVERY_DAY 0x7f
+#define END_OF_CRONTAB { .kind = END }
 
 #define TIME(h,m) ((h)*60+(m))
-#define END_OF_SCHEDULE { .kind = END }
 
-struct event eeprom_schedule[SCHEDULE_SIZE] EEMEM = {
+
+/* Initial contents of EEPROM after programming. In future this may be
+ * empty but currently it holds schedule for daily powersave from
+ * 02:00–19:00. */
+struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 	{ .kind = WEEKLY,
-	  .act = CUBE_START,
+	  .act = &cube_shutdown,
 	  .u = { .weekly = { .weekdays = EVERY_DAY,
 			     .minutes = TIME(2,0) },
 		}
 	},
 	{ .kind = WEEKLY,
-	  .act = CUBE_SHUTDOWN,
+	  .act = &cube_start,
 	  .u = { .weekly = { .weekdays = EVERY_DAY,
 			     .minutes = TIME(19,0) },
 		}
 	},
-	END_OF_SCHEDULE
+	END_OF_CRONTAB
 };
-
