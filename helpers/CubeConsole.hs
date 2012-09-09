@@ -49,7 +49,7 @@ main = do
 -- |Configures serial port for Active Robots I2C converter.
 configureSerialPort :: FilePath -> IO ()
 configureSerialPort devPath = do
-  code <- rawSystem "stty" ["-F",devPath,"9600","cs8","cstopb","-parenb","raw"]
+  code <- rawSystem "stty" ["-F",devPath,"9600","cs8","cstopb","-parenb","raw","-hupcl"]
   unless (code==ExitSuccess) $ fail "Serial port configuration failed."
 
 parseFully h p = do
