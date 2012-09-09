@@ -1,13 +1,12 @@
 #include <avr/eeprom.h>
-#include "schedule.h"
-#include "initial_eeprom.h"
+#include "cron.h"
+#include "configuration.h"
 #include "powersave.h"
 
 #define EVERY_DAY 0x7f
 #define END_OF_CRONTAB { .kind = END }
 
 #define TIME(h,m) ((h)*60+(m))
-
 
 /* Initial contents of EEPROM after programming. In future this may be
  * empty but currently it holds schedule for daily powersave from

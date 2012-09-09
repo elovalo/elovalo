@@ -6,9 +6,9 @@
 #include <avr/eeprom.h>
 #include "../pgmspace.h"
 #include "timer.h"
-#include "schedule.h"
+#include "cron.h"
 #include "powersave.h"
-#include "initial_eeprom.h"
+#include "configuration.h"
 #include "serial.h" // For temporary debug code
 
 #define SECS_IN_DAY ((time_t)60*60*24)

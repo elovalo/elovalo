@@ -1,5 +1,5 @@
-#ifndef SCHEDULE_H_
-#define SCHEDULE_H_
+#ifndef CRON_H_
+#define CRON_H_
 
 #include "timer.h"
 
@@ -37,4 +37,4 @@ struct action_info {
 void run_cron_check(const time_t now);
 void serial_hello(uint8_t x);
 
-#endif /* SCHEDULE_H_ */
+#endif /* CRON_H_ */
