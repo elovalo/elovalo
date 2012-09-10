@@ -2,6 +2,7 @@
 # ./playlist <playlist> <path>
 import os
 import sys
+import json
 
 import utils
 
@@ -14,16 +15,7 @@ def seek(data, **kwargs):
     return [k['playlist'] for k in data if filter(kwargs.get, k.keys())][0]
 
 
-def find_effects(playlist):
-    effect_names = map(lambda k: k['name'], playlist)
-    effects = dict(zip(effect_names, [[] for n in range(len(effect_names))]))
-
-    [effects[k['name']].append(int(k['length'])) for k in playlist]
-
-    return [(k, max(v)) for k, v in effects.items()]
-
-
-if __name__ == '__main__':
+def main():
     p = utils.parser()
     p.add_argument('playlist', help='name of the playlist to render')
     p.add_argument('output', help='output path')
@@ -34,13 +26,34 @@ if __name__ == '__main__':
         args = p.parse_args()
 
         playlist = seek(data, name=args.playlist)
-        effects = find_effects(playlist)
 
-        for effect, length in effects:
-            utils.export(effect, args.output, length / 1000)
+        fps = 0
+        geometry = None
+        length = 0
+        frames = []
+        for effect in playlist:
+            l = float(effect['length']) / 1000.0
+            utils.export(effect['name'], args.output, l)
+            length += l
 
-        # TODO: get effects + max lengths and export
-        #utils.export(effect, args.output, length)
-        # TODO: export each effect mentioned in the playlist
-        # fetch name + max length for each (need to use min for each at render)
-        #utils.execute(args) utils.render(...)
+            with open(os.path.join('exports', effect['name'] + '.json'),
+                    'r') as f:
+                d = json.load(f)
+                frames.extend(d['frames'][:int(l * d['fps'])])
+                fps = d['fps']
+                geometry = d['geometry']
+
+        with open(os.path.join('exports', 'playlist.json'), 'w') as f:
+            json.dump({
+                    'fps': fps,
+                    'geometry': geometry,
+                    'frames': frames,
+                },
+                f
+            )
+
+        utils.render_animation('playlist', args.output, length)
+
+
+if __name__ == '__main__':
+    main()
