@@ -2,6 +2,7 @@
  * Functions for accessing schedule
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include "../pgmspace.h"
 #include "cron.h"
@@ -23,6 +24,26 @@ const struct action_info cron_actions[] PROGMEM = {
 	{ &cube_start, s_cube_start, NULL },
 	{ &serial_hello, s_serial_hello, s_serial_hello_arg}
 };
+
+#define CRON_ACTIONS_LEN (sizeof(cron_actions)/sizeof(struct action_info))
+
+/**
+ * Validate event contents (before accepting it from serial console).
+ */
+bool validate_event(struct event *e)
+{
+	// Validate kind. END is not there for a reason.
+	if (e->kind != WEEKLY &&
+	    e->kind != ONETIME &&
+	    e->kind != EMPTY) return false;
+
+	// Validate act
+	for (uint8_t i=0; i<CRON_ACTIONS_LEN; i++) {
+		action_t x = (action_t)pgm_get(cron_actions[i].act, word);
+		if (e->act == x) return true;
+	}
+	return false;
+}
 
 /**
  * Checks if it any actions are needed to be run. May be run at

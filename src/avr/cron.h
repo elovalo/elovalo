@@ -1,6 +1,7 @@
 #ifndef CRON_H_
 #define CRON_H_
 
+#include <stdbool.h>
 #include "clock.h"
 
 typedef void(*action_t)(uint8_t);
@@ -10,6 +11,8 @@ enum event_kind {
 	ONETIME = 0x01, // One-time event
 	EMPTY   = 0xfe, // Not set, go to next
 	END     = 0xff  // End of schedule
+	/* After adding types, remember to update validate_event() and
+	   run_cron() */
 };
 
 struct event {
@@ -36,5 +39,6 @@ struct action_info {
 
 void run_cron(const time_t now);
 void serial_hello(uint8_t x);
+bool validate_event(struct event *e);
 
 #endif /* CRON_H_ */
