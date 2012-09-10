@@ -1,42 +1,30 @@
-import binascii
 import cmd
 import json
 import os
 import sys
-import struct
-import time
 
+import commands
 import conn
-from conn import Message
-import conf
-import conv
 import resp
 
 class EloCmd(cmd.Cmd):
 
-    EFFECTS = {
-        'game_of_life': '\x01',
-        'heart':        '\x02',
-        'brownian':     '\x03',
-        'sine':         '\x04',
-        'wave':         '\x05',
-        'sphere':       '\x06',
-        'worm':         '\x07',
-        'const':        '\x08',
-        'layers':       '\x09',
-        'all_on':       '\x0a',
-    }
-
     intro  = 'Type help to see available commands'
     prompt = ' > '
 
+    _initialized = False
     conn = None
 
+    def _init(self):
+        if self._initialized:
+            return
+
+        self.conn = conn.Connection()
+        self.commands = commands.Commands(self.conn)
+        self._initialized = True
+
     def preloop(self):
-        if not self.conn:
-            self.conn = conn.Connection()
-            self.conn.send_message(conf.CMD_GET_TIME)
-            self._process_resps(self.conn.read_responses())
+        self._init()
 
     def postloop(self):
         self.conn.close()
@@ -48,60 +36,36 @@ class EloCmd(cmd.Cmd):
 
     def do_time(self, param):
         'Get the current time difference from the device'
-        self.conn.send_message(conf.CMD_GET_TIME)
+        self.commands.get_time()
         return True
 
     def do_sync(self, line):
         'Sync the device time to your computer time'
-        t = conv.intToLong(int(time.time()))
-        self.conn.send_message(conf.CMD_SET_TIME, t)
+        self.commands.sync_time()
         return True
 
     def do_effect(self, effect):
         "Runs an effect on the device, accepts either effect name, or a 'f1' formatted hexadecimal effect number"
-        e = ''
-        if  effect in self.EFFECTS:
-            e = self.EFFECTS[effect]
-        elif len(effect) == 2:
-            try:
-                e = binascii.unhexlify(effect)
-            except TypeError:
-                print('Incorrect hex effect')
-        else:
-            print('No such effect')
-            return
-        self.conn.send_message(conf.CMD_CHANGE_EFFECT, e)
+        try:
+            self.commands.run_effect(effect)
+        except commands.NoEffectException, e:
+            print(e)
 
     def complete_effect(self, text, line, begidx, endidx):
         if not text:
-            completions = self.EFFECTS.keys()
+            completions = self.commands.EFFECTS.keys()
         else:
             completions = [f
-                           for f in self.EFFECTS.keys()
+                           for f in self.commands.EFFECTS.keys()
                            if f.startswith(text)
                            ]
         return completions
 
     def do_sensor(self, sensor_file):
-        f = open(sensor_file)
-        sensor_data = json.load(f)
-        f.close()
-        self._send_sensor_data(sensor_data["frames"][0])
-
-    def _send_sensor_data(self, data):
-        sdata = conv.sensor_data(data)
-        start = '\x00'
-        ln = '\x02'
-
-        for i in range(0, len(sdata), 2):
-            try:
-                d1 = sdata[i]
-                d2 = sdata[i+1]
-                self.conn.send_message(conf.CMD_SET_SENSOR,
-                    start + ln + d1 + d2)
-            except IndexError:
-                if conf.DEBUG:
-                    print("Error: Sensor data not dividable by 2")
+        try:
+            self.commands.send_sensor_data(sensor_file)
+        except IOError:
+            print("Could not open sensor data file")
 
     def complete_sensor(self, text, line, begidx, endidx):
         if not text:
@@ -111,19 +75,18 @@ class EloCmd(cmd.Cmd):
     
     def do_stop(self, line):
         'Sets the device to idle-mode'
-        self.conn.send_message(conf.CMD_STOP)
+        self.commands.stop()
 
     def do_quit(self, line):
         'Quits this prompt'
         sys.exit()
 
     def do_EOF(self, line):
+        #TODO: Exit on EOF
         return True
 
     def precmd(self, line):
-        if not self.conn:
-            self.conn = conn.Connection()
-            self._process_resps(self.conn.read_responses())
+        self._init()
         return cmd.Cmd.precmd(self, line)
 
     def postcmd(self, stop, line):

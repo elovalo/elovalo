@@ -35,7 +35,7 @@ def do_nothing(body):
 _responses = {
     conf.RESP_REBOOT:      reboot,
     conf.RESP_TIME:        time_,
-    conf.RESP_EFFECT_NAME: effect_name,
+    conf.RESP_EFFECT_NAMES: effect_name,
     conf.RESP_INVALID_CMD: invalid_cmd,
     conf.RESP_EFFECT_END:  do_nothing,
     conf.RESP_COMMAND_OK:  do_nothing

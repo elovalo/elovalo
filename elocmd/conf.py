@@ -26,10 +26,14 @@ CMD_SET_SENSOR     = '\x06'
 
 RESP_REBOOT        = '\x01'
 RESP_SWAP          = '\x02'
-RESP_EFFECT_NAME   = '\x03'
+RESP_EFFECT_NAMES   = '\x03'
 RESP_EFFECT_END    = '\x04'
 RESP_COMMAND_OK    = '\x05'
 RESP_TIME          = '\x06'
+
+# When command is correct but cannot be answered
+RESP_COMMAND_NOT_AVAILABLE = '\xef'
+
 RESP_INVALID_CMD   = '\xf0'
 RESP_INVALID_ARG_A = '\xfa'
 RESP_INVALID_ARG_B = '\xfb'
