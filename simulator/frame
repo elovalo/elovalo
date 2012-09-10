@@ -2,12 +2,12 @@
 # ./frame <effect> <path> <frame>
 from subprocess import Popen
 
-import init
+import utils
 
-p = init.parser()
+p = utils.parser()
 p.add_argument('frame')
 args = p.parse_args()
-init.execute(args)
+utils.execute(args)
 
 sp = Popen(["/bin/bash", "-i", "-c",
     "blender -b blender/simulator.blend -P blender/sim.py -f " + args.frame])

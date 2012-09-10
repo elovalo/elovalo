@@ -4,16 +4,16 @@
 import os
 from subprocess import Popen
 
-import init
+import utils
 
-p = init.parser()
+p = utils.parser()
 p.add_argument('--length', help="Animation length in seconds", type=int)
 
 args = p.parse_args()
 
 os.environ['length'] = str(args.length or '')
 
-init.execute(args)
+utils.execute(args)
 
 sp = Popen(["/bin/bash", "-i", "-c", "blender -b blender/simulator.blend" + \
     " -P blender/sim.py -a"])
