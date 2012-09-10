@@ -1,9 +1,7 @@
 /**
  * JSON exporter for non-embedded use.
  *
- * TODO: might be nicer to pass time in ms
- *
- * Usage: ./exporter <effect> <length in cs>
+ * Usage: ./exporter <effect> <length in ms>
  */
 
 #include <assert.h>
@@ -50,9 +48,9 @@ void export_effect(const effect_t *effect, int length) {
 	assert(bytes <= size);
 
 	printf("Exporting %f seconds of %s to file %s\n",
-	       (double)length/100,
-	       effect->name,
-	       filename);
+		(double)length/1000,
+		effect->name,
+		filename);
 
 	FILE *f = fopen(filename,"w");
 	if (f == NULL) {
@@ -77,7 +75,7 @@ void export_effect(const effect_t *effect, int length) {
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
-	for (ticks=0; ticks < length; ticks += drawing_time) {
+	for (ticks=0; ticks < length * 10; ticks += drawing_time) {
 		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment
