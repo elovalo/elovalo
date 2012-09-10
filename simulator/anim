@@ -6,15 +6,16 @@ from subprocess import Popen
 
 import utils
 
-p = utils.parser()
-p.add_argument('--length', help="Animation length in seconds", type=int)
+if __name__ == '__main__':
+    p = utils.parser()
+    p.add_argument('--length', help="Animation length in seconds", type=int)
 
-args = p.parse_args()
+    args = p.parse_args()
 
-os.environ['length'] = str(args.length or '')
+    os.environ['length'] = str(args.length or '')
 
-utils.execute(args)
+    utils.execute(args)
 
-sp = Popen(["/bin/bash", "-i", "-c", "blender -b blender/simulator.blend" + \
+    sp = Popen(["/bin/bash", "-i", "-c", "blender -b blender/simulator.blend" + \
     " -P blender/sim.py -a"])
-sp.communicate()
+    sp.communicate()
