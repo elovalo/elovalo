@@ -40,7 +40,10 @@ def write_fps(effect, output):
 
     with open(os.path.join(output, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
-        d = json.load(open(p, 'r'))
+
+        with open(p, 'r') as jf:
+            d = json.load(jf)
+
         json.dump(
             {
                 'fps': d['fps']
