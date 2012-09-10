@@ -12,9 +12,10 @@ if __name__ == '__main__':
 
     args = p.parse_args()
 
-    os.environ['length'] = str(args.length or '')
+    length = args.length or ''
+    os.environ['length'] = str(length)
 
-    utils.export(args.effect, args.output)
+    utils.export(args.effect, args.output, length)
 
     sp = Popen(["/bin/bash", "-i", "-c",
         "blender -b blender/simulator.blend -P blender/sim.py -a"])

@@ -19,17 +19,20 @@ def parser():
     return p
 
 
-def export(effect, output, length='100'):
+def export(effect, output, length=1000):
+    """ Expects length in ms!
+    """
     length = os.environ.get('length', length) or length
-    length = str(length)
+    length = float(length)
+    length *= 100  # convert to cs required by the exporter
+    length = str(int(length))
 
     set_env(effect, output)
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
-    # TODO: use effect name here too!
-    call(['../build/exporter/exporter ' + length], shell=True)
+    call(['../build/exporter/exporter ' + effect + ' ' + length], shell=True)
     write_fps(effect, output)
 
 
