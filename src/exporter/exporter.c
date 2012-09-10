@@ -1,27 +1,42 @@
 /**
  * JSON exporter for non-embedded use.
+ *
+ * TODO: might be nicer to pass time in ms
+ * TODO:./exporter <effect> 1000 causes double to overflow? nasty print
+ *
+ * Usage: ./exporter <effect> <length in cs>
  */
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
 #include "../effects.h"
 #include "../cube.h"
 
 void export_effect(const effect_t *effect, char length);
+const effect_t *find_effect(const char *name);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
-	// TODO @zouppen: make sure length is passed (or set it
-	// to some nice value)
-	for (int i=0; i<effects_len; i++) {
-		clear_buffer();
-		export_effect(&effects[i], atoi(argv[1]));
+	if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]));
+	else printf("Missing effect and length arguments!\n");
+}
+
+// might want to move this elsewhere so playlist player may use this
+const effect_t *find_effect(const char *name) {
+	for(int i = 0; i < effects_len; i++) {
+		if(strcmp(effects[i].name, name) == 0) {
+			return &effects[i];
+		}
 	}
+
+	// TODO: deal with this situation at top level
+	return &effects[effects_len];
 }
 
 void export_effect(const effect_t *effect, char length) {
