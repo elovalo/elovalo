@@ -7,6 +7,9 @@ import conf
 
 Message = collections.namedtuple('Message', 'kind body')
 
+class ElovaloException(BaseException):
+    pass
+
 class Connection():
     def __init__(self):
         self.serial = serial.Serial(

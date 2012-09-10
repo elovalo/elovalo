@@ -3,34 +3,34 @@ import json
 import time
 
 import conf
+import conn
 import conv
 
-class ElovaloException(BaseException):
+class NoEffectException(conn.ElovaloException):
     pass
 
-class NoEffectException(ElovaloException):
-    pass
-
-class IncorrectSensorDataException(ElovaloException):
+class IncorrectSensorDataException(conn.ElovaloException):
     pass
 
 class Commands():
 
-    EFFECTS = {
-        'game_of_life': '\x01',
-        'heart':        '\x02',
-        'brownian':     '\x03',
-        'sine':         '\x04',
-        'wave':         '\x05',
-        'sphere':       '\x06',
-        'worm':         '\x07',
-        'const':        '\x08',
-        'layers':       '\x09',
-        'all_on':       '\x0a',
-    }
-
     def __init__(self, conn):
         self.conn = conn
+        self.effects = {}
+        self.get_effects()
+
+    def get_effects(self):
+        self.conn.send_message(conf.CMD_LIST_EFFECTS)
+        resps = self.conn.read_responses()
+        for r in resps:
+            if r.kind == conf.RESP_EFFECT_NAMES:
+                effects = filter(None, r.body.split('\0'))
+                self._update_effects(effects)
+                print self.effects
+
+    def _update_effects(self, effects):
+        for i in range(len(effects)):
+            self.effects[effects[i]] = chr(i)
 
     def get_time(self):
         self.conn.send_message(conf.CMD_GET_TIME)
@@ -41,7 +41,7 @@ class Commands():
 
     def run_effect(self, effect):
         try:
-            e = self.EFFECTS[effect]
+            e = self.effects[effect]
             self._send_effect(e)
             return
         except KeyError:

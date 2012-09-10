@@ -2,10 +2,12 @@ import cmd
 import json
 import os
 import sys
+import time
 
 import commands
+import conf
 import conn
-import resp
+import responses
 
 class EloCmd(cmd.Cmd):
 
@@ -20,6 +22,9 @@ class EloCmd(cmd.Cmd):
             return
 
         self.conn = conn.Connection()
+        time.sleep(2) #FIXME: Give the device some time to boot...
+
+        self.responses = responses.Responses(self.conn)
         self.commands = commands.Commands(self.conn)
         self._initialized = True
 
@@ -33,6 +38,10 @@ class EloCmd(cmd.Cmd):
         self.precmd(s)
         self.onecmd(s)
         self.postcmd(False, s)
+
+    def do_effects(self, line):
+        self.commands.get_effects()
+        return True
 
     def do_time(self, param):
         'Get the current time difference from the device'
@@ -53,10 +62,10 @@ class EloCmd(cmd.Cmd):
 
     def complete_effect(self, text, line, begidx, endidx):
         if not text:
-            completions = self.commands.EFFECTS.keys()
+            completions = self.commands.effects.keys()
         else:
             completions = [f
-                           for f in self.commands.EFFECTS.keys()
+                           for f in self.commands.effects.keys()
                            if f.startswith(text)
                            ]
         return completions
@@ -93,9 +102,5 @@ class EloCmd(cmd.Cmd):
         return cmd.Cmd.precmd(self, line)
 
     def postcmd(self, stop, line):
-        self._process_resps(self.conn.read_responses())
+        self.responses.read()
         return False
-
-    def _process_resps(self, responses):
-        for r in responses:
-            resp.handle(r)
