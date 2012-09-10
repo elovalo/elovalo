@@ -2,7 +2,6 @@
 # ./anim <effect> <path>
 # renders starting from the first frame
 import os
-from subprocess import Popen
 
 import utils
 
@@ -16,7 +15,4 @@ if __name__ == '__main__':
     os.environ['length'] = str(length)
 
     utils.export(args.effect, args.output, length)
-
-    sp = Popen(["/bin/bash", "-i", "-c",
-        "blender -b blender/simulator.blend -P blender/sim.py -a"])
-    sp.communicate()
+    utils.render_animation(args.effect, args.output, length)

@@ -1,7 +1,7 @@
 import argparse
 import json
 import os
-from subprocess import call
+from subprocess import call, Popen
 
 
 def effect_parser():
@@ -53,3 +53,15 @@ def write_fps(effect, output):
             },
             f
         )
+
+
+def render_animation(effect, output, length):
+    """ Expects length in seconds!
+    """
+    os.environ['effect'] = effect
+    os.environ['output'] = output
+    os.environ['length'] = str(length)
+
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -a"])
+    sp.communicate()
