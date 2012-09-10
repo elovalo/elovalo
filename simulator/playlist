@@ -14,6 +14,15 @@ def seek(data, **kwargs):
     return [k['playlist'] for k in data if filter(kwargs.get, k.keys())][0]
 
 
+def find_effects(playlist):
+    effect_names = map(lambda k: k['name'], playlist)
+    effects = dict(zip(effect_names, [[] for n in range(len(effect_names))]))
+
+    [effects[k['name']].append(int(k['length'])) for k in playlist]
+
+    return [(k, max(v)) for k, v in effects.items()]
+
+
 if __name__ == '__main__':
     p = utils.parser()
     p.add_argument('playlist', help='name of the playlist to render')
@@ -25,13 +34,13 @@ if __name__ == '__main__':
         args = p.parse_args()
 
         playlist = seek(data, name=args.playlist)
+        effects = find_effects(playlist)
+
+        for effect, length in effects:
+            utils.export(effect, args.output, length / 1000)
 
         # TODO: get effects + max lengths and export
         #utils.export(effect, args.output, length)
         # TODO: export each effect mentioned in the playlist
         # fetch name + max length for each (need to use min for each at render)
         #utils.execute(args) utils.render(...)
-
-        # TODO: render playlist
-        for d in data:
-            print d

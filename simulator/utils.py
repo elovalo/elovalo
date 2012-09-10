@@ -21,12 +21,14 @@ def parser():
 
 def export(effect, output, length='100'):
     length = os.environ.get('length', length) or length
+    length = str(length)
 
     set_env(effect, output)
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
+    # TODO: use effect name here too!
     call(['../build/exporter/exporter ' + length], shell=True)
     write_fps(effect, output)
 

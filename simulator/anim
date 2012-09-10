@@ -8,7 +8,7 @@ import utils
 
 if __name__ == '__main__':
     p = utils.effect_parser()
-    p.add_argument('--length', help="Animation length in seconds", type=int)
+    p.add_argument('--length', help="Animation length in seconds", type=float)
 
     args = p.parse_args()
 
@@ -16,6 +16,6 @@ if __name__ == '__main__':
 
     utils.export(args.effect, args.output)
 
-    sp = Popen(["/bin/bash", "-i", "-c", "blender -b blender/simulator.blend" + \
-    " -P blender/sim.py -a"])
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -a"])
     sp.communicate()
