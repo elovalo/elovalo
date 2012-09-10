@@ -4,11 +4,14 @@ from subprocess import Popen
 
 import utils
 
-p = utils.parser()
-p.add_argument('frame')
-args = p.parse_args()
-utils.execute(args)
+if __name__ == '__main__':
+    p = utils.parser()
+    p.add_argument('frame')
+    args = p.parse_args()
+    utils.execute(args)
 
-sp = Popen(["/bin/bash", "-i", "-c",
-    "blender -b blender/simulator.blend -P blender/sim.py -f " + args.frame])
-sp.communicate()
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -f " +
+        args.frame]
+    )
+    sp.communicate()
