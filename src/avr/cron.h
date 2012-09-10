@@ -39,6 +39,6 @@ struct action_info {
 
 void run_cron(const time_t now);
 void serial_hello(uint8_t x);
-bool validate_event(struct event *e);
+bool is_event_valid(struct event *e);
 
 #endif /* CRON_H_ */

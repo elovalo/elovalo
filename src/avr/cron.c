@@ -25,12 +25,12 @@ const struct action_info cron_actions[] PROGMEM = {
 	{ &serial_hello, s_serial_hello, s_serial_hello_arg}
 };
 
-#define CRON_ACTIONS_LEN (sizeof(cron_actions)/sizeof(struct action_info))
+const uint8_t cron_actions_len = sizeof(cron_actions)/sizeof(struct action_info);
 
 /**
  * Validate event contents (before accepting it from serial console).
  */
-bool validate_event(struct event *e)
+bool is_event_valid(struct event *e)
 {
 	// Validate kind. END is not there for a reason.
 	if (e->kind != WEEKLY &&
@@ -38,7 +38,7 @@ bool validate_event(struct event *e)
 	    e->kind != EMPTY) return false;
 
 	// Validate act
-	for (uint8_t i=0; i<CRON_ACTIONS_LEN; i++) {
+	for (uint8_t i=0; i<cron_actions_len; i++) {
 		action_t x = (action_t)pgm_get(cron_actions[i].act, word);
 		if (e->act == x) return true;
 	}

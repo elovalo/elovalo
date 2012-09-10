@@ -18,6 +18,7 @@
 #include "tlc5940.h"
 #include "serial.h"
 #include "clock.h"
+#include "configuration.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
@@ -28,6 +29,7 @@
 #define MODE_IDLE           0x00
 #define MODE_EFFECT         0x01
 
+// Commands issued by the sender
 #define CMD_STOP            0x01
 #define CMD_CHANGE_EFFECT   0x02
 #define CMD_SERIAL_FRAME    0x03
@@ -35,13 +37,20 @@
 #define CMD_GET_TIME        0x05
 #define CMD_SET_SENSOR      0x06
 #define CMD_LIST_EFFECTS    0x07
+#define CMD_LIST_ACTIONS    0x08
+#define CMD_READ_CRONTAB    0x09
+#define CMD_WRITE_CRONTAB   0x0a
+#define CMD_NOTHING         0xff // May be used to end binary transmission
 
+// Response codes
 #define RESP_REBOOT         0x01
 #define RESP_SWAP           0x02
-#define RESP_EFFECT_NAMES   0x03
+#define RESP_EFFECT_NAMES   0x03 // List of strings is returned
 #define RESP_EFFECT_END     0x04
 #define RESP_COMMAND_OK     0x05
 #define RESP_TIME           0x06
+#define RESP_BINARY_START   0x07 // Start of binary blob
+#define RESP_BINARY_END     0x08 // End of binary blob
 #define RESP_COMMAND_NOT_AVAILABLE 0xef // When command is correct but cannot be answered 
 #define RESP_INVALID_CMD    0xf0
 #define RESP_INVALID_ARG_A  0xfa
@@ -137,11 +146,14 @@ void process_cmd(void)
 	// Some temporary variables
 	read_t x;
 	time_t tmp_time;
+	uint8_t i;
 
 	switch (cmd) {
 	case ESCAPE:
 		// Put the character back
 		serial_ungetc(ESCAPE);
+		break;
+	case CMD_NOTHING:
 		break;
 	case CMD_STOP:
 		mode = MODE_IDLE;
@@ -253,6 +265,55 @@ void process_cmd(void)
 			} while (c != '\0');
 		}
 		send_escaped('\0');
+		break;
+	case CMD_LIST_ACTIONS:
+		// TODO stub
+		break;
+	case CMD_READ_CRONTAB:
+		for (i=0; i<CRONTAB_SIZE; i++) {
+			// Read one crotab entry
+			struct event e;
+			uint8_t *p = (uint8_t*)&e;
+
+			get_crontab_entry(&e,i);
+			if (e.kind == END) break;
+			// Send individual bytes
+			for (int j=0; j<sizeof(struct event); j++) {
+				send_escaped(p[j]);
+			}
+		}
+		respond(RESP_BINARY_END);
+		break;
+	case CMD_WRITE_CRONTAB:
+		for (i=0; i<CRONTAB_SIZE; i++) {
+			// Writing a crontab entry
+			struct event e;
+			uint8_t *p = (uint8_t*)&e;
+			
+			// First is a special case
+			x = read_escaped();
+			if (!x.good) break; // It's okay to bail out now
+			p[0] = x.byte;
+
+			// Reading the rest
+			for (int j=1; j<sizeof(struct event); j++) {
+				x = read_escaped();
+				if (!x.good) {
+					// Failure
+					respond(RESP_SHORT_PAYLOAD);
+					return;
+				}
+				p[j] = x.byte;
+			}
+			
+			// Validating
+			if (!is_event_valid(&e)) {
+				respond(RESP_INVALID_ARG_A);
+				return;
+			}
+		}
+		truncate_crontab(i); // Truncate crontab to data length
+		respond(RESP_COMMAND_OK);
 		break;
 	default:
 		dislike(RESP_INVALID_CMD,cmd);
