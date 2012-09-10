@@ -2,7 +2,6 @@
  * JSON exporter for non-embedded use.
  *
  * TODO: might be nicer to pass time in ms
- * TODO:./exporter <effect> 1000 causes double to overflow? nasty print
  *
  * Usage: ./exporter <effect> <length in cs>
  */
@@ -17,7 +16,7 @@
 #include "../effects.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect, char length);
+void export_effect(const effect_t *effect, int length);
 const effect_t *find_effect(const char *name);
 
 int main(int argc, char **argv) {
@@ -39,7 +38,7 @@ const effect_t *find_effect(const char *name) {
 	return &effects[effects_len];
 }
 
-void export_effect(const effect_t *effect, char length) {
+void export_effect(const effect_t *effect, int length) {
 	const int size = 50;
 	char filename[size];
 
