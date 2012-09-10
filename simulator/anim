@@ -2,19 +2,17 @@
 # ./anim <effect> <path>
 # renders starting from the first frame
 import os
-import sys
-from subprocess import Popen
 
-import init
+import utils
 
-p = init.parser()
-p.add_argument('--length', help="Animation length in seconds", type=int)
+if __name__ == '__main__':
+    p = utils.effect_parser()
+    p.add_argument('--length', help="Animation length in seconds", type=float)
 
-args = p.parse_args()
+    args = p.parse_args()
 
-os.environ['length'] = str(args.length)
+    length = args.length or ''
+    os.environ['length'] = str(length)
 
-init.execute(args)
-
-sp = Popen(["/bin/bash", "-i", "-c", "blender -b simulator.blend -P sim.py -a"])
-sp.communicate()
+    utils.export(args.effect, args.output, length)
+    utils.render_animation(args.effect, args.output, length)

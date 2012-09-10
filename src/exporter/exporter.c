@@ -1,5 +1,7 @@
 /**
  * JSON exporter for non-embedded use.
+ *
+ * Usage: ./exporter <effect> <length in ms>
  */
 
 #include <assert.h>
@@ -8,23 +10,20 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
-#include "../effects.h"
+#include "../effect_utils.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect, char length);
+void export_effect(const effect_t *effect, int length);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
-	// TODO @zouppen: make sure length is passed (or set it
-	// to some nice value)
-	for (int i=0; i<effects_len; i++) {
-		clear_buffer();
-		export_effect(&effects[i], atoi(argv[1]));
-	}
+	// TODO: figure out what should happen if an effect is not found by name
+	if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]));
+	else printf("Missing effect and length arguments!\n");
 }
 
-void export_effect(const effect_t *effect, char length) {
+void export_effect(const effect_t *effect, int length) {
 	const int size = 50;
 	char filename[size];
 
@@ -36,9 +35,9 @@ void export_effect(const effect_t *effect, char length) {
 	assert(bytes <= size);
 
 	printf("Exporting %f seconds of %s to file %s\n",
-	       (double)length/100,
-	       effect->name,
-	       filename);
+		(double)length/1000,
+		effect->name,
+		filename);
 
 	FILE *f = fopen(filename,"w");
 	if (f == NULL) {
@@ -63,7 +62,7 @@ void export_effect(const effect_t *effect, char length) {
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
-	for (ticks=0; ticks < length; ticks += drawing_time) {
+	for (ticks=0; ticks < length * 10; ticks += drawing_time) {
 		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment

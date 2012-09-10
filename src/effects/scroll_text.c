@@ -5,5 +5,5 @@
 void effect(void)
 {
 	clear_buffer();
-	scroll_text("elovalo", 3, MAX_INTENSITY, -(ticks >> 2));
+	scroll_text("Elovalo loves U", 7, MAX_INTENSITY, 10-(ticks >> 3));
 }
