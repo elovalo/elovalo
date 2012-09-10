@@ -14,7 +14,7 @@ JSON = os.getenv('effect') or 'brownian'
 CUR_PATH = os.path.split(bpy.data.filepath)[0]
 
 render = bpy.data.scenes[0].render
-render_path = os.getenv('path')
+render_path = os.getenv('output')
 
 if render_path:
     render_path = render_path if render_path[-1] == '/' else render_path + '/'

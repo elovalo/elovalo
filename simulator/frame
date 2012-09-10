@@ -5,10 +5,10 @@ from subprocess import Popen
 import utils
 
 if __name__ == '__main__':
-    p = utils.parser()
-    p.add_argument('frame')
+    p = utils.effect_parser()
+    p.add_argument('frame', help="number of the frame to render")
     args = p.parse_args()
-    utils.execute(args)
+    utils.export(args.effect, args.output)
 
     sp = Popen(["/bin/bash", "-i", "-c",
         "blender -b blender/simulator.blend -P blender/sim.py -f " +

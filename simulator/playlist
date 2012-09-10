@@ -3,8 +3,35 @@
 import os
 import sys
 
+import utils
+
 sys.path.append(os.path.join(os.getcwd(), '..'))
 
 from generators import playlists
 
-# TODO: argparse + render
+
+def seek(data, **kwargs):
+    return [k['playlist'] for k in data if filter(kwargs.get, k.keys())][0]
+
+
+if __name__ == '__main__':
+    p = utils.parser()
+    p.add_argument('playlist', help='name of the playlist to render')
+    p.add_argument('output', help='output path')
+
+    data = playlists.load(os.path.join(os.getcwd(), '..', 'src', 'playlists'))
+
+    if data:
+        args = p.parse_args()
+
+        playlist = seek(data, name=args.playlist)
+
+        # TODO: get effects + max lengths and export
+        #utils.export(effect, args.output, length)
+        # TODO: export each effect mentioned in the playlist
+        # fetch name + max length for each (need to use min for each at render)
+        #utils.execute(args) utils.render(...)
+
+        # TODO: render playlist
+        for d in data:
+            print d
