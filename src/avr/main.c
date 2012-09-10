@@ -71,7 +71,7 @@ read_t read_escaped();
 void dislike(uint8_t error_code, uint8_t payload);
 void respond(uint8_t code);
 
-effect_t *next_effect(effect_t *effect);
+effect_t *next_effect(const effect_t *effect);
 
 int main() {
 	cli();
@@ -131,8 +131,6 @@ int main() {
 
 			ticks = centisecs();
 			if (ticks > effect_length) {
-				// TODO: figure out how to fetch the next effect from the
-				// playlist
 				effect = next_effect(effect);
 
 				respond(RESP_NEXT_EFFECT);
@@ -279,7 +277,7 @@ void process_cmd(void)
 	// Some cases return, do not write code here
 }
 
-effect_t *next_effect(effect_t *effect) {
+effect_t *next_effect(const effect_t *effect) {
 	// TODO
 }
 
