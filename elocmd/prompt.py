@@ -79,11 +79,14 @@ class EloCmd(cmd.Cmd):
 
     def do_quit(self, line):
         'Quits this prompt'
-        sys.exit()
+        self._quit()
 
     def do_EOF(self, line):
-        #TODO: Exit on EOF
-        return True
+        self._quit()
+
+    def _quit(self):
+        self.conn.close()
+        sys.exit()
 
     def precmd(self, line):
         self._init()
