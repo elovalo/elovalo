@@ -10,5 +10,5 @@ args = p.parse_args()
 init.execute(args)
 
 sp = Popen(["/bin/bash", "-i", "-c",
-    "blender -b simulator.blend -P sim.py -f " + args.frame])
+    "blender -b blender/simulator.blend -P blender/sim.py -f " + args.frame])
 sp.communicate()

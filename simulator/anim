@@ -2,7 +2,6 @@
 # ./anim <effect> <path>
 # renders starting from the first frame
 import os
-import sys
 from subprocess import Popen
 
 import init
@@ -16,5 +15,6 @@ os.environ['length'] = str(args.length or '')
 
 init.execute(args)
 
-sp = Popen(["/bin/bash", "-i", "-c", "blender -b simulator.blend -P sim.py -a"])
+sp = Popen(["/bin/bash", "-i", "-c", "blender -b blender/simulator.blend" + \
+    " -P blender/sim.py -a"])
 sp.communicate()
