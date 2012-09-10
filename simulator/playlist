@@ -37,7 +37,7 @@ if __name__ == '__main__':
         effects = find_effects(playlist)
 
         for effect, length in effects:
-            utils.export(effect, args.output, length)
+            utils.export(effect, args.output, length / 1000)
 
         # TODO: get effects + max lengths and export
         #utils.export(effect, args.output, length)

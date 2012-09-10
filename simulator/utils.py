@@ -19,14 +19,13 @@ def parser():
     return p
 
 
-def export(effect, output, length=1000):
-    """ Expects length in ms!
+def export(effect, output, length=1.0):
+    """ Expects length in seconds!
     """
     length = os.environ.get('length', length) or length
     length = float(length)
     length *= 100  # convert to cs required by the exporter
     length = str(int(length))
-
     set_env(effect, output)
 
     os.chdir('..')
