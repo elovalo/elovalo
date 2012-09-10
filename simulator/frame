@@ -1,17 +1,13 @@
 #!/usr/bin/env python
 # ./frame <effect> <path> <frame>
-from subprocess import Popen
-
 import utils
 
 if __name__ == '__main__':
     p = utils.effect_parser()
     p.add_argument('frame', help="number of the frame to render")
     args = p.parse_args()
-    utils.export(args.effect, args.output)
 
-    sp = Popen(["/bin/bash", "-i", "-c",
-        "blender -b blender/simulator.blend -P blender/sim.py -f " +
-        args.frame]
-    )
-    sp.communicate()
+    # XXX: it's possible the frame is not in export. figure out how
+    # to deal with this!
+    utils.export(args.effect, args.output)
+    utils.render_frame(args.effect, args.output, args.frame)

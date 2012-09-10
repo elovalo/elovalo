@@ -26,18 +26,12 @@ def export(effect, output, length=1.0):
     length = float(length)
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
-    set_env(effect, output)
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
     call(['../build/exporter/exporter ' + effect + ' ' + length], shell=True)
     write_fps(effect, output)
-
-
-def set_env(effect, output):
-    os.environ['effect'] = effect
-    os.environ['output'] = output
 
 
 def write_fps(effect, output):
@@ -64,4 +58,15 @@ def render_animation(effect, output, length):
 
     sp = Popen(["/bin/bash", "-i", "-c",
         "blender -b blender/simulator.blend -P blender/sim.py -a"])
+    sp.communicate()
+
+
+def render_frame(effect, output, frame):
+    os.environ['effect'] = effect
+    os.environ['output'] = output
+
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -f " +
+        frame]
+    )
     sp.communicate()
