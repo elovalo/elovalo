@@ -81,7 +81,8 @@ class SourceFile(object):
 
     @property
     def playlist(self):
-        definition = lambda f: '\t{ s_' + f['name'] + ', ' + str(f['length']) + ' },'
+        definition = lambda f: '\t{ s_' + f['name'] + ', ' + \
+            str(f['length']) + ' },'
 
         ret = ['const playlistitem_t playlist[] PROGMEM = {']
 
