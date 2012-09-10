@@ -8,32 +8,19 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
-#include "../effects.h"
+#include "../effect_utils.h"
 #include "../cube.h"
 
 void export_effect(const effect_t *effect, int length);
-const effect_t *find_effect(const char *name);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
+	// TODO: figure out what should happen if an effect is not found by name
 	if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]));
 	else printf("Missing effect and length arguments!\n");
-}
-
-// might want to move this elsewhere so playlist player may use this
-const effect_t *find_effect(const char *name) {
-	for(int i = 0; i < effects_len; i++) {
-		if(strcmp(effects[i].name, name) == 0) {
-			return &effects[i];
-		}
-	}
-
-	// TODO: deal with this situation at top level
-	return &effects[effects_len];
 }
 
 void export_effect(const effect_t *effect, int length) {
