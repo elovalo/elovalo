@@ -9,24 +9,31 @@ env.Append(LINKFLAGS = '-O2 -mmcu=atmega328p -flto')
 if GetOption('use_asm'):
     env.Append(CPPDEFINES = 'ASM_ISRS')
 
-Target = 'ledcube'
+Elf = 'firmware.elf'
+Sources = [ Glob('src/*.c'),
+            Glob('src/effects/lib/*.c'),
+            Glob('src/avr/*.c') ]
 
 # Make elf
-env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/avr/*.c')], LIBS='m')
+env.Program(Elf,Sources,LIBS='m')
 
-# Make hex
-env.Command(Target+".hex", Target+".elf", 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
+# Make hexes
+env.Command("flash.hex", Elf, 'avr-objcopy -j .text -j .data -O ihex $SOURCE $TARGET')
+env.Command("eeprom.hex", Elf, 'avr-objcopy -j .eeprom -O ihex $SOURCE $TARGET')
+env.Command("fuse.hex", Elf, 'avr-objcopy -j .fuse -O ihex $SOURCE $TARGET')
 
 # Dump assembly code
-env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
+env.Command("assembly.lss", Elf, 'avr-objdump -h -S $SOURCE >$TARGET')
 
 # Show memory usage
-env.Command(None, Target+".elf", "avr-size -C --mcu=atmega328p $SOURCE")
+env.Command(None, Elf, "avr-size -C --mcu=atmega328p $SOURCE")
 
 # Program the thing
 if GetOption('program'):
-    pgm = env.Command('pgm', Target+".hex",
-                      'avrdude -pm328p -cusbasp -y -u -Uflash:w:$SOURCE:a '+
+    pgm = env.Command('pgm', ["flash.hex","eeprom.hex","fuse.hex"],
+                      'avrdude -pm328p -cusbasp -y -u '+
+                      '-Uflash:w:${SOURCES[0]}:a '+
+                      '-Ueeprom:w:${SOURCES[1]}:a '+
                       '-Ulfuse:w:0xbf:m -Uhfuse:w:0xdb:m -Uefuse:w:0x5:m '+
                       '-Ulock:w:0xf:m')
     env.AlwaysBuild(pgm)
