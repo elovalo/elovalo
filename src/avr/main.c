@@ -117,8 +117,8 @@ int main() {
 
 			sensors.distance1 = hcsr04_get_distance_in_cm();
 			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
-			sensors.ambient_light = adc_get(0);
-			sensors.sound_pressure_level = adc_get(1);
+			sensors.ambient_light = adc_get(0) >> 2;
+			sensors.sound_pressure_level = adc_get(1) >> 2;
 
 			// Do the actual drawing
 			draw_t draw = (draw_t)pgm_get(effect->draw,word);
