@@ -10,7 +10,7 @@ void effect(void)
 
 	for (uint8_t x=0; x<8; x++) {
 		for (uint8_t y=0; y<8; y++) {
-			srand(5*x+y*3);
+			srand(x*LEDS_Y+y);
 			set_led(x,y,((ticks >> 3)+rand()) & 7, MAX_INTENSITY >> 3);
 		}
 	}
