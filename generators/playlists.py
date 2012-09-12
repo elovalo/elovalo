@@ -5,8 +5,8 @@ import xml.etree.ElementTree as ET
 from glob import glob
 
 
-def generate(source, target):
-    for data in load(source):
+def generate(source, target, effects=None):
+    for data in attach_ids(load(source), get_names(effects)):
         write(os.path.join(target, data['name'] + '.c'),
                 c_source(data['playlist']))
         write(os.path.join(target, data['name'] + '.h'),
@@ -21,10 +21,24 @@ def load(source):
         for path, data in read(glob(os.path.join(source, '*.' + fmt)), reader):
             ret.append({
                 'name': path.split('/')[-1].split('.')[0],
-                'playlist': data
+                'playlist': data,
             })
 
     return ret
+
+
+def attach_ids(data, effects):
+    for d in data:
+        playlist = d['playlist']
+
+        for effect in playlist:
+            effect['id'] = str(effects.index(effect['name']))
+
+    return data
+
+
+def get_names(effects):
+    return [e.split('/')[-1].split('.')[0] for e in effects]
 
 
 def read(paths, reader):
@@ -41,6 +55,7 @@ def write(path, data):
 def c_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
+#include <stdlib.h>
 #include "../pgmspace.h"
 #include "../playlist.h"
 '''
@@ -52,8 +67,8 @@ def c_source(data):
         return '\n'.join([name(n) for n in names(data)]) + '\n'
 
     def playlist(data):
-        definition = lambda f: '\t{ s_' + f['name'] + ', ' + \
-            str(f['length']) + ' },'
+        definition = lambda f: '\t{ ' + f['id'] + ', ' + \
+            str(f['length']) + ' }, /* ' + f['name'] + ' */'
 
         ret = ['const playlistitem_t playlist[] PROGMEM = {']
 
