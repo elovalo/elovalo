@@ -12,7 +12,7 @@ void effect(void)
 	if (z >= LEDS_Z)
 		z = LEDS_Z - 1;
 
-	for(uint8_t x=0; x<LEDS_X; x++) {
+	for(uint8_t x=0; x<2; x++) {
 		for(uint8_t y=0; y<LEDS_Y; y++) {
 			set_led(x, y, z, MAX_INTENSITY);
 		}
