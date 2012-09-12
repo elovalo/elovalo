@@ -30,8 +30,10 @@ static void enable_interrupts_and_run_cron(void);
  */
 ISR(TIMER2_COMPA_vect)
 {
-	// Tick counter for effects
-	ticks_volatile++;
+	/* Tick counter for effects. Stop incrementing after maximum
+	 * is reached to avoid messing the effect */
+	if (ticks_volatile != ~0)
+		ticks_volatile++;
 
 	// Run real time clock if it is set
 	if (!--rtc.div && is_time_valid()) {

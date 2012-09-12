@@ -53,7 +53,6 @@
 #define REPORT_READY        ')' // Processing of command is ready
 #define REPORT_BOOT         'B' // Device has been (re)booted
 #define REPORT_FLIP         '%' // Frame has been flipped, ready to receive new
-#define REPORT_EFFECT_END   '.' // Running of effect has stopped
 
 // Typical answers to commands. Use of these is command-specific
 
@@ -121,18 +120,8 @@ int main() {
 			// If a buffer is not yet flipped
 			if (may_flip) break;
 
-			// TODO: get length from playlist item
+			// Update clock and sensor values
 			ticks = centisecs();
-			if (ticks > 1000) {
-				// Rendered too long, stop.
-				mode = MODE_IDLE;
-
-				// Report to serial port
-				report(REPORT_EFFECT_END);
-				
-				break;
-			}
-
 			sensors.distance1 = hcsr04_get_distance_in_cm();
 			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
 			sensors.ambient_light = adc_get(0) >> 2;
