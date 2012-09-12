@@ -23,42 +23,51 @@
 #include "../cube.h"
 #include "../effects.h"
 
-#define ESCAPE              0x7e
-#define LITERAL_ESCAPE      0x00
+/* Serial communication constants. Please note: With CMD and RESP
+ * codes 0x00 and 0x7e are reserved for LITERAL_ESCAPE and ESCAPE,
+ * respectively. */
 
-#define MODE_IDLE           0x00
-#define MODE_EFFECT         0x01
+// Protocol fundamentals
+#define ESCAPE              '~'  // Escape character. Go to command mode
+#define LITERAL_ESCAPE      '\0' // Escape followed by this is literal escape.
 
 // Commands issued by the sender
-#define CMD_STOP            0x01
-#define CMD_CHANGE_EFFECT   0x02
-#define CMD_SERIAL_FRAME    0x03
-#define CMD_SET_TIME        0x04
-#define CMD_GET_TIME        0x05
-#define CMD_SET_SENSOR      0x06
-#define CMD_LIST_EFFECTS    0x07
-#define CMD_LIST_ACTIONS    0x08
-#define CMD_READ_CRONTAB    0x09
-#define CMD_WRITE_CRONTAB   0x0a
-#define CMD_NOTHING         0xff // May be used to end binary transmission
+#define CMD_STOP            '.'
+#define CMD_LIST_EFFECTS    'e'
+#define CMD_CHANGE_EFFECT   'E'
+#define CMD_SERIAL_FRAME    'F'
+#define CMD_GET_TIME        't'
+#define CMD_SET_TIME        'T'
+#define CMD_SET_SENSOR      'S'
+#define CMD_LIST_ACTIONS    'a'
+#define CMD_READ_CRONTAB    'c'
+#define CMD_WRITE_CRONTAB   'C'
+#define CMD_NOTHING         '*' // May be used to end binary transmission
 
-// Response codes
-#define RESP_REBOOT         0x01
-#define RESP_SWAP           0x02
-#define RESP_EFFECT_NAMES   0x03 // List of strings is returned
-#define RESP_EFFECT_END     0x04
-#define RESP_COMMAND_OK     0x05
-#define RESP_TIME           0x06
-#define RESP_BINARY_START   0x07 // Start of binary blob
-#define RESP_BINARY_END     0x08 // End of binary blob
-#define RESP_COMMAND_NOT_AVAILABLE 0xef // When command is correct but cannot be answered 
-#define RESP_INVALID_CMD    0xf0
-#define RESP_INVALID_ARG_A  0xfa
-#define RESP_INVALID_ARG_B  0xfb
-#define RESP_INVALID_ARG_C  0xfc
-#define RESP_INVALID_ARG_D  0xfd
-#define RESP_SHORT_PAYLOAD  0xfe
-#define RESP_JUNK_CHAR      0xff
+// Autonomous responses. These may occur anywhere, anytime
+#define REPORT_JUNK_CHAR    '@' // Unsolicited data received
+#define REPORT_INVALID_CMD  '?' // Unknown command type
+#define REPORT_ANSWERING    '(' // Command received, starting to process input
+#define REPORT_READY        ')' // Processing of command is ready
+#define REPORT_BOOT         'B' // Device has been (re)booted
+#define REPORT_FLIP         '%' // Frame has been flipped, ready to receive new
+#define REPORT_EFFECT_END   '.' // Running of effect has stopped
+
+// Typical answers to commands. Use of these is command-specific
+
+#define RESP_INTERRUPTED    0x00
+#define RESP_BAD_ARG_A      0x01
+#define RESP_BAD_ARG_B      0x02
+
+#define CRON_ITEM_NOT_VALID 0x01
+
+
+// Operating modes
+#define MODE_IDLE           0x00 // Do not update display buffers
+#define MODE_EFFECT         0x01 // Draw effect
+
+// Dirty tricks
+#define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
 
 typedef struct {
 	uint8_t good;
@@ -72,8 +81,8 @@ const effect_t *effect; // Current effect. Note: points to PGM
 void process_cmd(void);
 void send_escaped(uint8_t byte);
 read_t read_escaped();
-void dislike(uint8_t error_code, uint8_t payload);
-void respond(uint8_t code);
+void report(uint8_t code);
+bool answering(void);
 
 int main() {
 	cli();
@@ -89,14 +98,14 @@ int main() {
 	sei();
 
 	// Greet the serial user
-	respond(RESP_REBOOT);
+	report(REPORT_BOOT);
 
 	while(1) {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
 
 			if (cmd == ESCAPE) process_cmd();
-			else dislike(RESP_JUNK_CHAR,cmd);
+			else report(REPORT_JUNK_CHAR);
 		}
 
 		switch (mode) {
@@ -114,7 +123,7 @@ int main() {
 				mode = MODE_IDLE;
 
 				// Report to serial port
-				respond(RESP_EFFECT_END);
+				report(REPORT_EFFECT_END);
 				
 				break;
 			}
@@ -143,36 +152,23 @@ void process_cmd(void)
 {
 	uint8_t cmd = serial_read_blocking();
 
-	// Some temporary variables
-	read_t x;
-	time_t tmp_time;
-	uint8_t i;
-
-	switch (cmd) {
-	case ESCAPE:
+	if (cmd == ESCAPE) {
 		// Put the character back
 		serial_ungetc(ESCAPE);
-		break;
-	case CMD_NOTHING:
-		break;
-	case CMD_STOP:
+		return; // Skip out:
+	} ELSEIFCMD(CMD_NOTHING) {
+		// Nothing
+	} ELSEIFCMD(CMD_STOP) {
 		mode = MODE_IDLE;
-		break;
-	case CMD_CHANGE_EFFECT:
-		x = read_escaped();
+	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
+		read_t x = read_escaped();
 
-		if (!x.good) break;
-
-		if (x.byte >= effects_len) {
-			dislike(RESP_INVALID_ARG_A,cmd);
-			break;
-		}
+		if (!x.good) goto interrupted;
+		if (x.byte >= effects_len) goto bad_arg_a;
 
 		// Change mode and pick correct effect from the array.
 		mode = MODE_EFFECT;
 		effect = effects + x.byte;
-
-		respond(RESP_COMMAND_OK);
 
 		// Prevent flipping
 		may_flip = 0;
@@ -195,67 +191,45 @@ void process_cmd(void)
 		// Restart tick counter
 		reset_time();
 
-		break;
-	case CMD_SERIAL_FRAME:
-		mode = MODE_IDLE;
-		// TODO read serial data
-		break;
-	case CMD_SET_TIME:
-		tmp_time = 0;
+	} ELSEIFCMD(CMD_SET_TIME) {
+		time_t tmp_time = 0;
 		for (int8_t bit_pos=24; bit_pos>=0; bit_pos-=8) {
-			x = read_escaped();
-			if (!x.good) return;
+			read_t x = read_escaped();
+			if (!x.good) goto interrupted;
 			tmp_time |= (time_t)x.byte << bit_pos;
 		}
 		stime(&tmp_time);
-		respond(RESP_COMMAND_OK);
-		break;
-	case CMD_GET_TIME:
-		respond(RESP_TIME);
-		tmp_time = time(NULL);
-		serial_send(tmp_time >> 24);
-		serial_send(tmp_time >> 16);
-		serial_send(tmp_time >> 8);
-		serial_send(tmp_time);
-
-		break;
-	case CMD_SET_SENSOR:; // Doesn't compile without a semicolon?!
+	} ELSEIFCMD(CMD_GET_TIME) {
+		time_t tmp_time = time(NULL);
+		send_escaped(tmp_time >> 24);
+		send_escaped(tmp_time >> 16);
+		send_escaped(tmp_time >> 8);
+		send_escaped(tmp_time);
+	} ELSEIFCMD(CMD_SET_SENSOR) {
 		read_t start = read_escaped();
 		read_t len = read_escaped();
 
 		// Check we get bytes and not escapes
-		if (!start.good || !len.good) break;
+		if (!start.good || !len.good)
+			goto interrupted;
 
 		// Check boundaries
-		if (start.byte >= sizeof(sensors_t)) {
-			dislike(RESP_INVALID_ARG_A,start.byte);
-			break;
-		}
-		if (start.byte + len.byte > sizeof(sensors_t)) {
-			dislike(RESP_INVALID_ARG_B,len.byte);
-			break;
-		}
+		if (start.byte >= sizeof(sensors_t))
+			goto bad_arg_a;
+
+		if (start.byte + len.byte > sizeof(sensors_t))
+			goto bad_arg_b;
 
 		// Filling buffer byte by byte
 		uint8_t *p = (uint8_t*)&sensors;
 		for (uint8_t i=start.byte; i<start.byte+len.byte; i++) {
-			x = read_escaped();
-			if (!x.good) {
-				respond(RESP_SHORT_PAYLOAD);
-				return;
-			}
+			read_t x = read_escaped();
+			if (!x.good)
+				goto interrupted;
 			p[i] = x.byte;
 		}
-		
-		respond(RESP_COMMAND_OK);
-		break;
-	case CMD_LIST_EFFECTS:
+	} ELSEIFCMD(CMD_LIST_EFFECTS) {
 		// Report new effect name to serial user
-		if (effects_len == 0) {
-			respond(RESP_COMMAND_NOT_AVAILABLE);
-			break;
-		}
-		respond(RESP_EFFECT_NAMES);
 		for (uint8_t i=0; i<effects_len; i++) {
 			uint8_t *text_pgm = (uint8_t*)pgm_get(effects[i].name,word);
 			uint8_t c;
@@ -264,61 +238,75 @@ void process_cmd(void)
 				send_escaped(c);
 			} while (c != '\0');
 		}
-		send_escaped('\0');
-		break;
-	case CMD_LIST_ACTIONS:
+	} ELSEIFCMD(CMD_LIST_ACTIONS) {
 		// TODO stub
-		break;
-	case CMD_READ_CRONTAB:
-		for (i=0; i<CRONTAB_SIZE; i++) {
+	} ELSEIFCMD(CMD_READ_CRONTAB) {
+		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
 			// Read one crotab entry
 			struct event e;
 			uint8_t *p = (uint8_t*)&e;
 
 			get_crontab_entry(&e,i);
-			if (e.kind == END) break;
+			if (e.kind == END) break; // from for
 			// Send individual bytes
 			for (int j=0; j<sizeof(struct event); j++) {
 				send_escaped(p[j]);
 			}
 		}
-		respond(RESP_BINARY_END);
-		break;
-	case CMD_WRITE_CRONTAB:
+	} ELSEIFCMD(CMD_WRITE_CRONTAB) {
+		uint8_t i;
 		for (i=0; i<CRONTAB_SIZE; i++) {
 			// Writing a crontab entry
 			struct event e;
 			uint8_t *p = (uint8_t*)&e;
 			
 			// First is a special case
-			x = read_escaped();
-			if (!x.good) break; // It's okay to bail out now
+			read_t x = read_escaped();
+			if (!x.good) {
+				// Is okay if no data given
+				break; // for
+			}
 			p[0] = x.byte;
 
 			// Reading the rest
 			for (int j=1; j<sizeof(struct event); j++) {
 				x = read_escaped();
-				if (!x.good) {
-					// Failure
-					respond(RESP_SHORT_PAYLOAD);
-					return;
-				}
+				if (!x.good)
+					goto interrupted;
 				p[j] = x.byte;
 			}
 			
 			// Validating
 			if (!is_event_valid(&e)) {
-				respond(RESP_INVALID_ARG_A);
-				return;
+				send_escaped(CRON_ITEM_NOT_VALID);
+				send_escaped(i);
+				/* Break doesn't increment counter, so
+				 * truncating works okay */
+				break; // for
 			}
 		}
 		truncate_crontab(i); // Truncate crontab to data length
-		respond(RESP_COMMAND_OK);
-		break;
-	default:
-		dislike(RESP_INVALID_CMD,cmd);
+	} else {
+		report(REPORT_INVALID_CMD);
+		return;
 	}
-	// Some cases return, do not write code here
+	goto out;
+
+bad_arg_a:
+	report(RESP_BAD_ARG_A);
+	goto out;
+
+bad_arg_b:
+	report(RESP_BAD_ARG_B);
+	goto out;
+
+interrupted:
+	report(RESP_INTERRUPTED);
+	goto out;
+
+out:
+	// All commands should be ended, successful or not
+	report(REPORT_READY);
 }
 
 /**
@@ -350,20 +338,16 @@ read_t read_escaped() {
 }
 
 /**
- * Send error to user via serial port.
- */
-void dislike(uint8_t error_code, uint8_t payload) {
-	serial_send(ESCAPE);
-	serial_send(error_code);
-	send_escaped(payload);
-}
-
-/**
  * Send response via serial port.
  */
-void respond(uint8_t code) {
+void report(uint8_t code) {
 	serial_send(ESCAPE);
 	serial_send(code);
+}
+
+bool answering(void) {
+	report(REPORT_ANSWERING);
+	return true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
