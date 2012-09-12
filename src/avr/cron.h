@@ -37,6 +37,9 @@ struct action_info {
 	const char *arg_name; // Name of the argument. NULL if not used.
 };
 
+extern const struct action_info cron_actions[]; 
+extern const uint8_t cron_actions_len;
+
 void run_cron(const time_t now);
 void serial_hello(uint8_t x);
 bool is_event_valid(struct event *e);

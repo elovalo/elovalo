@@ -84,6 +84,7 @@ static void send_escaped(uint8_t byte);
 static read_t read_escaped();
 static void report(uint8_t code);
 static bool answering(void);
+static void send_string_from_pgm(const char * const* pgm_p);
 
 int main() {
 	cli();
@@ -238,7 +239,17 @@ void process_cmd(void)
 			} while (c != '\0');
 		}
 	} ELSEIFCMD(CMD_LIST_ACTIONS) {
-		// TODO stub
+		// Report function pointers and their values.
+		for (uint8_t i=0; i<cron_actions_len; i++) {
+			// Send function pointer, little-endian
+			uint16_t fp = pgm_get(cron_actions[i].act,word);
+			send_escaped(fp);
+			send_escaped(fp >> 8);
+
+			// Send action and arg name
+			send_string_from_pgm(&(cron_actions[i].act_name));
+			send_string_from_pgm(&(cron_actions[i].arg_name));
+		}
 	} ELSEIFCMD(CMD_READ_CRONTAB) {
 		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
 			// Read one crotab entry
@@ -347,6 +358,29 @@ static void report(uint8_t code) {
 static bool answering(void) {
 	report(REPORT_ANSWERING);
 	return true;
+}
+
+/**
+ * Sends a string to serial port. Pointer must point to program memory
+ * pointing to the actual string data in program memory. So, double
+ * pointing and kinda complex types.
+ */
+static void send_string_from_pgm(const char * const* pgm_p)
+{
+	char *p = (char*)pgm_read_word_near(pgm_p);
+	char c;
+
+	// If is NULL, print is as zero-length string
+	if ( p == NULL) {
+		send_escaped('\0');
+		return;
+	}
+	
+	// Read byte-by-byte and write, including NUL byte
+	do {
+		c = pgm_read_byte_near(p++);
+		send_escaped(c);
+	} while (c != '\0');
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
