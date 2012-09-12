@@ -16,6 +16,8 @@
 #include "main.h"
 #include "init.h"
 #include "tlc5940.h"
+#include "hcsr04.h"
+#include "adc.h"
 #include "serial.h"
 #include "timer.h"
 #include "../pgmspace.h"
@@ -79,6 +81,9 @@ int main() {
 	initUSART();
 	sei();
 
+	hcsr04_start_continuous_meas();
+	adc_start();
+
 	// Greet the serial user
 	respond(RESP_REBOOT);
 
@@ -109,6 +114,11 @@ int main() {
 				
 				break;
 			}
+
+			sensors.distance1 = hcsr04_get_distance_in_cm();
+			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
+			sensors.ambient_light = adc_get(0);
+			sensors.sound_pressure_level = adc_get(1);
 
 			// Do the actual drawing
 			draw_t draw = (draw_t)pgm_get(effect->draw,word);

@@ -50,7 +50,11 @@ typedef struct {
 #define FLIP 1
 
 typedef struct {
-	uint16_t debug_value; // Settable via serial port only.
+	uint16_t debug_value; // Settable via serial port only. TODO: to be removed
+	uint8_t distance1;
+	uint8_t distance2;
+	uint8_t ambient_light;
+	uint8_t sound_pressure_level;
 } sensors_t;
 
 // XXX: might want to replace flipBuffers with a set of bitfields
