@@ -78,11 +78,11 @@ uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
 // Private functions
-void process_cmd(void);
-void send_escaped(uint8_t byte);
-read_t read_escaped();
-void report(uint8_t code);
-bool answering(void);
+static void process_cmd(void);
+static void send_escaped(uint8_t byte);
+static read_t read_escaped();
+static void report(uint8_t code);
+static bool answering(void);
 
 int main() {
 	cli();
@@ -312,7 +312,7 @@ out:
 /**
  * Sends a byte and escapes it if necessary.
  */
-void send_escaped(uint8_t byte) {
+static void send_escaped(uint8_t byte) {
 	serial_send(byte);
 	if (byte == ESCAPE) serial_send(LITERAL_ESCAPE);
 }
@@ -321,7 +321,7 @@ void send_escaped(uint8_t byte) {
  * Reads a byte. If it is a command, do not consume input. This uses
  * blocking reads.
  */
-read_t read_escaped() {
+static read_t read_escaped() {
 	read_t ret = {1,0};
 	ret.byte = serial_read_blocking();
 
@@ -340,12 +340,12 @@ read_t read_escaped() {
 /**
  * Send response via serial port.
  */
-void report(uint8_t code) {
+static void report(uint8_t code) {
 	serial_send(ESCAPE);
 	serial_send(code);
 }
 
-bool answering(void) {
+static bool answering(void) {
 	report(REPORT_ANSWERING);
 	return true;
 }
