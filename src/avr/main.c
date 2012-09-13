@@ -156,8 +156,10 @@ void process_cmd(void)
 		// Put the character back
 		serial_ungetc(ESCAPE);
 		return; // Skip out:
-	} ELSEIFCMD(CMD_NOTHING) {
-		// Nothing
+	} if (cmd == CMD_NOTHING) {
+		/* Outputs nothing, just ensures that previous command
+		 * has ended */
+		return;
 	} ELSEIFCMD(CMD_STOP) {
 		mode = MODE_IDLE;
 	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
@@ -281,8 +283,10 @@ void process_cmd(void)
 			// Reading the rest
 			for (int j=1; j<sizeof(struct event); j++) {
 				x = read_escaped();
-				if (!x.good)
-					goto interrupted;
+				if (!x.good) {
+					send_escaped(RESP_INTERRUPTED);
+					break;
+				}
 				p[j] = x.byte;
 			}
 			
@@ -294,6 +298,9 @@ void process_cmd(void)
 				 * truncating works okay */
 				break; // for
 			}
+
+			// Write to EEPROM
+			set_crontab_entry(&e,i);
 		}
 		truncate_crontab(i); // Truncate crontab to data length
 	} else {
