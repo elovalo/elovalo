@@ -204,7 +204,7 @@ void process_cmd(void)
 
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time = 0;
-		for (int8_t bit_pos=24; bit_pos>=0; bit_pos-=8) {
+		for (uint8_t bit_pos=0; bit_pos<32; bit_pos+=8) {
 			read_t x = read_escaped();
 			if (!x.good) goto interrupted;
 			tmp_time |= (time_t)x.byte << bit_pos;
@@ -212,10 +212,10 @@ void process_cmd(void)
 		stime(&tmp_time);
 	} ELSEIFCMD(CMD_GET_TIME) {
 		time_t tmp_time = time(NULL);
-		send_escaped(tmp_time >> 24);
-		send_escaped(tmp_time >> 16);
-		send_escaped(tmp_time >> 8);
 		send_escaped(tmp_time);
+		send_escaped(tmp_time >> 8);
+		send_escaped(tmp_time >> 16);
+		send_escaped(tmp_time >> 24);
 	} ELSEIFCMD(CMD_SET_SENSOR) {
 		read_t start = read_escaped();
 		read_t len = read_escaped();
