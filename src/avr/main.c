@@ -94,6 +94,7 @@ static read_t read_escaped();
 static void report(uint8_t code);
 static bool answering(void);
 static void send_string_from_pgm(const char * const* pgm_p);
+static void sram_to_serial(void *src, uint8_t len);
 
 int main() {
 	cli();
@@ -212,10 +213,7 @@ void process_cmd(void)
 		stime(&tmp_time);
 	} ELSEIFCMD(CMD_GET_TIME) {
 		time_t tmp_time = time(NULL);
-		send_escaped(tmp_time);
-		send_escaped(tmp_time >> 8);
-		send_escaped(tmp_time >> 16);
-		send_escaped(tmp_time >> 24);
+		sram_to_serial(&tmp_time,sizeof(time_t));
 	} ELSEIFCMD(CMD_SET_SENSOR) {
 		read_t start = read_escaped();
 		read_t len = read_escaped();
@@ -265,14 +263,11 @@ void process_cmd(void)
 		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
 			// Read one crotab entry
 			struct event e;
-			uint8_t *p = (uint8_t*)&e;
-
 			get_crontab_entry(&e,i);
+
+			// If end, stop reading, otherwise send bytes
 			if (e.kind == END) break; // from for
-			// Send individual bytes
-			for (int j=0; j<sizeof(struct event); j++) {
-				send_escaped(p[j]);
-			}
+			sram_to_serial(&e,sizeof(e));
 		}
 	} ELSEIFCMD(CMD_WRITE_CRONTAB) {
 		uint8_t i;
@@ -397,6 +392,17 @@ static void send_string_from_pgm(const char * const* pgm_p)
 		c = pgm_read_byte_near(p++);
 		send_escaped(c);
 	} while (c != '\0');
+}
+
+/**
+ * Send any data starting from SRAM pointer p in escaped form to
+ * serial port.
+ */
+static void sram_to_serial(void *src, uint8_t len)
+{
+	uint8_t *p = (uint8_t*)src;
+	for (int i=0; i<len; i++)
+		send_escaped(*p++);
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
