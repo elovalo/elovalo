@@ -53,13 +53,14 @@ def write(path, data):
 def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
-#include "playlist.h"
+#include "playlists.h"
 #include "pgmspace.h"
 '''
 
     def master_playlist(data):
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
-        ret = ['const playlistitem_t master_playlist[' + str(len(effects)) +
+        effects_len = str(len(effects))
+        ret = ['const playlistitem_t master_playlist[' + effects_len +
             '] PROGMEM = {']
 
         [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + ' },')
@@ -67,10 +68,13 @@ def playlist_source(data):
 
         ret.append('};')
 
+        ret.append('const uint8_t master_playlist_len = ' + effects_len + ';')
+
         return '\n'.join(ret) + '\n'
 
     def playlist_indices(data):
-        ret = ['const uint8_t playlists[' + str(len(data)) +
+        playlists_len = str(len(data))
+        ret = ['const uint8_t playlists[' + playlists_len +
             '] PROGMEM = {\n\t0,']
 
         fx_lengths = [len(d['playlist']) for d in data[:-1]]
@@ -78,6 +82,8 @@ def playlist_source(data):
                 range(len(data) - 1)]
 
         ret.append('};')
+
+        ret.append('const uint8_t playlists_len = ' + playlists_len + ';')
 
         return '\n'.join(ret) + '\n'
 

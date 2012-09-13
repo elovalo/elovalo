@@ -24,6 +24,7 @@
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
+#include "../playlists.h"
 
 /* Serial communication constants. Please note: With CMD and RESP
  * codes 0x00 and 0x7e are reserved for LITERAL_ESCAPE and ESCAPE,
@@ -81,6 +82,8 @@ const effect_t *effect; // Current effect. Note: points to PGM
 
 uint16_t effect_length; // Length of the current effect. Used for playlist
 // It might be nice to use this for single effect too (set via serial).
+uint8_t active_effect; // Index of the active effect. Used for playlist
+
 
 // Private functions
 static void process_cmd(void);
@@ -89,8 +92,10 @@ static read_t read_escaped();
 static void report(uint8_t code);
 static bool answering(void);
 static void send_string_from_pgm(const char * const* pgm_p);
+static void init_playlist(void);
 
-effect_t *next_effect(const effect_t *effect);
+
+effect_t *next_effect();
 
 int main() {
 	cli();
@@ -101,7 +106,9 @@ int main() {
 
 	init_blank_timer();
 	init_effect_timer();
-
+	
+	init_playlist();
+	
 	initUSART();
 	sei();
 
@@ -125,9 +132,7 @@ int main() {
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
-			if (ticks > effect_length) {
-				effect = next_effect(effect);
-			}
+			if (ticks > effect_length) next_effect();
 
 			// no need to break!
 			// fall to MODE_EFFECT on purpose
@@ -333,9 +338,25 @@ out:
 	report(REPORT_READY);
 }
 
-effect_t *next_effect(const effect_t *effect) {
-	// TODO
+static void select_playlist_item(uint8_t index);
+
+static void init_playlist(void) {
+	select_playlist_item(0);
 }
+
+effect_t *next_effect() {
+	if(active_effect + 1 == master_playlist_len) select_playlist_item(0);
+	else select_playlist_item(active_effect + 1);
+}
+
+static void select_playlist_item(uint8_t index) {
+	active_effect = index;
+	playlistitem_t item = master_playlist[index];
+	effect = &effects[item.id];
+	effect_length = item.length;
+}
+
+
 
 /**
  * Sends a byte and escapes it if necessary.
