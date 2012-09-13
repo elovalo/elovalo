@@ -1,6 +1,7 @@
 #include <util/atomic.h>
 #include <stdlib.h>
-#include "timer.h"
+#include "clock.h"
+#include "cron.h"
 
 /* ticks_volatile is incremented roughly every 1 millisecond and
  * overflows every 64th second. The tick counter is in effect_utils.c,
@@ -19,6 +20,7 @@ static volatile struct {
 /* Private functions */
 static uint8_t is_time_valid(void);
 static uint8_t calc_posix_time_cksum(void);
+static void enable_interrupts_and_run_cron(void);
 
 /* Dividing 8 ms interval with 125 to get exactly 1 second */
 #define POSIX_DIVIDER 125
@@ -28,8 +30,10 @@ static uint8_t calc_posix_time_cksum(void);
  */
 ISR(TIMER2_COMPA_vect)
 {
-	// Tick counter for effects
-	ticks_volatile++;
+	/* Tick counter for effects. Stop incrementing after maximum
+	 * is reached to avoid messing the effect */
+	if (ticks_volatile != ~0)
+		ticks_volatile++;
 
 	// Run real time clock if it is set
 	if (!--rtc.div && is_time_valid()) {
@@ -38,6 +42,10 @@ ISR(TIMER2_COMPA_vect)
 
 		// Update checksum
 		rtc.cksum = calc_posix_time_cksum();
+
+		/* ATTENTION! Running of cron enables interrupts. This
+		 * must be last line of interrupt handler! */
+		enable_interrupts_and_run_cron();
 	}
 }
 
@@ -59,7 +67,9 @@ void reset_time(void) {
 }
 
 /**
- * Sets POSIX time to this device. Always succeedes and returns 0.
+ * Sets POSIX time to this device. Always succeedes and returns 0. Do
+ * NOT call this from interrupts because this turns toggles
+ * interrupts.
  */
 int stime(time_t *t) {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -72,7 +82,8 @@ int stime(time_t *t) {
 
 /**
  * Returns POSIX time. If the clock is not running (never set by
- * stime) it returns 0. (this part doesn't conform POSIX)
+ * stime) it returns 0. (this part doesn't conform POSIX). Do NOT call
+ * this from interrupts because this turns toggles interrupts.
  */
 time_t time(time_t *t) {
 	uint32_t time;
@@ -82,6 +93,16 @@ time_t time(time_t *t) {
  	}
 	if (t != NULL) *t = time;
 	return time;
+}
+
+/**
+ * This returns the time WITHOUT any validation. This is quick but
+ * MUST be called only with certainty that the time is okay and with
+ * interrupts disabled.
+ */
+time_t unsafe_time(time_t *t) {
+	if (t != NULL) *t = rtc.time;
+	return rtc.time;
 }
 
 /**
@@ -99,4 +120,23 @@ static uint8_t calc_posix_time_cksum(void) {
  */
 static uint8_t is_time_valid(void) {
 	return calc_posix_time_cksum() == rtc.cksum;
+}
+
+/**
+ * Runs cron with enabled interrupts. Detects if a cron run has been
+ * running too long.
+ */
+void enable_interrupts_and_run_cron(void) {
+	static uint8_t cron_running = 0;
+
+	if (cron_running) {
+		// TODO light up debug LED
+		return;
+	}
+	
+	cron_running = 1;
+	const time_t now = rtc.time; // Storing over sei()
+	sei();
+	run_cron(now);
+	cron_running = 0;
 }
