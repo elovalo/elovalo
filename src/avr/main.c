@@ -94,7 +94,8 @@ static read_t read_escaped();
 static void report(uint8_t code);
 static bool answering(void);
 static void send_string_from_pgm(const char * const* pgm_p);
-static void sram_to_serial(void *src, uint8_t len);
+static void sram_to_serial(void *src, uint16_t n);
+static bool serial_to_sram(void *dest, uint16_t n);
 
 int main() {
 	cli();
@@ -205,11 +206,8 @@ void process_cmd(void)
 
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time = 0;
-		for (uint8_t bit_pos=0; bit_pos<32; bit_pos+=8) {
-			read_t x = read_escaped();
-			if (!x.good) goto interrupted;
-			tmp_time |= (time_t)x.byte << bit_pos;
-		}
+		if (!serial_to_sram(&tmp_time,sizeof(tmp_time)))
+			goto interrupted;
 		stime(&tmp_time);
 	} ELSEIFCMD(CMD_GET_TIME) {
 		time_t tmp_time = time(NULL);
@@ -229,14 +227,9 @@ void process_cmd(void)
 		if (start.byte + len.byte > sizeof(sensors_t))
 			goto bad_arg_b;
 
-		// Filling buffer byte by byte
-		uint8_t *p = (uint8_t*)&sensors;
-		for (uint8_t i=start.byte; i<start.byte+len.byte; i++) {
-			read_t x = read_escaped();
-			if (!x.good)
-				goto interrupted;
-			p[i] = x.byte;
-		}
+		// Fill in sensor structure
+		if (!serial_to_sram((void*)&sensors+start.byte,len.byte))
+			goto interrupted;
 	} ELSEIFCMD(CMD_LIST_EFFECTS) {
 		// Report new effect name to serial user
 		for (uint8_t i=0; i<effects_len; i++) {
@@ -395,14 +388,31 @@ static void send_string_from_pgm(const char * const* pgm_p)
 }
 
 /**
- * Send any data starting from SRAM pointer p in escaped form to
- * serial port.
+ * Send n bytes of data starting from SRAM pointer p in escaped form
+ * to serial port.
  */
-static void sram_to_serial(void *src, uint8_t len)
+static void sram_to_serial(void *src, uint16_t n)
 {
 	uint8_t *p = (uint8_t*)src;
-	for (int i=0; i<len; i++)
+	for (int i=0; i<n; i++)
 		send_escaped(*p++);
+}
+
+/**
+ * Reads n bytes of escaped data from serial port to given SRAM
+ * location. If it contains a command, stop reading. If reading was
+ * interrupted due to command, returns false, otherwise true.
+ */
+static bool serial_to_sram(void *dest, uint16_t n)
+{
+	uint8_t *byte_p = (uint8_t*)dest;
+	for (int i=0; i<n; i++) {
+		read_t x = read_escaped();
+		if (!x.good)
+			return false;
+		*byte_p++ = x.byte;
+	}
+	return true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!
