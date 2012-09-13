@@ -1,16 +1,14 @@
 import os
 import json
+import itertools
 import yaml
 import xml.etree.ElementTree as ET
 from glob import glob
 
 
 def generate(source, target, effects=None):
-    for data in attach_ids(load(source), get_names(effects)):
-        write(os.path.join(target, data['name'] + '.c'),
-                c_source(data['playlist']))
-        write(os.path.join(target, data['name'] + '.h'),
-                h_source(data['playlist']))
+    write(target, playlist_source(attach_ids(load(source),
+        get_names(effects))))
 
 
 def load(source):
@@ -52,47 +50,42 @@ def write(path, data):
         t.write(data)
 
 
-def c_source(data):
+def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
-#include <stdlib.h>
-#include "../pgmspace.h"
-#include "../playlist.h"
+#include "playlist.h"
+#include "pgmspace.h"
 '''
 
-    def function_names(data):
-        names = lambda d: set([f['name'] for f in d])
-        name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
+    def master_playlist(data):
+        effects = list(itertools.chain(*[d['playlist'] for d in data]))
+        ret = ['const playlistitem_t master_playlist[' + str(len(effects)) +
+            '] PROGMEM = {']
 
-        return '\n'.join([name(n) for n in names(data)]) + '\n'
+        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + ' },')
+            for fx in effects]
 
-    def playlist(data):
-        definition = lambda f: '\t{ ' + f['id'] + ', ' + \
-            str(f['length']) + ' }, /* ' + f['name'] + ' */'
+        ret.append('};')
 
-        ret = ['const playlistitem_t playlist[] PROGMEM = {']
+        return '\n'.join(ret) + '\n'
 
-        ret.extend([definition(f) for f in data])
+    def playlist_indices(data):
+        ret = ['const uint8_t playlists[' + str(len(data)) +
+            '] PROGMEM = {\n\t0,']
 
-        ret.append('\t{ NULL, 0},')
+        fx_lengths = [len(d['playlist']) for d in data[:-1]]
+        [ret.append('\t' + str(sum(fx_lengths[:i + 1])) + ',') for i in
+                range(len(data) - 1)]
+
         ret.append('};')
 
         return '\n'.join(ret) + '\n'
 
     return '\n'.join([
         file_start,
-        function_names(data),
-        playlist(data)
+        master_playlist(data),
+        playlist_indices(data),
     ])
-
-
-def h_source(data):
-    return '\n'.join([
-            "/* GENERATED FILE! DON'T MODIFY!!! */",
-            '#include "../playlist.h"',
-            '\n'
-            'extern const playlistitem_t playlist[];',
-        ])
 
 
 def load_xml(src):

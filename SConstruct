@@ -13,7 +13,7 @@ effects.generate(
 
 playlists.generate(
     os.path.join(cwd, 'src/playlists/'),
-    os.path.join(cwd, 'src/playlists/'),
+    os.path.join(cwd, 'src', 'playlists.c'),
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
 
