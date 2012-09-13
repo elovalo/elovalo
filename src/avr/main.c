@@ -66,6 +66,7 @@
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers
 #define MODE_EFFECT         0x01 // Draw effect
+#define MODE_PLAYLIST       0x02 // Playlist
 
 // Dirty tricks
 #define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
@@ -122,6 +123,14 @@ int main() {
 		case MODE_IDLE:
 			// No operation
 			break;
+		case MODE_PLAYLIST:
+			ticks = centisecs();
+			if (ticks > effect_length) {
+				effect = next_effect(effect);
+			}
+
+			// no need to break!
+			// fall to MODE_EFFECT on purpose
 		case MODE_EFFECT:
 			// If a buffer is not yet flipped
 			if (may_flip) break;
@@ -143,17 +152,6 @@ int main() {
 
 			break;
 		}
-		case MODE_PLAYLIST:
-			if (may_flip) break;
-
-			ticks = centisecs();
-			if (ticks > effect_length) {
-				effect = next_effect(effect);
-
-				respond(RESP_NEXT_EFFECT);
-
-				break;
-			}
 	}
 
 	return 0;
