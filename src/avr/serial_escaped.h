@@ -20,8 +20,6 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
-
 // Serial protocol fundamentals
 #define ESCAPE              '~'  // Escape character. Go to command mode
 #define LITERAL_ESCAPE      '\0' // Escape followed by this is literal escape.
@@ -46,10 +44,11 @@ void sram_to_serial(void *src, uint16_t n);
 
 /**
  * Reads n bytes of escaped data from serial port to given SRAM
- * location. If it contains a command, stop reading. If reading was
- * interrupted due to command, returns false, otherwise true.
+ * location. If it contains a command, stop reading. Function returns
+ * the number of bytes read. If reading was interrupted due to
+ * command, return value may be less than n.
  */
-bool serial_to_sram(void *dest, uint16_t n);
+uint16_t serial_to_sram(void *dest, uint16_t n);
 
 /**
  * Sends a byte and escapes it if necessary.

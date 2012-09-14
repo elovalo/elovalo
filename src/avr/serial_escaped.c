@@ -47,16 +47,17 @@ void sram_to_serial(void *src, uint16_t n)
 		send_escaped(*p++);
 }
 
-bool serial_to_sram(void *dest, uint16_t n)
+uint16_t serial_to_sram(void *dest, uint16_t n)
 {
+	uint16_t i;
 	uint8_t *byte_p = (uint8_t*)dest;
-	for (int i=0; i<n; i++) {
+	for (i=0; i<n; i++) {
 		read_t x = read_escaped();
 		if (!x.good)
-			return false;
+			break;
 		*byte_p++ = x.byte;
 	}
-	return true;
+	return i;
 }
 
 void send_escaped(uint8_t byte) {

@@ -194,7 +194,7 @@ void process_cmd(void)
 
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time = 0;
-		if (!serial_to_sram(&tmp_time,sizeof(tmp_time)))
+		if (serial_to_sram(&tmp_time,sizeof(tmp_time)) < sizeof(tmp_time))
 			goto interrupted;
 		stime(&tmp_time);
 	} ELSEIFCMD(CMD_GET_TIME) {
@@ -216,17 +216,13 @@ void process_cmd(void)
 			goto bad_arg_b;
 
 		// Fill in sensor structure
-		if (!serial_to_sram((void*)&sensors+start.byte,len.byte))
+		void *p = &sensors;
+		if (serial_to_sram(p+start.byte,len.byte) < len.byte)
 			goto interrupted;
 	} ELSEIFCMD(CMD_LIST_EFFECTS) {
-		// Report new effect name to serial user
+		// Print effect names separated by '\0' character
 		for (uint8_t i=0; i<effects_len; i++) {
-			uint8_t *text_pgm = (uint8_t*)pgm_get(effects[i].name,word);
-			uint8_t c;
-			do {
-				c = pgm_read_byte(text_pgm++);
-				send_escaped(c);
-			} while (c != '\0');
+			send_string_from_pgm(&effects[i].name);
 		}
 	} ELSEIFCMD(CMD_LIST_ACTIONS) {
 		// Report function pointers and their values.
@@ -237,8 +233,8 @@ void process_cmd(void)
 			send_escaped(fp >> 8);
 
 			// Send action and arg name
-			send_string_from_pgm(&(cron_actions[i].act_name));
-			send_string_from_pgm(&(cron_actions[i].arg_name));
+			send_string_from_pgm(&cron_actions[i].act_name);
+			send_string_from_pgm(&cron_actions[i].arg_name);
 		}
 	} ELSEIFCMD(CMD_READ_CRONTAB) {
 		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
@@ -246,7 +242,7 @@ void process_cmd(void)
 			struct event e;
 			get_crontab_entry(&e,i);
 
-			// If end, stop reading, otherwise send bytes
+			// If it's end, stop reading, otherwise send bytes
 			if (e.kind == END) break; // from for
 			sram_to_serial(&e,sizeof(e));
 		}
@@ -255,39 +251,34 @@ void process_cmd(void)
 		for (i=0; i<CRONTAB_SIZE; i++) {
 			// Writing a crontab entry
 			struct event e;
-			uint8_t *p = (uint8_t*)&e;
-			
-			// First is a special case
-			read_t x = read_escaped();
-			if (!x.good) {
-				// Is okay if no data given
-				break; // for
-			}
-			p[0] = x.byte;
 
-			// Reading the rest
-			for (int j=1; j<sizeof(struct event); j++) {
-				x = read_escaped();
-				if (!x.good) {
-					send_escaped(RESP_INTERRUPTED);
-					break;
-				}
-				p[j] = x.byte;
+			/* Read a single element. If user stops
+			 * sending in element boundary, that is
+			 * acceptable. If not, then report error. */
+			uint8_t bytes_read = serial_to_sram(&e,sizeof(e));
+			if (bytes_read == 0) {
+				break; // It's okay to stop in element boundary
+			} else if (bytes_read < sizeof(e)) {
+				send_escaped(RESP_INTERRUPTED);
+				break;
 			}
 			
 			// Validating
 			if (!is_event_valid(&e)) {
 				send_escaped(CRON_ITEM_NOT_VALID);
 				send_escaped(i);
-				/* Break doesn't increment counter, so
-				 * truncating works okay */
-				break; // for
+				break;
 			}
 
 			// Write to EEPROM
 			set_crontab_entry(&e,i);
 		}
-		truncate_crontab(i); // Truncate crontab to data length
+
+		/* Truncating crontab to element count. This is done
+		 * even in case of an error. In that case the crontab
+		 * is truncated to the length of first valid
+		 * entries. */
+		truncate_crontab(i);
 	} else {
 		report(REPORT_INVALID_CMD);
 		return;
