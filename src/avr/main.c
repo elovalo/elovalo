@@ -132,7 +132,12 @@ int main() {
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
-			if (ticks > effect_length) next_effect();
+			if (ticks > effect_length) {
+				next_effect();
+
+				init_t init = (init_t)pgm_get(effect->init, word);
+				if (init != NULL) init();
+			}
 
 			// no need to break!
 			// fall to MODE_EFFECT on purpose
