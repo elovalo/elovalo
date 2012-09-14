@@ -26,6 +26,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <inttypes.h>
+#include <util/atomic.h>
 #include "hcsr04.h"
 
 //values for state
@@ -192,14 +193,22 @@ void hcsr04_stop_continuous_meas(void)
 
 uint16_t hcsr04_get_pulse_length(void)
 {
-	return resp_pulse_length;
+	uint16_t ret_val;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		ret_val = resp_pulse_length;
+	}
+	return ret_val;
 }
 
 uint16_t hcsr04_get_distance_in_cm(void)
 {
-	if (resp_pulse_length == HCSR04_MEAS_FAIL)
-		return resp_pulse_length;
+	uint16_t tmp_pulse_length;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		tmp_pulse_length = resp_pulse_length;
+	}
+	if (tmp_pulse_length == HCSR04_MEAS_FAIL)
+		return tmp_pulse_length;
 
 	// 36 pulses per 10 cm, when clock divider is 256 in TCCR1B
-	return (10 * resp_pulse_length) / 36;
+	return (10 * tmp_pulse_length) / 36;
 }
