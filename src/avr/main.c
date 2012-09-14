@@ -28,19 +28,17 @@
 #include "hcsr04.h"
 #include "adc.h"
 #include "serial.h"
+#include "serial_escaped.h"
 #include "clock.h"
 #include "configuration.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
 
-/* Serial communication constants. Please note: With CMD and RESP
- * codes 0x00 and 0x7e are reserved for LITERAL_ESCAPE and ESCAPE,
- * respectively. */
-
-// Protocol fundamentals
-#define ESCAPE              '~'  // Escape character. Go to command mode
-#define LITERAL_ESCAPE      '\0' // Escape followed by this is literal escape.
+/* Serial communication constants. Please note when allocating new CMD
+ * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
+ * the values in serial_escaped.h .
+ */
 
 // Commands issued by the sender
 #define CMD_STOP            '.'
@@ -79,23 +77,13 @@
 // Dirty tricks
 #define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
 
-typedef struct {
-	uint8_t good;
-	uint8_t byte;
-} read_t;
-
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
 // Private functions
 static void process_cmd(void);
-static void send_escaped(uint8_t byte);
-static read_t read_escaped();
 static void report(uint8_t code);
 static bool answering(void);
-static void send_string_from_pgm(const char * const* pgm_p);
-static void sram_to_serial(void *src, uint16_t n);
-static bool serial_to_sram(void *dest, uint16_t n);
 
 int main() {
 	cli();
@@ -324,34 +312,6 @@ out:
 }
 
 /**
- * Sends a byte and escapes it if necessary.
- */
-static void send_escaped(uint8_t byte) {
-	serial_send(byte);
-	if (byte == ESCAPE) serial_send(LITERAL_ESCAPE);
-}
-
-/**
- * Reads a byte. If it is a command, do not consume input. This uses
- * blocking reads.
- */
-static read_t read_escaped() {
-	read_t ret = {1,0};
-	ret.byte = serial_read_blocking();
-
-	if (ret.byte == ESCAPE) {
-		ret.byte = serial_read_blocking();
-		if (ret.byte != LITERAL_ESCAPE) {
-			// Put bytes back and report that we got nothing.
-			serial_ungetc(ret.byte);
-			serial_ungetc(ESCAPE);
-			ret.good = 0;
-		}
-	}
-	return ret;
-}
-
-/**
  * Send response via serial port.
  */
 static void report(uint8_t code) {
@@ -361,57 +321,6 @@ static void report(uint8_t code) {
 
 static bool answering(void) {
 	report(REPORT_ANSWERING);
-	return true;
-}
-
-/**
- * Sends a string to serial port. Pointer must point to program memory
- * pointing to the actual string data in program memory. So, double
- * pointing and kinda complex types.
- */
-static void send_string_from_pgm(const char * const* pgm_p)
-{
-	char *p = (char*)pgm_read_word_near(pgm_p);
-	char c;
-
-	// If is NULL, print is as zero-length string
-	if ( p == NULL) {
-		send_escaped('\0');
-		return;
-	}
-	
-	// Read byte-by-byte and write, including NUL byte
-	do {
-		c = pgm_read_byte_near(p++);
-		send_escaped(c);
-	} while (c != '\0');
-}
-
-/**
- * Send n bytes of data starting from SRAM pointer p in escaped form
- * to serial port.
- */
-static void sram_to_serial(void *src, uint16_t n)
-{
-	uint8_t *p = (uint8_t*)src;
-	for (int i=0; i<n; i++)
-		send_escaped(*p++);
-}
-
-/**
- * Reads n bytes of escaped data from serial port to given SRAM
- * location. If it contains a command, stop reading. If reading was
- * interrupted due to command, returns false, otherwise true.
- */
-static bool serial_to_sram(void *dest, uint16_t n)
-{
-	uint8_t *byte_p = (uint8_t*)dest;
-	for (int i=0; i<n; i++) {
-		read_t x = read_escaped();
-		if (!x.good)
-			return false;
-		*byte_p++ = x.byte;
-	}
 	return true;
 }
 
