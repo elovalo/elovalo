@@ -72,6 +72,9 @@ bool is_event_valid(struct event *e)
 void run_cron(const time_t now) {
 	static time_t last_time = 0;
 
+	// Do not break when clock is set to past
+	if (last_time > now) last_time=now;
+
 	time_t start_of_day = now / SECS_IN_DAY * SECS_IN_DAY;
 	int16_t last_min = (last_time < start_of_day)
 		? -1
