@@ -1,3 +1,22 @@
+/*
+ *  Copyright 2012 Elovalo project group 
+ *  
+ *  This file is part of Elovalo.
+ *  
+ *  Elovalo is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  Elovalo is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * Functions for accessing schedule
  */
@@ -52,6 +71,9 @@ bool is_event_valid(struct event *e)
  */ 
 void run_cron(const time_t now) {
 	static time_t last_time = 0;
+
+	// Do not break when clock is set to past
+	if (last_time > now) last_time=now;
 
 	time_t start_of_day = now / SECS_IN_DAY * SECS_IN_DAY;
 	int16_t last_min = (last_time < start_of_day)
