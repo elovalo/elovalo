@@ -43,4 +43,12 @@
 // Global variables
 extern volatile uint8_t may_flip;
 
+/**
+ * Set global dimming of the LED cube. Possible values range from 0 to
+ * 255. It's performed by tuning BLANK interval which may lead to
+ * flickering when using low intensities. Also, there is certain low
+ * limit for intensity. Use the functions in powersave.h if you need
+ * to turn the cube completely off. */
+void tlc5940_set_dimming(uint8_t x);
+
 #endif /* TLC5940_H_ */
