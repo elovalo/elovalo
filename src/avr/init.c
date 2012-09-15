@@ -36,8 +36,14 @@
  *      Author: Icchan
  */
 
+/* Timing accuracy with 8 data bits and 1 stop bit is about 4 percent:
+   http://www.maximintegrated.com/app-notes/index.mvp/id/2141 */
+#define BAUD 230400
+#define BAUD_TOL 4
+
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <util/setbaud.h>
 #include "pinMacros.h"
 #include "init.h"
 
@@ -116,14 +122,18 @@ void init_effect_timer(){
 
 void initUSART(){
 
-	uint16_t ubrr = 103; //(F_CPU/(16UL*BAUD_RATE))-1;
-
 	DDRD |= (1<<PD1);
 
-	// USART0 Baud Rate Register
-	// set clock divider
-	UBRR0H = (uint8_t)(ubrr >> 8);
-	UBRR0L = (uint8_t)ubrr;
+	/* See more information about the macro usage:
+	 * http://www.nongnu.org/avr-libc/user-manual/group__util__setbaud.html
+	 */
+	UBRR0H = UBRRH_VALUE;
+	UBRR0L = UBRRL_VALUE;
+#if USE_2X
+	UCSR0A |= (1 << U2X0);
+#else
+	UCSR0A &= ~(1 << U2X0);
+#endif
 
 	// Set frame format to 8 data bits, no parity, 1 stop bit
 	UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);
