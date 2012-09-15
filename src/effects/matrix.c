@@ -41,7 +41,11 @@ void effect(void)
 	for(uint8_t i = 0; i < matrix_xyz_len; i++) {
 		xyz_t xyz = matrix_xyz[i];
 
-		set_led(xyz.x, xyz.y, xyz.z, MAX_INTENSITY);
+		for(uint8_t j = 0; j < 3; j++) {
+			if(xyz.z + j < LEDS_Z) {
+				set_led(xyz.x, xyz.y, xyz.z + j, MAX_INTENSITY);
+			}
+		}
 
 		uint8_t z = xyz.z;
 
