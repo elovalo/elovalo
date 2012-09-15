@@ -53,6 +53,7 @@
 #define CMD_RUN_ACTION      'A'
 #define CMD_READ_CRONTAB    'c'
 #define CMD_WRITE_CRONTAB   'C'
+#define CMD_SELECT_PLAYLIST 'P'
 #define CMD_NOTHING         '*' // May be used to end binary transmission
 
 // Autonomous responses. These may occur anywhere, anytime
@@ -93,6 +94,8 @@ static void report(uint8_t code);
 static bool answering(void);
 static void init_playlist(void);
 static void next_effect();
+static void select_playlist_item(uint8_t index);
+static void init_current_effect(void);
 
 int main() {
 	cli();
@@ -132,9 +135,7 @@ int main() {
 			ticks = centisecs();
 			if (ticks > effect_length) {
 				next_effect();
-
-				init_t init = (init_t)pgm_get(effect->init, word);
-				if (init != NULL) init();
+				init_current_effect();
 			}
 
 			// no need to break!
@@ -194,14 +195,9 @@ void process_cmd(void)
 		mode = MODE_EFFECT;
 		effect = effects + x.byte;
 
-		// Prevent flipping
+		// Prepare running of the new effect
 		may_flip = 0;
-
-		// Fetch init pointer from PROGMEM and run it
-		init_t init = (init_t)pgm_get(effect->init, word);
-		if (init != NULL) init();
-
-		// Swap buffer to bring back buffer to front
+		init_current_effect();
 		gs_buf_swap();
 		
 		/* Support NO_FLIP. Restore buffers to "normal state"
@@ -214,7 +210,15 @@ void process_cmd(void)
 
 		// Restart tick counter
 		reset_time();
-
+	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
+		uint8_t i;
+		if (serial_to_sram(&i,sizeof(i)) < sizeof(i))
+			goto interrupted;
+		if (i >= playlists_len)
+			goto bad_arg_a;
+		// Change mode and run init
+		select_playlist_item(playlists[i]);
+		init_current_effect();
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time = 0;
 		if (serial_to_sram(&tmp_time,sizeof(tmp_time)) < sizeof(tmp_time))
@@ -337,8 +341,6 @@ out:
 	report(REPORT_READY);
 }
 
-static void select_playlist_item(uint8_t index);
-
 static void init_playlist(void) {
 	select_playlist_item(0);
 }
@@ -355,6 +357,10 @@ static void select_playlist_item(uint8_t index) {
 	effect_length = item.length;
 }
 
+static void init_current_effect(void) {
+	init_t init = (init_t)pgm_get(effect->init, word);
+	if (init != NULL) init();
+}
 
 
 /**
