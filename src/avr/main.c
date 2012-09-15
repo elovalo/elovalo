@@ -50,6 +50,7 @@
 #define CMD_SET_TIME        'T'
 #define CMD_SET_SENSOR      'S'
 #define CMD_LIST_ACTIONS    'a'
+#define CMD_RUN_ACTION      'A'
 #define CMD_READ_CRONTAB    'c'
 #define CMD_WRITE_CRONTAB   'C'
 #define CMD_NOTHING         '*' // May be used to end binary transmission
@@ -69,7 +70,6 @@
 #define RESP_BAD_ARG_B      0x02
 
 #define CRON_ITEM_NOT_VALID 0x01
-
 
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers
@@ -258,6 +258,18 @@ void process_cmd(void)
 			send_string_from_pgm(&cron_actions[i].act_name);
 			send_string_from_pgm(&cron_actions[i].arg_name);
 		}
+	} ELSEIFCMD(CMD_RUN_ACTION) {
+		// Runs given action immediately
+		struct {
+			action_t act;
+			uint8_t arg;
+		} a;
+
+		if (serial_to_sram(&a,sizeof(a) < sizeof(a)))
+			goto interrupted;
+		if (!is_action_valid(a.act))
+			goto bad_arg_a;
+		a.act(a.arg);
 	} ELSEIFCMD(CMD_READ_CRONTAB) {
 		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
 			// Read one crotab entry
