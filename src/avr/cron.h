@@ -61,6 +61,16 @@ extern const uint8_t cron_actions_len;
 
 void run_cron(const time_t now);
 void serial_hello(uint8_t x);
+
+/**
+ * Validate event contents (before accepting it from serial console).
+ */
 bool is_event_valid(struct event *e);
+
+/**
+ * Returns true if given action function pointer is allowed and false
+ * if it is not an action.
+ */
+bool is_action_valid(action_t act);
 
 #endif /* CRON_H_ */
