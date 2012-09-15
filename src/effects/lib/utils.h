@@ -113,4 +113,10 @@ extern sensors_t sensors;
 /* take sign of a, either -1, 0, or 1 */
 #define ZSGN(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
 
+typedef struct {
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
+} xyz_t;
+
 #endif // EFFECT_UTILS_H
