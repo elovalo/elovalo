@@ -104,8 +104,8 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        merge = lambda f: f.globs + f.function_declarations + f.functions + \
-            f.init + f.effect
+        merge = lambda f: f.typedefs + f.globs + f.function_declarations + \
+            f.functions + f.init + f.effect
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
 
@@ -118,6 +118,7 @@ class SourceFile(object):
         with open(path, 'r') as f:
             content = analyze(self.name, f.readlines())
 
+        self.typedefs = self._block(content, 'typedef')
         self.globs = self._globals(content)
         self.function_declarations = self._function_declarations(content)
         self.functions = self._functions(content)
@@ -169,8 +170,9 @@ def analyze(name, content):
             ('flip', '#\s*pragma\s+FLIP\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
+            ('typedef', 'typedef\s+struct\s*[{]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
-            ('assignment', '\s*' + types + '(\s+\w+)'),
+            ('assignment', '[a-zA-Z]+(\s+\w+)'),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
@@ -182,6 +184,18 @@ def analyze(name, content):
 
         # TODO: fix the regex. matches too much
         if 'assignment' in ret['types'] and 'function' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex. matches too much
+        if 'assignment' in ret['types'] and ret['content'].startswith('\t'):
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if 'flip' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if ret['content'].startswith('typedef '):
             ret['types'].remove('assignment')
 
         block = ''
@@ -199,12 +213,35 @@ def analyze(name, content):
                 ret['types'].append('function_declaration')
             else:
                 block = parse_function(name, content, ret, i)
+        elif 'typedef' in ret['types']:
+            block = parse_typedef(name, content, ret, i)
 
         ret['block'] = block
 
         return ret
 
+    content = remove_license_blocks(content)
+
     return [analyze_line(i, line) for i, line in enumerate(content)]
+
+
+def remove_license_blocks(lines):
+    i = 0
+
+    for j, line in enumerate(lines):
+        if line == ' */\n':
+            i = j
+            break
+
+    return lines[i + 1:]
+
+
+def typedef_definition(name, line):
+    return line['content']
+
+
+def parse_typedef(name, lines, line, index):
+    return _parse(name, lines, line, index, typedef_definition)
 
 
 def parse_xy(name, lines, line, index):
