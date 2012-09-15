@@ -21,40 +21,19 @@
 
 #include "common.h"
 
-const uint8_t matrix_xyz_len = 10;
-xyz_t matrix_xyz[10];
-
-void init(void)
-{
-	for(uint8_t i = 0; i < matrix_xyz_len; i++) {
-		matrix_xyz[i] = (xyz_t){
-			.x = randint(0, LEDS_X),
-			.y = randint(0, LEDS_Y),
-			.z = randint(0, LEDS_Z)
-		};
-	}
-
-	clear_buffer();
-}
 void effect(void)
 {
+	float fac;
+	uint8_t cur = (ticks >> 2) % 8;
+
 	clear_buffer();
 
-	for(uint8_t i = 0; i < matrix_xyz_len; i++) {
-		xyz_t xyz = matrix_xyz[i];
+	for(uint8_t i = 0; i < LEDS_X; i++) {
+		if(i > cur) fac = 0.0;
+		else fac = (cur - i) * 0.1;
 
-		for(uint8_t j = 0; j < 3; j++) {
-			if(xyz.z + j < LEDS_Z) {
-				set_led(xyz.x, xyz.y, xyz.z + j, MAX_INTENSITY);
-			}
+		for(uint8_t j = 0; j < LEDS_Z; j++) {
+			set_row(i, j, 0, 7, MAX_INTENSITY * fac);
 		}
-
-		uint8_t z = xyz.z;
-
-		z++;
-
-		if(z >= LEDS_Z) z = 0;
-
-		matrix_xyz[i].z = z;
 	}
 }
