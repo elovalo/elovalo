@@ -28,11 +28,8 @@
 #define TLC5940_H_
 
 // TLC5940 pins
-#define DCPRG 	D,PD2 /* Changes if the DC data is written to the
-		       * EEPROM (low) or to the register (high)*/
-#define VPRG 	D,PD3 //when high, TLC5940 is in DC mode, while low, in GS mode
-#define XLAT 	B,PB1 //Data latch from shift register to the device registers
-#define BLANK 	D,PD7 // BLANK pin. Digital pin 7 on Arduino
+#define XLAT 	B,PB1 // Data latch from shift register to the device registers
+#define BLANK 	B,PB2 // BLANK pin.
 
 // SPI pins
 #define MOSI 	B,PB3
