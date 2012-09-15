@@ -105,7 +105,7 @@ int stime(time_t *t) {
  * this from interrupts because this turns toggles interrupts.
  */
 time_t time(time_t *t) {
-	uint32_t time;
+	time_t time;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 		// Time is zero when it's not set
 		time = is_time_valid() ? rtc.time : 0;

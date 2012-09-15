@@ -27,6 +27,7 @@
 #include "cron.h"
 #include "powersave.h"
 #include "configuration.h"
+#include "tlc5940.h"
 #include "serial.h" // For temporary debug code
 
 #define SECS_IN_DAY ((time_t)60*60*24)
@@ -37,18 +38,18 @@ PROGMEM const char s_cube_shutdown[] = "Power-off the cube part";
 PROGMEM const char s_cube_start[] = "Power-on the cube part";
 PROGMEM const char s_serial_hello[] = "Say \"hello\" to serial console";
 PROGMEM const char s_serial_hello_arg[] = "Number to write after \"hello\"";
+PROGMEM const char s_dimming[] = "Set cube intensity";
+PROGMEM const char s_dimming_arg[] = "Intensity between 0 and 255";
 
 const struct action_info cron_actions[] PROGMEM = { 
 	{ &cube_shutdown, s_cube_shutdown, NULL },
 	{ &cube_start, s_cube_start, NULL },
-	{ &serial_hello, s_serial_hello, s_serial_hello_arg}
+	{ &serial_hello, s_serial_hello, s_serial_hello_arg},
+	{ &tlc5940_set_dimming, s_dimming, s_dimming_arg}
 };
 
 const uint8_t cron_actions_len = sizeof(cron_actions)/sizeof(struct action_info);
 
-/**
- * Validate event contents (before accepting it from serial console).
- */
 bool is_event_valid(struct event *e)
 {
 	// Validate kind. END is not there for a reason.
@@ -57,9 +58,15 @@ bool is_event_valid(struct event *e)
 	    e->kind != EMPTY) return false;
 
 	// Validate act
+	return is_action_valid(e->act);
+}
+
+bool is_action_valid(action_t act)
+{
+	// Validate act
 	for (uint8_t i=0; i<cron_actions_len; i++) {
 		action_t x = (action_t)pgm_get(cron_actions[i].act, word);
-		if (e->act == x) return true;
+		if (act == x) return true;
 	}
 	return false;
 }

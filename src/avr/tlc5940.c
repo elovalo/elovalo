@@ -41,6 +41,10 @@ volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
 
+/* Minimum blank interval depends on SPI clock divider. */
+#define SPI_CLOCK_DIVIDER 4
+#define MIN_BLANK_INTERVAL ((1 << SPI_CLOCK_DIVIDER) - 1)
+
 /* SPI transmit interrupt vector SPIF is cleared when entering this
  * interrupt vector. This is called when byte transmission is
  * finished.
@@ -129,3 +133,16 @@ ISR(TIMER0_COMPA_vect)
 	// Set up byte counter for SPI interrupt
 	layer_bytes_left = BYTES_PER_LAYER + 1;
 }
+
+void tlc5940_set_dimming(uint8_t x)
+{
+	if (x <= MIN_BLANK_INTERVAL) {
+		/* It's dimmer than possible. Use the maximum BLANK
+		   interval */
+		OCR0A = 255;
+	} else {
+		/* Making BLANK happen slower */
+		OCR0A = ((uint16_t)MIN_BLANK_INTERVAL << 8)/x;
+	}
+}
+

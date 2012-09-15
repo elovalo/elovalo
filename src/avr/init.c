@@ -46,6 +46,7 @@
 #include <util/setbaud.h>
 #include "pinMacros.h"
 #include "init.h"
+#include "tlc5940.h"
 
 /**
  * Sets up pins used by TLC5940.
@@ -97,8 +98,8 @@ void init_blank_timer(){
 
 	// CTC with OCRA as TOP
 	TCCR0A = (1 << WGM01);
-	// Interrupt generation interval
-	OCR0A = 15;
+	// Interrupt generation interval is set by dimmer
+	tlc5940_set_dimming(255);
 	// Enable Timer Compare match A interrupt
 	TIMSK0 |= (1 << OCIE0A);
 	// Prescaler clk_io / 1024
