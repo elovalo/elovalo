@@ -115,7 +115,7 @@ See file `simulator/README.md`.
 * [Joni Katajamäki](https://github.com/katis) - Embedded programming, hardware design 
 * [Jukka Kinnunen](https://github.com/resutoor) - Hardware design and debugging
 * [Joel Lehtonen](https://github.com/Zouppen/) - Embedded programming, effect engine programming
-* Lasse Saari - Management, pedestal fabrication
+* [Lasse Saari](https://github.com/lassesaari) - Management, pedestal fabrication
 * [Marko Silokunnas](https://github.com/marant) - Soldering
 * [Mio Taalas](https://github.com/mtaalas/) - LED driver interface design, PCB design,
   embedded programming
