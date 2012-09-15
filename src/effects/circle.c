@@ -22,5 +22,5 @@
 #include "common.h"
 
 void effect(void) {
-	circle_shape(0, 0, 0, MAX_INTENSITY);
+	circle_shape(0, 0, 0, 6, 10, MAX_INTENSITY);
 }
