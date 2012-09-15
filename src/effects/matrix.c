@@ -19,13 +19,13 @@
 
 #include "common.h"
 
-const uint8_t xy_pairs_len = 10;
-xyz_t xy_pairs[10];
+const uint8_t matrix_xyz_len = 10;
+xyz_t matrix_xyz[10];
 
 void init(void)
 {
-	for(uint8_t i = 0; i < xy_pairs_len; i++) {
-		xy_pairs[i] = (xyz_t){
+	for(uint8_t i = 0; i < matrix_xyz_len; i++) {
+		matrix_xyz[i] = (xyz_t){
 			.x = randint(0, LEDS_X),
 			.y = randint(0, LEDS_Y),
 			.z = randint(0, LEDS_Z)
@@ -38,8 +38,8 @@ void effect(void)
 {
 	clear_buffer();
 
-	for(uint8_t i = 0; i < xy_pairs_len; i++) {
-		xyz_t xyz = xy_pairs[i];
+	for(uint8_t i = 0; i < matrix_xyz_len; i++) {
+		xyz_t xyz = matrix_xyz[i];
 
 		set_led(xyz.x, xyz.y, xyz.z, MAX_INTENSITY);
 
@@ -49,6 +49,6 @@ void effect(void)
 
 		if(z >= LEDS_Z) z = 0;
 
-		xy_pairs[i].z = z;
+		matrix_xyz[i].z = z;
 	}
 }
