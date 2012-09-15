@@ -40,7 +40,7 @@ def parser():
 def export(effect, output, length=1.0):
     """ Expects length in seconds!
     """
-    length = os.environ.get('length', length) or length
+    length = os.environ.get('length', length) or 1.0
     length = float(length)
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
