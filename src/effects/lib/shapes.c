@@ -22,17 +22,33 @@
 #include <stdlib.h>
 #include "utils.h"
 
-void fish_shape(uint8_t x, uint8_t y, uint8_t z, uint16_t intensity)
+void circle_shape(int8_t xi, int8_t yi, int8_t zi, uint16_t intensity)
 {
-	if(x > 0) set_row(x - 1, z + 1, y + 1, y + 4, intensity);
+	xi -= LEDS_X / 2;
+	yi -= LEDS_Y / 2;
 
-	set_led(x, y, z, intensity);
-	set_row(x, z, y + 2, y + 4, intensity);
-	set_row(x, z + 1, y, y + 5, intensity);
-	set_row(x, z + 2, y + 2, y + 3, intensity);
-	set_led(x, y, z + 2, intensity);
+	for(int8_t x = xi; x < LEDS_X + xi; x++) {
+		for(int8_t y = yi; y < LEDS_Y + yi; y++) {
+			float sq = x * x + y * y;
 
-	if(x < LEDS_X - 1) set_row(x + 1, z + 1, y + 1, y + 4, intensity);
+			if(6 < sq && sq < 10) {
+				set_led(x - xi, y - yi, zi, MAX_INTENSITY);
+			}
+		}
+	}
+}
+
+void fish_shape(uint8_t xi, uint8_t yi, uint8_t zi, uint16_t intensity)
+{
+	if(xi > 0) set_row(xi - 1, zi + 1, yi + 1, yi + 4, intensity);
+
+	set_led(xi, yi, zi, intensity);
+	set_row(xi, zi, yi + 2, yi + 4, intensity);
+	set_row(xi, zi + 1, yi, yi + 5, intensity);
+	set_row(xi, zi + 2, yi + 2, yi + 3, intensity);
+	set_led(xi, yi, zi + 2, intensity);
+
+	if(xi < LEDS_X - 1) set_row(xi + 1, zi + 1, yi + 1, yi + 4, intensity);
 }
 
 static void heart_layer(uint8_t x, uint16_t intensity);
@@ -66,7 +82,7 @@ void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, fl
 				float sq = x * x + y * y + z * z;
 
 				if(rsq_min * fac < sq && sq < rsq_max * fac) {
-					set_led(x - zi, y - yi, z - zi, MAX_INTENSITY);
+					set_led(x - xi, y - yi, z - zi, MAX_INTENSITY);
 				}
 			}
 		}
