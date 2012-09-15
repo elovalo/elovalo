@@ -31,6 +31,7 @@
 #include "serial_escaped.h"
 #include "clock.h"
 #include "configuration.h"
+#include "powersave.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
@@ -91,6 +92,7 @@ int main() {
 	wdt_disable(); // To make sure nothing weird happens
 	init_tlc5940();
 	init_spi();
+	init_ps();
 
 	init_blank_timer();
 	init_effect_timer();
