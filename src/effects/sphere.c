@@ -23,7 +23,9 @@
 
 void effect(void)
 {
-	float a = -3.5 - 3 * (float)(ticks % 26 - 13) / 13;
+	float fac = (float)((ticks >> 3) % 10) / 10;
 
-	sphere_shape(a, a, a, 8, 16, 0.2);
+	clear_buffer();
+
+	sphere_shape(-3, -3, -3, 10, 14, fac);
 }
