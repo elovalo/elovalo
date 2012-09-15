@@ -91,10 +91,7 @@ uint8_t active_effect; // Index of the active effect. Used for playlist
 static void process_cmd(void);
 static void report(uint8_t code);
 static bool answering(void);
-static void send_string_from_pgm(const char * const* pgm_p);
 static void init_playlist(void);
-
-
 static void next_effect();
 
 int main() {
