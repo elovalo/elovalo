@@ -32,7 +32,6 @@
 #include "tlc5940.h"
 #include "pinMacros.h"
 #include "init.h"
-#include "main.h"
 #include "../cube.h"
 
 register uint8_t layer_bytes_left asm ("r4");

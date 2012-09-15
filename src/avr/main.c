@@ -22,7 +22,6 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include "pinMacros.h"
-#include "main.h"
 #include "init.h"
 #include "tlc5940.h"
 #include "hcsr04.h"
