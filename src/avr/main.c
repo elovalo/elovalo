@@ -95,7 +95,7 @@ static void send_string_from_pgm(const char * const* pgm_p);
 static void init_playlist(void);
 
 
-static void *next_effect();
+static void next_effect();
 
 int main() {
 	cli();
@@ -333,7 +333,7 @@ static void init_playlist(void) {
 	select_playlist_item(0);
 }
 
-static void *next_effect() {
+static void next_effect() {
 	if(active_effect + 1 == master_playlist_len) select_playlist_item(0);
 	else select_playlist_item(active_effect + 1);
 }
