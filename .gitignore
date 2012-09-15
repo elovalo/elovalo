@@ -17,3 +17,6 @@
 
 # Python files
 *.pyc
+
+# OS X
+.DS_Store
