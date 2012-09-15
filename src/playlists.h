@@ -1,6 +1,7 @@
 typedef struct {
 	uint8_t id;
 	uint16_t length;
+	const char *text;
 } playlistitem_t;
 
 extern const playlistitem_t master_playlist[];
