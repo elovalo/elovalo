@@ -22,5 +22,16 @@
 #include "common.h"
 
 void effect(void) {
-	circle_shape(0, 0, 0, 6, 10, MAX_INTENSITY);
+	int8_t fac = (ticks >> 4) % 2;
+
+	clear_buffer();
+
+	circle_shape(fac, 0, 0, 9, 13, MAX_INTENSITY);
+	circle_shape(-fac, 0, 1, 8, 12, MAX_INTENSITY);
+	circle_shape(0, fac, 2, 7, 11, MAX_INTENSITY);
+	circle_shape(0, -fac, 3, 7, 10, MAX_INTENSITY);
+	circle_shape(fac, 0, 4, 6, 9, MAX_INTENSITY);
+	circle_shape(-fac, 0, 5, 3, 5, MAX_INTENSITY);
+	circle_shape(0, fac, 6, 1, 3, MAX_INTENSITY);
+	set_led(fac, 4, 7, MAX_INTENSITY);
 }

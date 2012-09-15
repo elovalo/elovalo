@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "utils.h"
 
-void circle_shape(int8_t xi, int8_t yi, int8_t zi, uint16_t intensity)
+void circle_shape(int8_t xi, int8_t yi, int8_t zi, float rsq_min, float rsq_max, uint16_t intensity)
 {
 	xi -= LEDS_X / 2;
 	yi -= LEDS_Y / 2;
@@ -31,7 +31,7 @@ void circle_shape(int8_t xi, int8_t yi, int8_t zi, uint16_t intensity)
 		for(int8_t y = yi; y < LEDS_Y + yi; y++) {
 			float sq = x * x + y * y;
 
-			if(6 < sq && sq < 10) {
+			if(rsq_min < sq && sq < rsq_max) {
 				set_led(x - xi, y - yi, zi, MAX_INTENSITY);
 			}
 		}

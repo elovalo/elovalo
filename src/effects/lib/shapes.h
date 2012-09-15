@@ -17,7 +17,7 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-void circle_shape(int8_t xi, int8_t yi, int8_t zi, uint16_t intensity);
+void circle_shape(int8_t xi, int8_t yi, int8_t zi, float rsq_min, float rsq_max, uint16_t intensity);
 void fish_shape(uint8_t xi, uint8_t yi, uint8_t zi, uint16_t intensity);
 void heart_shape(void);
 void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, float fac);

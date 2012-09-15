@@ -24,5 +24,5 @@
 void effect(void) {
 	clear_buffer();
 
-	circle_shape(0, 0, (ticks >> 2) % LEDS_Z, MAX_INTENSITY);
+	circle_shape(0, 0, (ticks >> 2) % LEDS_Z, 6, 10, MAX_INTENSITY);
 }
