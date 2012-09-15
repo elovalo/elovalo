@@ -8,9 +8,29 @@ Documentation TODO.
 
 These requirements are for building with SCons in Debian GNU/Linux or Ubuntu. This should compile with Windows and Eclipse. TODO add instructions for Windows.
 
-To build on Debian GNU/Linux or Ubuntu platform, install the following packages:
+To build on Ubuntu install the following packages from the Quantal repository:
 
     avr-gcc gcc scons
+
+In order to install Quantal(12.10) packages you have to enable Quantal repositories:
+
+Add the following lines to <tt>/etc/apt/preferences/</tt>
+
+    Package: *
+    Pin: release a=quantal
+    Pin-Priority: 100
+
+And add the following line to <tt>/etc/apt/sources.list</tt>
+
+    deb http://archive.ubuntu.com/ubuntu quantal main restricted universe multiverse
+
+Now you can install packages from the Quantal repository like this:
+
+    sudo apt-get install avr-gcc/quantal avr-libc/quantal
+
+You can compile the program by running
+
+    # scons
 
 If you want to generate animations, install the following packages as well:
 
@@ -95,7 +115,7 @@ See file `simulator/README.md`.
 * [Joni Katajamäki](https://github.com/katis) - Embedded programming, hardware design 
 * [Jukka Kinnunen](https://github.com/resutoor) - Hardware design and debugging
 * [Joel Lehtonen](https://github.com/Zouppen/) - Embedded programming, effect engine programming
-* Lasse Saari - Management, pedestal fabrication
+* [Lasse Saari](https://github.com/lassesaari) - Management, pedestal fabrication
 * [Marko Silokunnas](https://github.com/marant) - Soldering
 * [Mio Taalas](https://github.com/mtaalas/) - LED driver interface design, PCB design,
   embedded programming
