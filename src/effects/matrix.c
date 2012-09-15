@@ -17,6 +17,8 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma FLIP
+
 #include "common.h"
 
 const uint8_t matrix_xyz_len = 10;
