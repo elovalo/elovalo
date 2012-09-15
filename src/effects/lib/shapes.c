@@ -22,6 +22,19 @@
 #include <stdlib.h>
 #include "utils.h"
 
+void fish_shape(uint8_t x, uint8_t y, uint8_t z, uint16_t intensity)
+{
+	if(x > 0) set_row(x - 1, z + 1, y + 1, y + 4, intensity);
+
+	set_led(x, y, z, intensity);
+	set_row(x, z, y + 2, y + 4, intensity);
+	set_row(x, z + 1, y, y + 5, intensity);
+	set_row(x, z + 2, y + 2, y + 3, intensity);
+	set_led(x, y, z + 2, intensity);
+
+	if(x < LEDS_X - 1) set_row(x + 1, z + 1, y + 1, y + 4, intensity);
+}
+
 static void heart_layer(uint8_t x, uint16_t intensity);
 
 void heart_shape(void)

@@ -17,10 +17,10 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-void fish_shape(uint8_t x, uint8_t y, uint8_t z, uint16_t intensity);
-void heart_shape(void);
-void sphere_shape(float xi, float yi, float zi, float rsq_min, float rsq_max, float fac);
-void line(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
-	uint16_t intensity);
-void cube_shape(uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2,
-	uint16_t intensity);
+# pragma FLIP
+
+#include "common.h"
+
+void effect(void) {
+	fish_shape(2, 1, 1, MAX_INTENSITY);
+}
