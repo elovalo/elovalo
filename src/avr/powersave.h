@@ -17,5 +17,17 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Initializes power supply.
+ */
+void init_ps(void);
+
+/**
+ * Powers on the cube portion and exits power save mode.
+ */
 void cube_start(uint8_t unused);
+
+/**
+ * Powers off the cube portion and enters power save mode.
+ */
 void cube_shutdown(uint8_t unused);
