@@ -25,9 +25,9 @@ import xml.etree.ElementTree as ET
 from glob import glob
 
 
-def generate(source, target, effects=None):
-    write(target, playlist_source(attach_ids(load(source),
-        get_names(effects))))
+def generate(source, target, conf, effects=None):
+    write(target, playlist_source(attach_ids(get_playlists(
+        load(source), load_conf(conf)), get_names(effects))))
 
 
 def load(source):
@@ -43,6 +43,28 @@ def load(source):
 
     return ret
 
+
+def load_conf(path):
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            return json.loads(f.read())
+
+
+def get_playlists(data, conf):
+    if conf:
+        ret = []
+
+        for name in conf:
+            for d in data:
+                if name == d['name']:
+                    ret.append(d)
+                    break
+
+        return ret
+
+    print 'Missing playlist conf! Using all playlists instead.'
+
+    return data
 
 def attach_ids(data, effects):
     for d in data:

@@ -14,6 +14,7 @@ effects.generate(
 playlists.generate(
     os.path.join(cwd, 'src/playlists/'),
     os.path.join(cwd, 'src', 'playlists.c'),
+    os.path.join(cwd, 'src', 'playlists.json'),
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
 
