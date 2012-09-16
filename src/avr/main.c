@@ -270,7 +270,7 @@ void process_cmd(void)
 			uint8_t arg;
 		} a;
 
-		if (serial_to_sram(&a,sizeof(a) < sizeof(a)))
+		if (serial_to_sram(&a,sizeof(a)) < sizeof(a))
 			goto interrupted;
 		if (!is_action_valid(a.act))
 			goto bad_arg_a;
@@ -325,15 +325,15 @@ void process_cmd(void)
 	goto out;
 
 bad_arg_a:
-	report(RESP_BAD_ARG_A);
+	send_escaped(RESP_BAD_ARG_A);
 	goto out;
 
 bad_arg_b:
-	report(RESP_BAD_ARG_B);
+	send_escaped(RESP_BAD_ARG_B);
 	goto out;
 
 interrupted:
-	report(RESP_INTERRUPTED);
+	send_escaped(RESP_INTERRUPTED);
 	goto out;
 
 out:
