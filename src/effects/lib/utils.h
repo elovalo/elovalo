@@ -97,27 +97,9 @@ void iterate_xyz(iterate_xyz_t f);
 
 void clear_buffer(void);
 
-uint8_t randint(uint8_t min, uint8_t max);
-uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
-float fclamp(float a, float min, float max);
-
 extern uint16_t ticks;
 extern sensors_t sensors;
 
 #define MAX_INTENSITY ((1<<GS_DEPTH)-1)
-
-// math utils from
-// ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define ABS(a) (((a)<0) ? -(a) : (a))
-
-/* take sign of a, either -1, 0, or 1 */
-#define ZSGN(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
-
-typedef struct {
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
-} xyz_t;
 
 #endif // EFFECT_UTILS_H

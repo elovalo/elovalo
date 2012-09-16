@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "math.h"
 #include "utils.h"
 
 void circle_shape(int8_t xi, int8_t yi, int8_t zi, float rsq_min, float rsq_max, uint16_t intensity)

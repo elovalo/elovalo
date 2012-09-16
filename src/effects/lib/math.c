@@ -1,5 +1,5 @@
 /*
- *  Copyright 2012 Elovalo project group 
+ *  Copyright 2012 Elovalo project group.
  *  
  *  This file is part of Elovalo.
  *  
@@ -16,12 +16,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "../env.h"
-#include "lib/math.h"
-#include "lib/utils.h"
-#include "lib/shapes.h"
-#include "lib/text.h"
+
+int8_t clamp(uint8_t x, uint8_t a, uint8_t b)
+{
+	return x < a? a: (x > b? b: x);
+}
+
+float fclamp(float x, float a, float b)
+{
+	return x < a? a: (x > b? b: x);
+}
+
+uint8_t randint(uint8_t min, uint8_t max)
+{
+	// could use some optimization
+	return (rand() % max) + min;
+}
