@@ -24,16 +24,15 @@
 void effect(void)
 {
 	float fac;
-	uint8_t cur = (ticks >> 2) % 8;
+	int8_t cur = (ticks >> 5) % 8;
 
 	clear_buffer();
 
-	for(uint8_t i = 0; i < LEDS_X; i++) {
-		if(i > cur) fac = 0.0;
-		else fac = (cur - i) * 0.1;
-
+	for(int8_t i = 0; i < LEDS_X; i++) {
 		for(uint8_t j = 0; j < LEDS_Z; j++) {
-			set_row(i, j, 0, 7, MAX_INTENSITY * fac);
+			fac = j <= cur? (cur - j) * 0.1: 0.0;
+
+			set_row(i, LEDS_Z - 1 - j, 0, 7, MAX_INTENSITY * fac);
 		}
 	}
 }
