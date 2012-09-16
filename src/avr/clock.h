@@ -17,12 +17,33 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Returns the time in centiseconds (not really, 0.008 seconds after
+ * clock granularity change). TODO rename this function. */
 uint16_t centisecs(void);
+
 void reset_time(void);
 
 /* Time functions are modelled after POSIX */
 typedef uint32_t time_t;
 
+/**
+ * Returns POSIX time. If the clock is not running (never set by
+ * stime) it returns 0. (this part doesn't conform POSIX). Do NOT call
+ * this from interrupts because this turns toggles interrupts.
+ */
 time_t time(time_t *t);
+
+/**
+ * Sets POSIX time to this device. Always succeedes and returns 0. Do
+ * NOT call this from interrupts because this turns toggles
+ * interrupts.
+ */
 int stime(time_t *t);
+
+/**
+ * This returns the time WITHOUT any validation. This is quick but
+ * MUST be called only with certainty that the time is okay and with
+ * interrupts disabled.
+ */
 time_t unsafe_time(time_t *t);

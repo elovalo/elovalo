@@ -32,7 +32,17 @@
 extern uint8_t *gs_buf_front;
 extern uint8_t *gs_buf_back;
 
+/**
+ * Swap buffers. Call this only from interrupt handlers or places
+ * where no interrupts may occur.
+ */
 void gs_buf_swap(void);
+
+/**
+ * Restore buffers after NO_FLIP effect. May be safely run even if the
+ * last effect was FLIP effect. Must be called when there is no
+ * possibility of gs_buf_swap happening the same time.
+ */
 void gs_restore_bufs(void);
 
 #endif /* CUBE_H_ */

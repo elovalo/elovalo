@@ -17,5 +17,12 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * TODO: API
+ */
 void cube_start(uint8_t unused);
+
+/**
+ * TODO: API
+ */
 void cube_shutdown(uint8_t unused);

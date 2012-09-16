@@ -46,9 +46,6 @@ const struct action_info cron_actions[] PROGMEM = {
 
 const uint8_t cron_actions_len = sizeof(cron_actions)/sizeof(struct action_info);
 
-/**
- * Validate event contents (before accepting it from serial console).
- */
 bool is_event_valid(struct event *e)
 {
 	// Validate kind. END is not there for a reason.
@@ -64,11 +61,6 @@ bool is_event_valid(struct event *e)
 	return false;
 }
 
-/**
- * Checks if it any actions are needed to be run. May be run at
- * arbitary intervals, though running it once per minute is a wise
- * choice. NB. Interrupts should be enabled when calling this!
- */ 
 void run_cron(const time_t now) {
 	static time_t last_time = 0;
 

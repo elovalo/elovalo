@@ -27,10 +27,26 @@
 #ifndef INIT_H_
 #define INIT_H_
 
+/**
+ * Sets up pins used by TLC5940.
+ */
 void init_tlc5940(void);
+
+/**
+ * Initializes pins used in SPI communication.
+ */
 void init_spi(void);
+
+/**
+ * Initializes BLANK Timer / Timer0
+ */
 void init_blank_timer(void);
+
+/**
+ * Initializes effect tick timer / Timer2
+ */
 void init_effect_timer(void);
+
 void initUSART(void);
 
 #define DEBUG_LED D,PD4

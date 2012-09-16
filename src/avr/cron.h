@@ -59,8 +59,22 @@ struct action_info {
 extern const struct action_info cron_actions[]; 
 extern const uint8_t cron_actions_len;
 
-void run_cron(const time_t now);
-void serial_hello(uint8_t x);
+/**
+ * Validate event contents (before accepting it from serial console).
+ */
 bool is_event_valid(struct event *e);
+
+/**
+ * Checks if it any actions are needed to be run. May be run at
+ * arbitary intervals, though running it once per minute is a wise
+ * choice. NB. Interrupts should be enabled when calling this!
+ */ 
+void run_cron(const time_t now);
+
+/**
+ * TODO: API
+ */
+void serial_hello(uint8_t x);
+
 
 #endif /* CRON_H_ */

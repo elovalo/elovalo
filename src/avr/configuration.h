@@ -21,6 +21,21 @@
 
 #include "cron.h"
 
+/**
+ * Gets single crontab entry from crontab (stored on EEPROM).
+ */
 void get_crontab_entry(struct event *p, uint8_t i);
+
+/**
+ * Truncates crontab to contain n elements. When n is zero, it
+ * effectively clears the crontab.
+ */
 void truncate_crontab(uint8_t n);
+
+/**
+ * Sets crontab entry. If you append to crontab, remember to
+ * truncate_crontab() afterwards to ensure there are no "dangling"
+ * objects left there. Do not leave gaps to crontab. If you need to
+ * clear an element, use kind of EMPTY.
+ */
 void set_crontab_entry(struct event *p,uint8_t i);

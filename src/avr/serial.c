@@ -69,9 +69,6 @@ ISR(USART_TX_vect)
 	if (tx_out_i == TX_BUF_SIZE) tx_out_i = 0;
 }
 
-/**
- * Returns the number of bytes available in receive buffer
- */
 uint8_t serial_available(void) {
 	// If it overflows, do not let reads to happen
 	if (rx_state == TXRX_OVERFLOW) return 0;
@@ -80,39 +77,22 @@ uint8_t serial_available(void) {
 	return (rx_in_i < rx_out_i) ? diff + RX_BUF_SIZE : diff;
 }
 
-/**
- * Empties receive buffer.
- */
 void serial_RX_empty(void) {
 	rx_out_i = rx_in_i;
 	rx_state = TXRX_OK;
 }
 
-/**
- * Empties transmit buffer.
- * And clears the error condition
- */
 void serial_TX_empty(void) {
 	tx_in_i = tx_out_i;
 	tx_state = TXRX_OK;
 }
 
-/**
- * Reads a byte from receive buffer. Does not check underrun
- * condition; the user is responsible to check serial_available()
- * before calling this.
- */
 uint8_t serial_read(void) {
 	uint8_t data = rx_buf[rx_out_i++];
 	if (rx_out_i == RX_BUF_SIZE) rx_out_i = 0;
 	return data;
 }
 
-/**
- * Put a byte back to serial buffer. Note the possibility of an
- * overflow. Check rx_state afterwards if you want to check we are in
- * a sane state.
- */
 void serial_ungetc(uint8_t x)
 {
 	// Done as single assignment this to avoid atomicity problem
@@ -127,20 +107,11 @@ void serial_ungetc(uint8_t x)
 	}
 }
 
-/**
- * Returns free capacity in send buffer. That is how many bytes can be
- * transmitted at once.
- */
 uint8_t serial_send_available(void) {
 	uint8_t diff = tx_out_i - tx_in_i - 1;
 	return (tx_out_i < tx_in_i + 1) ? diff + TX_BUF_SIZE : diff;
 }
 
-/**
- * Send a byte to serial port. Does not check overflow condition; the
- * user is responsible to check serial_send_available() before calling
- * this. Do not use from interrupts (or manipulate atomic block)
- */
 void serial_send_nonblocking(uint8_t data)
 {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -164,19 +135,11 @@ void serial_send_nonblocking(uint8_t data)
 	}
 }
 
-/**
- * Reads a byte from receive buffer. Waits in a busy wait loop for
- * more data if no data is already available.
- */
 uint8_t serial_read_blocking(void) {
 	while(!serial_available());
 	return serial_read();
 }
 
-/**
- * Send a byte to serial port. Checks overflow condition and blocks if
- * the buffer is full. Do not call from interrupts!
- */
 void serial_send(uint8_t data) {
 	while ((tx_in_i+1 == tx_out_i) ||
 	       (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
