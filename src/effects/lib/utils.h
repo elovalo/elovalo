@@ -83,22 +83,55 @@ typedef struct {
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
+/**
+ * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
+ */
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 
+/**
+ * TODO: API
+ */
 void set_z(uint8_t x, uint8_t y, uint16_t intensity);
 
+/**
+ * Sets led intensity. i is the intensity of the LED in range
+ * 0..4095. This implementation is AVR optimized and handles only
+ * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
+ * no padding. Do not call directly, use set_led() instead.
+ */
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
-uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
-
+/**
+ * Gets led intensity. Wraps around bounds.
+ */
 uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z);
 
+/**
+ * Gets led intensity from front buffer. Returns intensity of a LED in
+ * range 0..4095.  This implementation is AVR optimized and handles
+ * only cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer
+ * has no padding. Do not call directly, use get_led() instead.
+ */
+uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
+
+
 typedef void(*iterate_xy_t)(uint8_t,uint8_t);
+
+/**
+ * Iterates x, y voxels
+ */
 void iterate_xy(iterate_xy_t f);
 
 typedef void(*iterate_xyz_t)(uint8_t,uint8_t,uint8_t);
+
+/**
+ * Iterates all voxels
+ */
 void iterate_xyz(iterate_xyz_t f);
 
+/**
+ * Sets all voxels in back buffer as black
+ */
 void clear_buffer(void);
 
 uint8_t randint(uint8_t min, uint8_t max);

@@ -21,6 +21,13 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Scrolls given text
+ */
 void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset);
+
+/**
+ * Renders character (index from font8x8_basic) at x with intensity.
+ */
 void render_character(uint8_t index, uint8_t x, uint16_t intensity, int16_t offset);
 
