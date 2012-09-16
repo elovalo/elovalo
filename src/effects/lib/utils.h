@@ -99,6 +99,7 @@ void clear_buffer(void);
 
 uint8_t randint(uint8_t min, uint8_t max);
 uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
+float fclamp(float a, float min, float max);
 
 extern uint16_t ticks;
 extern sensors_t sensors;

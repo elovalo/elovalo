@@ -200,7 +200,12 @@ void clear_buffer(void)
 
 uint8_t clamp(uint8_t x, uint8_t a, uint8_t b)
 {
-	return x < a ? a : (x > b ? b : x);
+	return x < a? a: (x > b? b: x);
+}
+
+float fclamp(float x, float a, float b)
+{
+	return x < a? a: (x > b? b: x);
 }
 
 uint8_t randint(uint8_t min, uint8_t max)
