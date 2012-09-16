@@ -1,5 +1,7 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
+from glob import glob
+
 from generators import effects, playlists
 
 cwd = GetLaunchDir()
@@ -11,7 +13,9 @@ effects.generate(
 
 playlists.generate(
     os.path.join(cwd, 'src/playlists/'),
-    os.path.join(cwd, 'src/playlists/')
+    os.path.join(cwd, 'src', 'playlists.c'),
+    os.path.join(cwd, 'src', 'playlists.json'),
+    effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
 
 AddOption('--no-avr',

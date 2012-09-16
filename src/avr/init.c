@@ -42,7 +42,7 @@
 
 /* Timing accuracy with 8 data bits and 1 stop bit is about 4 percent:
    http://www.maximintegrated.com/app-notes/index.mvp/id/2141 */
-#define BAUD 230400
+#define BAUD 115200
 #define BAUD_TOL 4
 
 #include <avr/interrupt.h>
@@ -61,13 +61,10 @@ void init_tlc5940(void)
 	 * init. */
 	PORTB |= (1<<PB2);
 	DDRB |=
-		(1<<PB1); // XLAT: output
-
+		(1<<PB1)| // XLAT: output
+		(1<<PB2); // BLANK: output
 	DDRD |=
-		(1<<PD2)| // DCPRG: output
-		(1<<PD3)| // VPRG: output
-		(1<<PD4)| // Debug LED: output
-		(1<<PD7); // BLANK: output
+		(1<<PD4); // Debug LED: output
 }
 
 void init_spi(void)

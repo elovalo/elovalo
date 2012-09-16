@@ -22,9 +22,23 @@
  */
 
 #include <stdint.h>
+#include <avr/io.h>
+#include "pinMacros.h"
 
-void cube_start(uint8_t unused) {
+#define PS_ON D,PD3
+
+void init_ps(void)
+{
+	DDRD |=
+		(1<<PD3); // PS_ON: output
 }
 
-void cube_shutdown(uint8_t unused) {
+void cube_start(uint8_t unused)
+{
+	pin_high(PS_ON);
+}
+
+void cube_shutdown(uint8_t unused)
+{
+	pin_low(PS_ON);
 }

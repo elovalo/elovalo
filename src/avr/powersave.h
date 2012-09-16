@@ -22,11 +22,16 @@
  */
 
 /**
- * TODO: API
+ * Initializes power supply.
+ */
+void init_ps(void);
+
+/**
+ * Powers on the cube portion and exits power save mode.
  */
 void cube_start(uint8_t unused);
 
 /**
- * TODO: API
+ * Powers off the cube portion and enters power save mode.
  */
 void cube_shutdown(uint8_t unused);

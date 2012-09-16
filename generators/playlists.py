@@ -19,17 +19,15 @@
 
 import os
 import json
+import itertools
 import yaml
 import xml.etree.ElementTree as ET
 from glob import glob
 
 
-def generate(source, target):
-    for data in load(source):
-        write(os.path.join(target, data['name'] + '.c'),
-                c_source(data['playlist']))
-        write(os.path.join(target, data['name'] + '.h'),
-                h_source(data['playlist']))
+def generate(source, target, conf, effects=None):
+    write(target, playlist_source(attach_ids(get_playlists(
+        load(source), load_conf(conf)), get_names(effects))))
 
 
 def load(source):
@@ -40,10 +38,46 @@ def load(source):
         for path, data in read(glob(os.path.join(source, '*.' + fmt)), reader):
             ret.append({
                 'name': path.split('/')[-1].split('.')[0],
-                'playlist': data
+                'playlist': data,
             })
 
     return ret
+
+
+def load_conf(path):
+    if os.path.exists(path):
+        with open(path, 'r') as f:
+            return json.loads(f.read())
+
+
+def get_playlists(data, conf):
+    if conf:
+        ret = []
+
+        for name in conf:
+            for d in data:
+                if name == d['name']:
+                    ret.append(d)
+                    break
+
+        return ret
+
+    print 'Missing playlist conf! Using all playlists instead.'
+
+    return data
+
+def attach_ids(data, effects):
+    for d in data:
+        playlist = d['playlist']
+
+        for effect in playlist:
+            effect['id'] = str(effects.index(effect['name']))
+
+    return data
+
+
+def get_names(effects):
+    return [e.split('/')[-1].split('.')[0] for e in effects]
 
 
 def read(paths, reader):
@@ -57,46 +91,48 @@ def write(path, data):
         t.write(data)
 
 
-def c_source(data):
+def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
-#include "../pgmspace.h"
-#include "../playlist.h"
+#include "playlists.h"
+#include "pgmspace.h"
 '''
 
-    def function_names(data):
-        names = lambda d: set([f['name'] for f in d])
-        name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
+    def master_playlist(data):
+        effects = list(itertools.chain(*[d['playlist'] for d in data]))
+        effects_len = str(len(effects))
+        ret = ['const playlistitem_t master_playlist[' + effects_len +
+            '] PROGMEM = {']
 
-        return '\n'.join([name(n) for n in names(data)]) + '\n'
+        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + ' },')
+            for fx in effects]
 
-    def playlist(data):
-        definition = lambda f: '\t{ s_' + f['name'] + ', ' + \
-            str(f['length']) + ' },'
-
-        ret = ['const playlistitem_t playlist[] PROGMEM = {']
-
-        ret.extend([definition(f) for f in data])
-
-        ret.append('\t{ NULL, 0},')
         ret.append('};')
+
+        ret.append('const uint8_t master_playlist_len = ' + effects_len + ';')
+
+        return '\n'.join(ret) + '\n'
+
+    def playlist_indices(data):
+        playlists_len = str(len(data))
+        ret = ['const uint8_t playlists[' + playlists_len +
+            '] PROGMEM = {\n\t0,']
+
+        fx_lengths = [len(d['playlist']) for d in data[:-1]]
+        [ret.append('\t' + str(sum(fx_lengths[:i + 1])) + ',') for i in
+                range(len(data) - 1)]
+
+        ret.append('};')
+
+        ret.append('const uint8_t playlists_len = ' + playlists_len + ';')
 
         return '\n'.join(ret) + '\n'
 
     return '\n'.join([
         file_start,
-        function_names(data),
-        playlist(data)
+        master_playlist(data),
+        playlist_indices(data),
     ])
-
-
-def h_source(data):
-    return '\n'.join([
-            "/* GENERATED FILE! DON'T MODIFY!!! */",
-            '#include "../playlist.h"',
-            '\n'
-            'extern const playlistitem_t playlist[];',
-        ])
 
 
 def load_xml(src):

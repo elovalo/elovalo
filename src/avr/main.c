@@ -26,7 +26,6 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include "pinMacros.h"
-#include "main.h"
 #include "init.h"
 #include "tlc5940.h"
 #include "hcsr04.h"
@@ -35,9 +34,11 @@
 #include "serial_escaped.h"
 #include "clock.h"
 #include "configuration.h"
+#include "powersave.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
+#include "../playlists.h"
 
 /* Serial communication constants. Please note when allocating new CMD
  * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
@@ -56,6 +57,7 @@
 #define CMD_RUN_ACTION      'A'
 #define CMD_READ_CRONTAB    'c'
 #define CMD_WRITE_CRONTAB   'C'
+#define CMD_SELECT_PLAYLIST 'P'
 #define CMD_NOTHING         '*' // May be used to end binary transmission
 
 // Autonomous responses. These may occur anywhere, anytime
@@ -77,6 +79,7 @@
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers
 #define MODE_EFFECT         0x01 // Draw effect
+#define MODE_PLAYLIST       0x02 // Playlist
 
 // Dirty tricks
 #define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
@@ -84,10 +87,19 @@
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
+uint16_t effect_length; // Length of the current effect. Used for playlist
+// It might be nice to use this for single effect too (set via serial).
+uint8_t active_effect; // Index of the active effect. Used for playlist
+
+
 // Private functions
 static void process_cmd(void);
 static void report(uint8_t code);
 static bool answering(void);
+static void init_playlist(void);
+static void next_effect();
+static void select_playlist_item(uint8_t index);
+static void init_current_effect(void);
 
 int main() {
 	cli();
@@ -95,10 +107,13 @@ int main() {
 	wdt_disable(); // To make sure nothing weird happens
 	init_tlc5940();
 	init_spi();
+	init_ps();
 
 	init_blank_timer();
 	init_effect_timer();
-
+	
+	init_playlist();
+	
 	initUSART();
 	sei();
 
@@ -120,7 +135,16 @@ int main() {
 		case MODE_IDLE:
 			// No operation
 			break;
-		case MODE_EFFECT: // TODO: playlist logic
+		case MODE_PLAYLIST:
+			ticks = centisecs();
+			if (ticks > effect_length) {
+				next_effect();
+				init_current_effect();
+			}
+
+			// no need to break!
+			// fall to MODE_EFFECT on purpose
+		case MODE_EFFECT:
 			// If a buffer is not yet flipped
 			if (may_flip) break;
 
@@ -175,14 +199,9 @@ void process_cmd(void)
 		mode = MODE_EFFECT;
 		effect = effects + x.byte;
 
-		// Prevent flipping
+		// Prepare running of the new effect
 		may_flip = 0;
-
-		// Fetch init pointer from PROGMEM and run it
-		init_t init = (init_t)pgm_get(effect->init, word);
-		if (init != NULL) init();
-
-		// Swap buffer to bring back buffer to front
+		init_current_effect();
 		gs_buf_swap();
 		
 		/* Support NO_FLIP. Restore buffers to "normal state"
@@ -195,7 +214,15 @@ void process_cmd(void)
 
 		// Restart tick counter
 		reset_time();
-
+	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
+		uint8_t i;
+		if (serial_to_sram(&i,sizeof(i)) < sizeof(i))
+			goto interrupted;
+		if (i >= playlists_len)
+			goto bad_arg_a;
+		// Change mode and run init
+		select_playlist_item(playlists[i]);
+		init_current_effect();
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time = 0;
 		if (serial_to_sram(&tmp_time,sizeof(tmp_time)) < sizeof(tmp_time))
@@ -247,7 +274,7 @@ void process_cmd(void)
 			uint8_t arg;
 		} a;
 
-		if (serial_to_sram(&a,sizeof(a) < sizeof(a)))
+		if (serial_to_sram(&a,sizeof(a)) < sizeof(a))
 			goto interrupted;
 		if (!is_action_valid(a.act))
 			goto bad_arg_a;
@@ -302,21 +329,43 @@ void process_cmd(void)
 	goto out;
 
 bad_arg_a:
-	report(RESP_BAD_ARG_A);
+	send_escaped(RESP_BAD_ARG_A);
 	goto out;
 
 bad_arg_b:
-	report(RESP_BAD_ARG_B);
+	send_escaped(RESP_BAD_ARG_B);
 	goto out;
 
 interrupted:
-	report(RESP_INTERRUPTED);
+	send_escaped(RESP_INTERRUPTED);
 	goto out;
 
 out:
 	// All commands should be ended, successful or not
 	report(REPORT_READY);
 }
+
+static void init_playlist(void) {
+	select_playlist_item(0);
+}
+
+static void next_effect() {
+	if(active_effect + 1 == master_playlist_len) select_playlist_item(0);
+	else select_playlist_item(active_effect + 1);
+}
+
+static void select_playlist_item(uint8_t index) {
+	active_effect = index;
+	playlistitem_t item = master_playlist[index];
+	effect = &effects[item.id];
+	effect_length = item.length;
+}
+
+static void init_current_effect(void) {
+	init_t init = (init_t)pgm_get(effect->init, word);
+	if (init != NULL) init();
+}
+
 
 /**
  * Send response via serial port.
