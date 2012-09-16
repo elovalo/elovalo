@@ -226,8 +226,7 @@ def remove_license_blocks(lines):
     i = 0
 
     for j, line in enumerate(lines):
-        if line == ' *  along with Elovalo.  If not, see ' + \
-                '<http://www.gnu.org/licenses/>.\n':
+        if line == ' */\n':
             i = j
             break
 

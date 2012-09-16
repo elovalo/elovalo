@@ -1,8 +1,6 @@
-/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
- * vi: set shiftwidth=8 tabstop=8 expandtab:
- * :indentSize=8:tabSize=8:noTabs=true:
- */
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
  *  This file is part of Elovalo.
