@@ -25,8 +25,8 @@
 
 void init_ps(void)
 {
-	DDRD |=
-		(1<<PD3); // PS_ON: output
+	DDRD |= (1<<PD3); // PS_ON: output
+	// PS_ON is low on startup
 }
 
 void cube_start(uint8_t unused)
