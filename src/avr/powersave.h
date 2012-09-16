@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -17,5 +21,12 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * TODO: API
+ */
 void cube_start(uint8_t unused);
+
+/**
+ * TODO: API
+ */
 void cube_shutdown(uint8_t unused);

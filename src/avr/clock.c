@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -68,9 +72,6 @@ ISR(TIMER2_COMPA_vect)
 	}
 }
 
-/**
- * Returns the time in centiseconds (not really, 0.008 seconds after
- * clock granularity change). TODO rename this function. */
 uint16_t centisecs(void) {
 	uint16_t copy_of_ticks;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -85,25 +86,6 @@ void reset_time(void) {
 	}
 }
 
-/**
- * Sets POSIX time to this device. Always succeedes and returns 0. Do
- * NOT call this from interrupts because this turns toggles
- * interrupts.
- */
-int stime(time_t *t) {
-	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		rtc.time = *t;
-		rtc.div = POSIX_DIVIDER;
-		rtc.cksum = calc_posix_time_cksum();
-	}
-	return 0;
-}
-
-/**
- * Returns POSIX time. If the clock is not running (never set by
- * stime) it returns 0. (this part doesn't conform POSIX). Do NOT call
- * this from interrupts because this turns toggles interrupts.
- */
 time_t time(time_t *t) {
 	time_t time;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -114,11 +96,15 @@ time_t time(time_t *t) {
 	return time;
 }
 
-/**
- * This returns the time WITHOUT any validation. This is quick but
- * MUST be called only with certainty that the time is okay and with
- * interrupts disabled.
- */
+int stime(time_t *t) {
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		rtc.time = *t;
+		rtc.div = POSIX_DIVIDER;
+		rtc.cksum = calc_posix_time_cksum();
+	}
+	return 0;
+}
+
 time_t unsafe_time(time_t *t) {
 	if (t != NULL) *t = rtc.time;
 	return rtc.time;

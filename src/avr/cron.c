@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -71,11 +75,6 @@ bool is_action_valid(action_t act)
 	return false;
 }
 
-/**
- * Checks if it any actions are needed to be run. May be run at
- * arbitary intervals, though running it once per minute is a wise
- * choice. NB. Interrupts should be enabled when calling this!
- */ 
 void run_cron(const time_t now) {
 	static time_t last_time = 0;
 

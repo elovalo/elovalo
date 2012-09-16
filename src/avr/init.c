@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -48,9 +52,6 @@
 #include "init.h"
 #include "tlc5940.h"
 
-/**
- * Sets up pins used by TLC5940.
- */
 void init_tlc5940(void)
 {
 	/* Set BLANK high (The pin used as BLANK is also !SS pin, thus
@@ -69,9 +70,6 @@ void init_tlc5940(void)
 		(1<<PD7); // BLANK: output
 }
 
-/**
- * Initializes pins used in SPI communication.
- */
 void init_spi(void)
 {
 	DDRB |=
@@ -88,9 +86,6 @@ void init_spi(void)
 	   runs SPI at f_osc / 4 = 4 MHz, when f_osc is 16 MHz */
 }
 
-/**
- * Initializes BLANK Timer / Timer0
- */
 void init_blank_timer(){
 	/* We have 12 bit PWM cycle on TLC5940, prescaler of 1024, and
 	 * TLC5940 clock divider of 4. So we need to have output
@@ -106,9 +101,6 @@ void init_blank_timer(){
 	TCCR0B |= (1 << CS02) | (1 << CS00);
 }
 
-/**
- * Initializes effect tick timer / Timer2
- */
 void init_effect_timer(){
 	//CTC with OCRA as TOP
 	TCCR2A |= (1 << WGM21);

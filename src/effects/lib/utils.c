@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -45,9 +49,6 @@ uint16_t ticks;
 /* Sensor values are stored in this struct */ 
 sensors_t sensors = {MAX_INTENSITY};
 
-/**
- * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
- */
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
 {
 	for(uint8_t i = y1; i <= y2; i++) {
@@ -68,12 +69,6 @@ void set_z(uint8_t x, uint8_t y, uint16_t intensity)
 	set_led_8_8_12(x,y,lower_z + 1,upper_i);
 }
 
-/**
- * Sets led intensity. i is the intensity of the LED in range
- * 0..4095. This implementation is AVR optimized and handles only
- * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
- * no padding. Do not call directly, use set_led() instead.
- */
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 {
 	/* Assert (on testing environment) that we supply correct
@@ -108,9 +103,6 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	gs_buf_back[byte_pos+1] = raw;
 }
 
-/**
- * Gets led intensity. Wraps around bounds.
- */
 uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z)
 {
 	// Assert it is not too low where we can't wrap without modulus
@@ -130,12 +122,6 @@ uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z)
 	return get_led(rx, ry, rz);
 }
 
-/**
- * Gets led intensity from front buffer. Returns intensity of a LED in
- * range 0..4095.  This implementation is AVR optimized and handles
- * only cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer
- * has no padding. Do not call directly, use get_led() instead.
- */
 uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z)
 {
 	/* Assert (on testing environment) that we supply correct
@@ -164,9 +150,6 @@ uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z)
 	return (bit_pos & 0x7) ? raw & 0x0fff : raw >> 4;
 }
 
-/**
- * Iterates x, y voxels
- */
 void iterate_xy(iterate_xy_t f)
 {
 	for(uint8_t x = 0; x < LEDS_X; x++) {
@@ -176,9 +159,6 @@ void iterate_xy(iterate_xy_t f)
 	}
 }
 
-/**
- * Iterates all voxels
- */
 void iterate_xyz(iterate_xyz_t f)
 {
 	for(uint8_t x = 0; x < LEDS_X; x++) {
@@ -190,9 +170,6 @@ void iterate_xyz(iterate_xyz_t f)
 	}
 }
 
-/**
- * Sets all voxels in back buffer as black
- */
 void clear_buffer(void)
 {
 	memset(gs_buf_back,0,GS_BUF_BYTES);

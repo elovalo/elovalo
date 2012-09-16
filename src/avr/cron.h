@@ -1,3 +1,7 @@
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
 /*
  *  Copyright 2012 Elovalo project group 
  *  
@@ -59,7 +63,21 @@ struct action_info {
 extern const struct action_info cron_actions[]; 
 extern const uint8_t cron_actions_len;
 
+/**
+ * Validate event contents (before accepting it from serial console).
+ */
+bool is_event_valid(struct event *e);
+
+/**
+ * Checks if it any actions are needed to be run. May be run at
+ * arbitary intervals, though running it once per minute is a wise
+ * choice. NB. Interrupts should be enabled when calling this!
+ */ 
 void run_cron(const time_t now);
+
+/**
+ * TODO: API
+ */
 void serial_hello(uint8_t x);
 
 /**
