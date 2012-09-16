@@ -142,7 +142,7 @@ int main() {
 			// fall to MODE_EFFECT on purpose
 		case MODE_EFFECT:
 			// If a buffer is not yet flipped
-			if (may_flip) break;
+			if (flags.may_flip) break;
 
 			// Update clock and sensor values
 			ticks = centisecs();
@@ -155,8 +155,7 @@ int main() {
 			draw_t draw = (draw_t)pgm_get(effect->draw,word);
 			if (draw != NULL) {
 				draw();
-				// Mark buffer ready for swapping
-				may_flip = 1;
+				allow_flipping(true);
 			}
 
 			break;
@@ -196,7 +195,7 @@ void process_cmd(void)
 		effect = effects + x.byte;
 
 		// Prepare running of the new effect
-		may_flip = 0;
+		allow_flipping(false);
 		init_current_effect();
 		gs_buf_swap();
 		
