@@ -1,18 +1,18 @@
 #
-# Copyright 2012 Elovalo project group 
-# 
+# Copyright 2012 Elovalo project group
+#
 # This file is part of Elovalo.
-# 
+#
 # Elovalo is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Elovalo is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -20,6 +20,10 @@ import argparse
 import json
 import os
 from subprocess import call, Popen
+
+
+WARNING = '\033[91m'
+ENDC = '\033[0m'
 
 
 def effect_parser():
@@ -49,7 +53,7 @@ def export(effect, output, length=1.0):
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
     call(['../build/exporter/exporter ' + effect + ' ' + length], shell=True)
-    write_fps(effect, output)
+    return write_fps(effect, output)
 
 
 def write_fps(effect, output):
@@ -58,6 +62,11 @@ def write_fps(effect, output):
 
     with open(os.path.join(output, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
+
+        if not os.path.exists(p):
+            print WARNING + \
+                'Missing export json. Check out your effect code!' + ENDC
+            return False
 
         with open(p, 'r') as jf:
             d = json.load(jf)
@@ -68,6 +77,8 @@ def write_fps(effect, output):
             },
             f
         )
+
+    return True
 
 
 def render_animation(effect, output, length):
