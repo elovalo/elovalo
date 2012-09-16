@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -48,9 +48,6 @@
 #include "init.h"
 #include "tlc5940.h"
 
-/**
- * Sets up pins used by TLC5940.
- */
 void init_tlc5940(void)
 {
 	/* Set BLANK high (The pin used as BLANK is also !SS pin, thus
@@ -66,9 +63,6 @@ void init_tlc5940(void)
 		(1<<PD4); // Debug LED: output
 }
 
-/**
- * Initializes pins used in SPI communication.
- */
 void init_spi(void)
 {
 	DDRB |=
@@ -85,9 +79,6 @@ void init_spi(void)
 	   runs SPI at f_osc / 4 = 4 MHz, when f_osc is 16 MHz */
 }
 
-/**
- * Initializes BLANK Timer / Timer0
- */
 void init_blank_timer(){
 	/* We have 12 bit PWM cycle on TLC5940, prescaler of 1024, and
 	 * TLC5940 clock divider of 4. So we need to have output
@@ -103,9 +94,6 @@ void init_blank_timer(){
 	TCCR0B |= (1 << CS02) | (1 << CS00);
 }
 
-/**
- * Initializes effect tick timer / Timer2
- */
 void init_effect_timer(){
 	//CTC with OCRA as TOP
 	TCCR2A |= (1 << WGM21);

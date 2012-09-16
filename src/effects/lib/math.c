@@ -16,15 +16,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdlib.h>
+#include <stdint.h>
 
-# pragma FLIP
-
-#include "common.h"
-
-XY(effect)
+int8_t clamp(uint8_t x, uint8_t a, uint8_t b)
 {
-	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
-	uint16_t i = scaler * (2 + sin((float)x / 2 + (float)ticks / 15) + sin((float)y / 2 + (float)ticks / 30));
+	return x < a? a: (x > b? b: x);
+}
 
-	set_z(x, y, i);
+float fclamp(float x, float a, float b)
+{
+	return x < a? a: (x > b? b: x);
+}
+
+uint8_t randint(uint8_t min, uint8_t max)
+{
+	// could use some optimization
+	return (rand() % max) + min;
 }

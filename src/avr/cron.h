@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef CRON_H_
@@ -59,7 +59,21 @@ struct action_info {
 extern const struct action_info cron_actions[]; 
 extern const uint8_t cron_actions_len;
 
+/**
+ * Validate event contents (before accepting it from serial console).
+ */
+bool is_event_valid(struct event *e);
+
+/**
+ * Checks if it any actions are needed to be run. May be run at
+ * arbitary intervals, though running it once per minute is a wise
+ * choice. NB. Interrupts should be enabled when calling this!
+ */ 
 void run_cron(const time_t now);
+
+/**
+ * TODO: API
+ */
 void serial_hello(uint8_t x);
 
 /**

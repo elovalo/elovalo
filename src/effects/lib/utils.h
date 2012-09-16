@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef EFFECT_UTILS_H
@@ -79,44 +79,60 @@ typedef struct {
 // XXX: might want to replace flipBuffers with a set of bitfields
 // if more flags are needed
 
+/**
+ * Sets row x, z, y1, y2 to given intensity. See below set_led for more details.
+ */
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 
+/**
+ * TODO: API
+ */
 void set_z(uint8_t x, uint8_t y, uint16_t intensity);
 
+/**
+ * Sets led intensity. i is the intensity of the LED in range
+ * 0..4095. This implementation is AVR optimized and handles only
+ * cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer has
+ * no padding. Do not call directly, use set_led() instead.
+ */
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i);
 
-uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
-
+/**
+ * Gets led intensity. Wraps around bounds.
+ */
 uint16_t get_led_wrap(int8_t x, int8_t y, int8_t z);
 
+/**
+ * Gets led intensity from front buffer. Returns intensity of a LED in
+ * range 0..4095.  This implementation is AVR optimized and handles
+ * only cases where LEDS_X and LEDS_Y are 8, GS_DEPTH is 12, and layer
+ * has no padding. Do not call directly, use get_led() instead.
+ */
+uint16_t get_led_8_8_12(uint8_t x, uint8_t y, uint8_t z);
+
+
 typedef void(*iterate_xy_t)(uint8_t,uint8_t);
+
+/**
+ * Iterates x, y voxels
+ */
 void iterate_xy(iterate_xy_t f);
 
 typedef void(*iterate_xyz_t)(uint8_t,uint8_t,uint8_t);
+
+/**
+ * Iterates all voxels
+ */
 void iterate_xyz(iterate_xyz_t f);
 
+/**
+ * Sets all voxels in back buffer as black
+ */
 void clear_buffer(void);
-
-uint8_t randint(uint8_t min, uint8_t max);
-uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
 
 extern uint16_t ticks;
 extern sensors_t sensors;
 
 #define MAX_INTENSITY ((1<<GS_DEPTH)-1)
-
-// math utils from
-// ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define ABS(a) (((a)<0) ? -(a) : (a))
-
-/* take sign of a, either -1, 0, or 1 */
-#define ZSGN(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
-
-typedef struct {
-	uint8_t x;
-	uint8_t y;
-	uint8_t z;
-} xyz_t;
 
 #endif // EFFECT_UTILS_H
