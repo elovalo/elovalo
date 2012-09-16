@@ -84,9 +84,6 @@ ISR(TIMER0_COMPA_vect)
 	pin_high(XLAT);
 	pin_low(XLAT);
 
-	// Send first byte
-	SPDR = ~layer;
-
 	// Main screen turn on and start PWM timers on TLC5940
 	pin_low(BLANK);
 
@@ -106,6 +103,9 @@ ISR(TIMER0_COMPA_vect)
 		// Roll send_ptr back to start of buffer
 		send_ptr = gs_buf_front;
 	}
+
+	// Send first byte
+	SPDR = ~layer;
 
 	// Set up byte counter for SPI interrupt
 	layer_bytes_left = BYTES_PER_LAYER + 1;

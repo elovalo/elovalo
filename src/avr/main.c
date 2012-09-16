@@ -97,6 +97,12 @@ int main() {
 	init_effect_timer();
 
 	initUSART();
+
+#define PS_ON D,PD3
+
+	DDRD |= (1<<PD3); // PS_ON: output
+	pin_high(PS_ON);
+
 	sei();
 
 	hcsr04_start_continuous_meas();
