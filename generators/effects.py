@@ -217,21 +217,27 @@ def analyze(name, content):
 
         return ret
 
-    content = remove_license_blocks(content)
+    content = remove_comments(content)
 
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
-def remove_license_blocks(lines):
-    i = 0
+def remove_comments(text):
+    # http://stackoverflow.com/a/241506
+    def replacer(match):
+        s = match.group(0)
 
-    for j, line in enumerate(lines):
-        if line == ' */\n':
-            i = j
-            break
+        return '' if s.startswith('/') else s
 
-    return lines[i + 1:]
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
 
+    id = lambda a: a
+    add_newline = lambda a: a + '\n'
+    return map(add_newline , filter(id, re.sub(pattern, replacer,
+        ''.join(text)).split('\n')))
 
 def typedef_definition(name, line):
     return line['content']
