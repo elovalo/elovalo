@@ -59,10 +59,11 @@ typedef void(*init_t)(void);
 /* This structure holds information about the effects and how to draw
  * them. */
 typedef struct {
-	const char *name;     // Name for effect. Used in file dumps.
-	init_t init;          // Initializatior, may be NULL.
-	draw_t draw;          // Drawing function, run once per buffer swap.
-	uint8_t flip_buffers; // Flip buffers during execution.
+	const char *name;      // Name for effect. Used in file dumps.
+	init_t init;           // Initializatior, may be NULL.
+	draw_t draw;           // Drawing function, run once per buffer swap.
+	uint8_t flip_buffers;  // Flip buffers during execution.
+	uint8_t minimum_ticks; // Minimum amount of ticks per draw.
 } effect_t;
 
 #define NO_FLIP 0

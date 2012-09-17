@@ -21,6 +21,8 @@ import os
 import re
 from glob import glob
 
+TICK_GRANULARITY = 8
+
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
  * Led cube effects
  */
@@ -86,7 +88,7 @@ class SourceFiles(object):
     @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps  + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
@@ -122,6 +124,7 @@ class SourceFile(object):
         self.init = self._block(content, 'init')
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
+        self.max_fps = self._max_fps(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -141,6 +144,16 @@ class SourceFile(object):
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
+
+    def _max_fps(self, c):
+        max_fps = filter(lambda line: 'max_fps' in line['types'], c)
+
+        if len(max_fps):
+            i = int(max_fps[0]['content'].split()[-1].strip('\n'))
+
+            return str(int(1000.0 / (TICK_GRANULARITY * i)))
+
+        return '0'
 
 
 def find_globals(content):
@@ -165,6 +178,7 @@ def analyze(name, content):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
             ('typedef', 'typedef\s+struct\s*[{]'),
