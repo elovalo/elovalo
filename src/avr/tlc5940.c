@@ -1,3 +1,22 @@
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
+ *  Copyright 2012 Elovalo project group 
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
  * tlc5940.c
  *
@@ -13,7 +32,6 @@
 #include "tlc5940.h"
 #include "pinMacros.h"
 #include "init.h"
-#include "main.h"
 #include "../cube.h"
 
 register uint8_t layer_bytes_left asm ("r4");
@@ -21,6 +39,10 @@ register uint8_t *send_ptr asm ("r2");
 volatile uint8_t may_flip = 0;
 
 #define NL "\n\t"
+
+/* Minimum blank interval depends on SPI clock divider. */
+#define SPI_CLOCK_DIVIDER 4
+#define MIN_BLANK_INTERVAL ((1 << SPI_CLOCK_DIVIDER) - 1)
 
 /* SPI transmit interrupt vector SPIF is cleared when entering this
  * interrupt vector. This is called when byte transmission is
@@ -110,3 +132,16 @@ ISR(TIMER0_COMPA_vect)
 	// Set up byte counter for SPI interrupt
 	layer_bytes_left = BYTES_PER_LAYER + 1;
 }
+
+void tlc5940_set_dimming(uint8_t x)
+{
+	if (x <= MIN_BLANK_INTERVAL) {
+		/* It's dimmer than possible. Use the maximum BLANK
+		   interval */
+		OCR0A = 255;
+	} else {
+		/* Making BLANK happen slower */
+		OCR0A = ((uint16_t)MIN_BLANK_INTERVAL << 8)/x;
+	}
+}
+

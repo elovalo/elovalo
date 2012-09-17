@@ -1,6 +1,27 @@
+#
+# Copyright 2012 Elovalo project group
+#
+# This file is part of Elovalo.
+#
+# Elovalo is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Elovalo is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 import os
 import re
 from glob import glob
+
+TICK_GRANULARITY = 8
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
  * Led cube effects
@@ -8,13 +29,10 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <math.h>
 #include "pgmspace.h"
 #include "env.h"
 #include "effects.h"
-#include "effects/lib/utils.h"
-#include "effects/lib/text.h"
-#include "effects/lib/shapes.h"
+#include "effects/common.h"
 '''
 
 
@@ -70,7 +88,7 @@ class SourceFiles(object):
     @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps  + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
@@ -85,8 +103,8 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        merge = lambda f: f.globs + f.function_declarations + f.functions + \
-            f.init + f.effect
+        merge = lambda f: f.typedefs + f.globs + f.function_declarations + \
+            f.functions + f.init + f.effect
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
 
@@ -99,12 +117,14 @@ class SourceFile(object):
         with open(path, 'r') as f:
             content = analyze(self.name, f.readlines())
 
+        self.typedefs = self._block(content, 'typedef')
         self.globs = self._globals(content)
         self.function_declarations = self._function_declarations(content)
         self.functions = self._functions(content)
         self.init = self._block(content, 'init')
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
+        self.max_fps = self._max_fps(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -124,6 +144,16 @@ class SourceFile(object):
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
+
+    def _max_fps(self, c):
+        max_fps = filter(lambda line: 'max_fps' in line['types'], c)
+
+        if len(max_fps):
+            i = int(max_fps[0]['content'].split()[-1].strip('\n'))
+
+            return str(int(1000.0 / (TICK_GRANULARITY * i)))
+
+        return '0'
 
 
 def find_globals(content):
@@ -148,10 +178,12 @@ def analyze(name, content):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
+            ('typedef', 'typedef\s+struct\s*[{]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
-            ('assignment', '\s*' + types + '(\s+\w+)'),
+            ('assignment', '[a-zA-Z]+(\s+\w+)'),
         )
         t = [n for n, p in patterns if len(re.compile(p).findall(line)) > 0]
 
@@ -163,6 +195,18 @@ def analyze(name, content):
 
         # TODO: fix the regex. matches too much
         if 'assignment' in ret['types'] and 'function' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex. matches too much
+        if 'assignment' in ret['types'] and ret['content'].startswith('\t'):
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if 'flip' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if ret['content'].startswith('typedef '):
             ret['types'].remove('assignment')
 
         block = ''
@@ -180,12 +224,41 @@ def analyze(name, content):
                 ret['types'].append('function_declaration')
             else:
                 block = parse_function(name, content, ret, i)
+        elif 'typedef' in ret['types']:
+            block = parse_typedef(name, content, ret, i)
 
         ret['block'] = block
 
         return ret
 
+    content = remove_comments(content)
+
     return [analyze_line(i, line) for i, line in enumerate(content)]
+
+
+def remove_comments(text):
+    # http://stackoverflow.com/a/241506
+    def replacer(match):
+        s = match.group(0)
+
+        return '' if s.startswith('/') else s
+
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
+
+    id = lambda a: a
+    add_newline = lambda a: a + '\n'
+    return map(add_newline , filter(id, re.sub(pattern, replacer,
+        ''.join(text)).split('\n')))
+
+def typedef_definition(name, line):
+    return line['content']
+
+
+def parse_typedef(name, lines, line, index):
+    return _parse(name, lines, line, index, typedef_definition)
 
 
 def parse_xy(name, lines, line, index):

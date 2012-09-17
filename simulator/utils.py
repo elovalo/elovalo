@@ -1,49 +1,104 @@
-import bpy
+#
+# Copyright 2012 Elovalo project group
+#
+# This file is part of Elovalo.
+#
+# Elovalo is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Elovalo is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+#
+import argparse
+import json
+import os
+from subprocess import call, Popen
 
 
-def get_selected():
-    return bpy.context.selected_editable_objects
+WARNING = '\033[91m'
+ENDC = '\033[0m'
 
 
-def cube():
-    bpy.obs.mesh.primitive_cube_add()
-    return get_selected()[0]
+def effect_parser():
+    p = parser()
+    p.add_argument('effect', help='name of the effect to render')
+    p.add_argument('output', help='output path')
+
+    return p
 
 
-def material(n, o=None):
-    if o:
-        o.active_material = material(n)
-        return
+def parser():
+    p = argparse.ArgumentParser()
+    p.add_argument('--hd', help='render in HD', action='store_true')
 
-    return bpy.data.materials[n]
-
-
-def duplicate(n):
-    mat = material(n)
-
-    bpy.ops.material.new()
-    ret = bpy.data.materials[-1]
-
-    for n in filter(lambda a: not a.startswith('__'), dir(mat)):
-        try:
-            setattr(ret, n, getattr(mat, n))
-        except AttributeError:
-            pass  # skip read-only cases
-
-    return ret
+    return p
 
 
-def ob(n):
-    scn = bpy.data.scenes[0]
-    return [a for a in scn.objects if a.name == n][0]
+def export(effect, output, length=1.0):
+    """ Expects length in seconds!
+    """
+    length = os.environ.get('length', length) or 1.0
+    length = float(length)
+    length *= 1000  # convert to ms required by the exporter
+    length = str(int(length))
+
+    os.chdir('..')
+    call('scons --no-avr', shell=True)
+    os.chdir('simulator')
+    call(['../build/exporter/exporter ' + effect + ' ' + length], shell=True)
+    return write_fps(effect, output)
 
 
-def chunked(g, amount):
-    ret = []
+def write_fps(effect, output):
+    if not os.path.exists(output):
+        os.mkdir(output)
 
-    for i, n in enumerate(g):
-        ret.append(n)
+    with open(os.path.join(output, 'fps.json'), 'w') as f:
+        p = os.path.join('exports', effect + '.json')
 
-        if not ((i + 1) % amount):
-            yield ret
-            ret = []
+        if not os.path.exists(p):
+            print WARNING + \
+                'Missing export json. Check out your effect code!' + ENDC
+            return False
+
+        with open(p, 'r') as jf:
+            d = json.load(jf)
+
+        json.dump(
+            {
+                'fps': d['fps']
+            },
+            f
+        )
+
+    return True
+
+
+def render_animation(effect, output, length):
+    """ Expects length in seconds!
+    """
+    os.environ['effect'] = effect
+    os.environ['output'] = output
+    os.environ['length'] = str(length)
+
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -a"])
+    sp.communicate()
+
+
+def render_frame(effect, output, frame):
+    os.environ['effect'] = effect
+    os.environ['output'] = output
+
+    sp = Popen(["/bin/bash", "-i", "-c",
+        "blender -b blender/simulator.blend -P blender/sim.py -f " +
+        frame]
+    )
+    sp.communicate()

@@ -1,3 +1,22 @@
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
+ *  Copyright 2012 Elovalo project group 
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /*
  * init.c
  *
@@ -17,14 +36,18 @@
  *      Author: Icchan
  */
 
+/* Timing accuracy with 8 data bits and 1 stop bit is about 4 percent:
+   http://www.maximintegrated.com/app-notes/index.mvp/id/2141 */
+#define BAUD 115200
+#define BAUD_TOL 4
+
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <util/setbaud.h>
 #include "pinMacros.h"
 #include "init.h"
+#include "tlc5940.h"
 
-/**
- * Sets up pins used by TLC5940.
- */
 void init_tlc5940(void)
 {
 	/* Set BLANK high (The pin used as BLANK is also !SS pin, thus
@@ -34,18 +57,12 @@ void init_tlc5940(void)
 	 * init. */
 	PORTB |= (1<<PB2);
 	DDRB |=
-		(1<<PB1); // XLAT: output
-
+		(1<<PB1)| // XLAT: output
+		(1<<PB2); // BLANK: output
 	DDRD |=
-		(1<<PD2)| // DCPRG: output
-		(1<<PD3)| // VPRG: output
-		(1<<PD4)| // Debug LED: output
-		(1<<PD7); // BLANK: output
+		(1<<PD4); // Debug LED: output
 }
 
-/**
- * Initializes pins used in SPI communication.
- */
 void init_spi(void)
 {
 	DDRB |=
@@ -62,9 +79,6 @@ void init_spi(void)
 	   runs SPI at f_osc / 4 = 4 MHz, when f_osc is 16 MHz */
 }
 
-/**
- * Initializes BLANK Timer / Timer0
- */
 void init_blank_timer(){
 	/* We have 12 bit PWM cycle on TLC5940, prescaler of 1024, and
 	 * TLC5940 clock divider of 4. So we need to have output
@@ -72,17 +86,14 @@ void init_blank_timer(){
 
 	// CTC with OCRA as TOP
 	TCCR0A = (1 << WGM01);
-	// Interrupt generation interval
-	OCR0A = 15;
+	// Interrupt generation interval is set by dimmer
+	tlc5940_set_dimming(255);
 	// Enable Timer Compare match A interrupt
 	TIMSK0 |= (1 << OCIE0A);
 	// Prescaler clk_io / 1024
 	TCCR0B |= (1 << CS02) | (1 << CS00);
 }
 
-/**
- * Initializes effect tick timer / Timer2
- */
 void init_effect_timer(){
 	//CTC with OCRA as TOP
 	TCCR2A |= (1 << WGM21);
@@ -97,14 +108,18 @@ void init_effect_timer(){
 
 void initUSART(){
 
-	uint16_t ubrr = 103; //(F_CPU/(16UL*BAUD_RATE))-1;
-
 	DDRD |= (1<<PD1);
 
-	// USART0 Baud Rate Register
-	// set clock divider
-	UBRR0H = (uint8_t)(ubrr >> 8);
-	UBRR0L = (uint8_t)ubrr;
+	/* See more information about the macro usage:
+	 * http://www.nongnu.org/avr-libc/user-manual/group__util__setbaud.html
+	 */
+	UBRR0H = UBRRH_VALUE;
+	UBRR0L = UBRRL_VALUE;
+#if USE_2X
+	UCSR0A |= (1 << U2X0);
+#else
+	UCSR0A &= ~(1 << U2X0);
+#endif
 
 	// Set frame format to 8 data bits, no parity, 1 stop bit
 	UCSR0C |= (1<<UCSZ01)|(1<<UCSZ00);

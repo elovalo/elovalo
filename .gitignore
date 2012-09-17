@@ -7,9 +7,7 @@
 
 # SCons build directories
 /.sconsign.dblite
-/build_debug
-/build_release
-/build_exporter
+/build
 
 # Some temp files
 /exports
