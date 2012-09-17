@@ -21,7 +21,7 @@
 
 #include "common.h"
 
-const uint8_t matrix_xyz_len = 10;
+static const uint8_t matrix_xyz_len = 10;
 xyz_t matrix_xyz[10];
 
 void init(void)
