@@ -48,6 +48,8 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.function_names)
         t.write('\n')
+        t.write(inp.union)
+        t.write('\n')
         t.write(inp.effects)
         t.write('\n')
         t.write('const uint8_t effects_len = sizeof(effects) / ' +
@@ -86,9 +88,21 @@ class SourceFiles(object):
         return '\n'.join([name(f.name) for f in self._files]) + '\n'
 
     @property
+    def union(self):
+        struct = lambda f: f.variables.replace('vars', f.name)
+
+        ret = ['static union {']
+
+        ret.extend([struct(f) for f in self._files if f.variables])
+
+        ret.append('} vars;')
+
+        return '\n'.join(ret) + '\n'
+
+    @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ', ' + f.max_fps  + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
@@ -125,6 +139,7 @@ class SourceFile(object):
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
         self.max_fps = self._max_fps(content)
+        self.variables = 'TODO'
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
