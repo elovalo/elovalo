@@ -20,32 +20,32 @@
 #include "common.h"
 
 struct {
-	uint16_t worm_pos[3];
-	uint16_t worm_dir;
-	int worm_speed;
+	uint16_t pos[3];
+	uint16_t dir;
+	int speed;
 } vars;
 
 void init(void)
 {
-	vars.worm_pos[0] = 4;
-	vars.worm_pos[1] = 4;
-	vars.worm_pos[2] = 4;
-	vars.worm_dir = 0;
-	vars.worm_speed = 1;
+	vars.pos[0] = 4;
+	vars.pos[1] = 4;
+	vars.pos[2] = 4;
+	vars.dir = 0;
+	vars.speed = 1;
 
 	clear_buffer();
 }
 void effect(void)
 {
-	set_led(vars.worm_pos[0], vars.worm_pos[1], vars.worm_pos[2], MAX_INTENSITY);
+	set_led(vars.pos[0], vars.pos[1], vars.pos[2], MAX_INTENSITY);
 
 	// Relies on the fact that it's a cube
 	// Not entirely fool proof but probably good enough
-	int new_pos = worm_pos[vars.worm_dir] + vars.worm_speed;
+	int new_pos = vars.pos[vars.dir] + vars.speed;
 	if(new_pos < 0 || new_pos >= LEDS_X || randint(0, 10) > 7) {
-		vars.worm_dir = vars.worm_dir + 1 > 2? 0: vars.worm_dir + 1;
-		vars.worm_speed = -vars.worm_speed;
+		vars.dir = vars.dir + 1 > 2? 0: vars.dir + 1;
+		vars.speed = -vars.speed;
 	}
 
-	vars.worm_pos[vars.worm_dir] += vars.worm_speed;
+	vars.pos[vars.dir] += vars.speed;
 }
