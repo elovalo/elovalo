@@ -139,7 +139,7 @@ class SourceFile(object):
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
         self.max_fps = self._max_fps(content)
-        self.variables = 'TODO'
+        self.variables = self._variables(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -170,6 +170,12 @@ class SourceFile(object):
 
         return '0'
 
+    def _variables(self, c):
+        a = filter(lambda line: 'struct' in line['types'], c)
+
+        if a and a[0]['block'].endswith('vars;\n'):
+            return a[0]['block']
+
 
 def find_globals(content):
     ret = []
@@ -196,7 +202,8 @@ def analyze(name, content):
             ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
-            ('typedef', 'typedef\s+struct\s*[{]'),
+            ('typedef', '\s*typedef\s+struct\s*[{]'),
+            ('struct', '\s*struct\s*[{]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
             ('assignment', '[a-zA-Z]+(\s+\w+)'),
         )
@@ -221,7 +228,13 @@ def analyze(name, content):
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if ret['content'].startswith('typedef '):
+        if ret['content'].startswith('typedef ') \
+                and 'assignment' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if ret['content'].startswith('struct ') \
+                and 'assignment' in ret['types']:
             ret['types'].remove('assignment')
 
         block = ''
@@ -240,6 +253,8 @@ def analyze(name, content):
             else:
                 block = parse_function(name, content, ret, i)
         elif 'typedef' in ret['types']:
+            block = parse_typedef(name, content, ret, i)
+        elif 'struct' in ret['types']:
             block = parse_typedef(name, content, ret, i)
 
         ret['block'] = block
@@ -265,8 +280,9 @@ def remove_comments(text):
 
     id = lambda a: a
     add_newline = lambda a: a + '\n'
-    return map(add_newline , filter(id, re.sub(pattern, replacer,
+    return map(add_newline, filter(id, re.sub(pattern, replacer,
         ''.join(text)).split('\n')))
+
 
 def typedef_definition(name, line):
     return line['content']
