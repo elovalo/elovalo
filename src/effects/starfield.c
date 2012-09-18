@@ -19,13 +19,16 @@
 
 #include "common.h"
 
-const uint8_t starfield_xyz_len = 10;
-xyz_t starfield_xyz[10];
+struct {
+	xyz_t xyz[10];
+} vars;
+
+static const uint8_t xyz_len = 10;
 
 void init(void)
 {
-	for(uint8_t i = 0; i < starfield_xyz_len; i++) {
-		starfield_xyz[i] = (xyz_t){
+	for(uint8_t i = 0; i < xyz_len; i++) {
+		vars.xyz[i] = (xyz_t){
 			.x = randint(0, LEDS_X),
 			.y = randint(0, LEDS_Y),
 			.z = randint(0, LEDS_Z)
@@ -38,8 +41,8 @@ void effect(void)
 {
 	clear_buffer();
 
-	for(uint8_t i = 0; i < starfield_xyz_len; i++) {
-		xyz_t xyz = starfield_xyz[i];
+	for(uint8_t i = 0; i < xyz_len; i++) {
+		xyz_t xyz = vars.xyz[i];
 
 		set_led(xyz.x, xyz.y, xyz.z, MAX_INTENSITY);
 
@@ -49,6 +52,6 @@ void effect(void)
 
 		if(y >= LEDS_Y) y = 0;
 
-		starfield_xyz[i].y = y;
+		vars.xyz[i].y = y;
 	}
 }
