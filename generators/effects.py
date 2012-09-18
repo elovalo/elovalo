@@ -224,7 +224,7 @@ def analyze(name, content):
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if 'flip' in ret['types']:
+        if 'flip' in ret['types'] or 'max_fps' in ret['types']:
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
