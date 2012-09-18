@@ -23,11 +23,11 @@ struct {
 	xyz_t xyz[10];
 } vars;
 
-static const uint8_t xyz_len = 10;
+static const uint8_t starfield_xyz_len = 10;
 
 void init(void)
 {
-	for(uint8_t i = 0; i < xyz_len; i++) {
+	for(uint8_t i = 0; i < starfield_xyz_len; i++) {
 		vars.xyz[i] = (xyz_t){
 			.x = randint(0, LEDS_X),
 			.y = randint(0, LEDS_Y),
@@ -41,7 +41,7 @@ void effect(void)
 {
 	clear_buffer();
 
-	for(uint8_t i = 0; i < xyz_len; i++) {
+	for(uint8_t i = 0; i < starfield_xyz_len; i++) {
 		xyz_t xyz = vars.xyz[i];
 
 		set_led(xyz.x, xyz.y, xyz.z, MAX_INTENSITY);
