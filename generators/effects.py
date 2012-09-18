@@ -262,6 +262,7 @@ def analyze(name, content):
         return ret
 
     content = remove_comments(content)
+    content = replace_variables(content, 'vars.', 'vars.' + name + '.')
 
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
@@ -282,6 +283,10 @@ def remove_comments(text):
     add_newline = lambda a: a + '\n'
     return map(add_newline, filter(id, re.sub(pattern, replacer,
         ''.join(text)).split('\n')))
+
+
+def replace_variables(text, source, target):
+    return [line.replace(source, target) for line in text]
 
 
 def typedef_definition(name, line):
