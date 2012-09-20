@@ -46,23 +46,25 @@ def export(effect, output, length=1.0, data='', sensors=''):
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
 
-    sensor_file = write_sensor_data(sensors, output, length)
+    if not os.path.exists(output):
+        os.mkdir(output)
+
+    sensor_output = os.path.join(output, 'sensors.json')
+    sensor_file = write_sensor_data(sensors, sensor_output, length)
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
-    call(['../build/exporter/exporter ' + effect + ' ' + length + ' ' + data],
+    call(['../build/exporter/exporter ' + effect + ' ' + length + ' ' + data +
+        ' ' + sensor_output],
         shell=True)
     write_fps(effect, output)
 
 
 def write_sensor_data(sensors, output, length):
-    if not os.path.exists(output):
-        os.mkdir(output)
-
     data = parse_sensor_data(sensors, length)
 
-    with open(os.path.join(output, 'sensors.json'), 'w') as f:
+    with open(output, 'w') as f:
         json.dump(data, f)
 
 
@@ -90,9 +92,6 @@ def parse_sensor_data(sensors, length):
 
 
 def write_fps(effect, output):
-    if not os.path.exists(output):
-        os.mkdir(output)
-
     with open(os.path.join(output, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
 
