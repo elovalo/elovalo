@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <avr/interrupt.h>
@@ -142,7 +142,7 @@ int main() {
 			// fall to MODE_EFFECT on purpose
 		case MODE_EFFECT:
 			// If a buffer is not yet flipped
-			if (may_flip) break;
+			if (flags.may_flip) break;
 
 			// Update clock and sensor values
 			ticks = centisecs();
@@ -155,8 +155,7 @@ int main() {
 			draw_t draw = (draw_t)pgm_get(effect->draw,word);
 			if (draw != NULL) {
 				draw();
-				// Mark buffer ready for swapping
-				may_flip = 1;
+				allow_flipping(true);
 			}
 
 			break;
@@ -196,7 +195,7 @@ void process_cmd(void)
 		effect = effects + x.byte;
 
 		// Prepare running of the new effect
-		may_flip = 0;
+		allow_flipping(false);
 		init_current_effect();
 		gs_buf_swap();
 		
@@ -260,6 +259,7 @@ void process_cmd(void)
 			send_escaped(fp >> 8);
 
 			// Send action and arg name
+			send_string_from_pgm(&cron_actions[i].act_key);
 			send_string_from_pgm(&cron_actions[i].act_name);
 			send_string_from_pgm(&cron_actions[i].arg_name);
 		}
@@ -270,7 +270,7 @@ void process_cmd(void)
 			uint8_t arg;
 		} a;
 
-		if (serial_to_sram(&a,sizeof(a) < sizeof(a)))
+		if (serial_to_sram(&a,sizeof(a)) < sizeof(a))
 			goto interrupted;
 		if (!is_action_valid(a.act))
 			goto bad_arg_a;
@@ -325,15 +325,15 @@ void process_cmd(void)
 	goto out;
 
 bad_arg_a:
-	report(RESP_BAD_ARG_A);
+	send_escaped(RESP_BAD_ARG_A);
 	goto out;
 
 bad_arg_b:
-	report(RESP_BAD_ARG_B);
+	send_escaped(RESP_BAD_ARG_B);
 	goto out;
 
 interrupted:
-	report(RESP_INTERRUPTED);
+	send_escaped(RESP_INTERRUPTED);
 	goto out;
 
 out:

@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <util/atomic.h>
@@ -68,9 +68,6 @@ ISR(TIMER2_COMPA_vect)
 	}
 }
 
-/**
- * Returns the time in centiseconds (not really, 0.008 seconds after
- * clock granularity change). TODO rename this function. */
 uint16_t centisecs(void) {
 	uint16_t copy_of_ticks;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -85,25 +82,6 @@ void reset_time(void) {
 	}
 }
 
-/**
- * Sets POSIX time to this device. Always succeedes and returns 0. Do
- * NOT call this from interrupts because this turns toggles
- * interrupts.
- */
-int stime(time_t *t) {
-	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		rtc.time = *t;
-		rtc.div = POSIX_DIVIDER;
-		rtc.cksum = calc_posix_time_cksum();
-	}
-	return 0;
-}
-
-/**
- * Returns POSIX time. If the clock is not running (never set by
- * stime) it returns 0. (this part doesn't conform POSIX). Do NOT call
- * this from interrupts because this turns toggles interrupts.
- */
 time_t time(time_t *t) {
 	time_t time;
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -114,11 +92,15 @@ time_t time(time_t *t) {
 	return time;
 }
 
-/**
- * This returns the time WITHOUT any validation. This is quick but
- * MUST be called only with certainty that the time is okay and with
- * interrupts disabled.
- */
+int stime(time_t *t) {
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		rtc.time = *t;
+		rtc.div = POSIX_DIVIDER;
+		rtc.cksum = calc_posix_time_cksum();
+	}
+	return 0;
+}
+
 time_t unsafe_time(time_t *t) {
 	if (t != NULL) *t = rtc.time;
 	return rtc.time;

@@ -22,6 +22,10 @@ import os
 from subprocess import call, Popen
 
 
+WARNING = '\033[91m'
+ENDC = '\033[0m'
+
+
 def effect_parser():
     p = parser()
     p.add_argument('effect', help='name of the effect to render')
@@ -59,7 +63,7 @@ def export(effect, output, length=1.0, data='', sensors=''):
             sensor_output + ' ' + data
     print 'executing ' + cmd
     call([cmd], shell=True)
-    write_fps(effect, output)
+    return write_fps(effect, output)
 
 
 def write_sensor_data(sensors, output, length):
@@ -96,6 +100,11 @@ def write_fps(effect, output):
     with open(os.path.join(output, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
 
+        if not os.path.exists(p):
+            print WARNING + \
+                'Missing export json. Check out your effect code!' + ENDC
+            return False
+
         with open(p, 'r') as jf:
             d = json.load(jf)
 
@@ -105,6 +114,8 @@ def write_fps(effect, output):
             },
             f
         )
+
+    return True
 
 
 def render_animation(effect, output, length):

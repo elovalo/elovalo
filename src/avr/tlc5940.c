@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -29,6 +29,7 @@
  */
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include "tlc5940.h"
 #include "pinMacros.h"
 #include "init.h"
@@ -36,7 +37,10 @@
 
 register uint8_t layer_bytes_left asm ("r4");
 register uint8_t *send_ptr asm ("r2");
-volatile uint8_t may_flip = 0;
+volatile struct flags flags = { .may_flip = false,
+				.report_flip = false,
+				.layer = 0
+};
 
 #define NL "\n\t"
 
@@ -97,8 +101,6 @@ ISR(SPI_STC_vect)
  */
 ISR(TIMER0_COMPA_vect)
 {
-	static uint8_t layer = 0x01;
-
 	// Main screen turn off
 	pin_high(BLANK);
 
@@ -106,28 +108,28 @@ ISR(TIMER0_COMPA_vect)
 	pin_high(XLAT);
 	pin_low(XLAT);
 
-	// Send first byte
-	SPDR = ~layer;
-
 	// Main screen turn on and start PWM timers on TLC5940
 	pin_low(BLANK);
 
-	if (layer != 0x80) {
+	if (flags.layer != (1<<LAYER_BITS)-1) {
 		// Advance layer
-		layer <<= 1;
+		flags.layer++;
 	} else {
 		// Prepare drawing first layer
-		layer=0x01;
+		flags.layer=0;
 		
 		// If we have new buffer, flip to it
-		if (may_flip) {
+		if (flags.may_flip) {
 			gs_buf_swap();
-			may_flip = 0;
+			flags.may_flip = 0;
 		}
 
 		// Roll send_ptr back to start of buffer
 		send_ptr = gs_buf_front;
 	}
+
+	// Send first byte
+	SPDR = ~(1<<flags.layer);
 
 	// Set up byte counter for SPI interrupt
 	layer_bytes_left = BYTES_PER_LAYER + 1;
@@ -145,3 +147,8 @@ void tlc5940_set_dimming(uint8_t x)
 	}
 }
 
+void allow_flipping(bool state) {
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		flags.may_flip = state;
+	}
+}

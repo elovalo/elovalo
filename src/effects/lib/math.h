@@ -17,14 +17,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-# pragma FLIP
+// math utils from
+// ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define ABS(a) (((a)<0) ? -(a) : (a))
 
-#include "common.h"
+/* take sign of a, either -1, 0, or 1 */
+#define ZSGN(a) (((a)<0) ? -1 : (a)>0 ? 1 : 0)
 
-XY(effect)
-{
-	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
-	uint16_t i = scaler * (2 + sin((float)x / 2 + (float)ticks / 15) + sin((float)y / 2 + (float)ticks / 30));
+typedef struct {
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
+} xyz_t;
 
-	set_z(x, y, i);
-}
+uint8_t randint(uint8_t min, uint8_t max);
+uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
+float fclamp(float a, float min, float max);

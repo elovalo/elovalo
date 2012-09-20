@@ -1,20 +1,20 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
- *  This file is part of Elovalo.
- *  
- *  Elovalo is free software: you can redistribute it and/or modify
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  Elovalo is distributed in the hope that it will be useful,
+ *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -34,6 +34,11 @@
 
 // The info table for serial port access
 
+PROGMEM const char key_cube_shutdown[] = "off";
+PROGMEM const char key_cube_start[] = "on";
+PROGMEM const char key_serial_hello[] = "hello";
+PROGMEM const char key_dimming[] = "intensity";
+
 PROGMEM const char s_cube_shutdown[] = "Power-off the cube part";
 PROGMEM const char s_cube_start[] = "Power-on the cube part";
 PROGMEM const char s_serial_hello[] = "Say \"hello\" to serial console";
@@ -42,10 +47,10 @@ PROGMEM const char s_dimming[] = "Set cube intensity";
 PROGMEM const char s_dimming_arg[] = "Intensity between 0 and 255";
 
 const struct action_info cron_actions[] PROGMEM = { 
-	{ &cube_shutdown, s_cube_shutdown, NULL },
-	{ &cube_start, s_cube_start, NULL },
-	{ &serial_hello, s_serial_hello, s_serial_hello_arg},
-	{ &tlc5940_set_dimming, s_dimming, s_dimming_arg}
+	{ &cube_shutdown, key_cube_shutdown, s_cube_shutdown, NULL },
+	{ &cube_start, key_cube_start, s_cube_start, NULL },
+	{ &serial_hello, key_serial_hello, s_serial_hello, s_serial_hello_arg},
+	{ &tlc5940_set_dimming, key_dimming, s_dimming, s_dimming_arg}
 };
 
 const uint8_t cron_actions_len = sizeof(cron_actions)/sizeof(struct action_info);
@@ -71,11 +76,6 @@ bool is_action_valid(action_t act)
 	return false;
 }
 
-/**
- * Checks if it any actions are needed to be run. May be run at
- * arbitary intervals, though running it once per minute is a wise
- * choice. NB. Interrupts should be enabled when calling this!
- */ 
 void run_cron(const time_t now) {
 	static time_t last_time = 0;
 

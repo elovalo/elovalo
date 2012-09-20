@@ -1,18 +1,18 @@
 #
-# Copyright 2012 Elovalo project group 
-# 
+# Copyright 2012 Elovalo project group
+#
 # This file is part of Elovalo.
-# 
+#
 # Elovalo is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Elovalo is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -21,19 +21,18 @@ import os
 import re
 from glob import glob
 
+TICK_GRANULARITY = 8
+
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
  * Led cube effects
  */
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <math.h>
 #include "pgmspace.h"
 #include "env.h"
 #include "effects.h"
-#include "effects/lib/utils.h"
-#include "effects/lib/text.h"
-#include "effects/lib/shapes.h"
+#include "effects/common.h"
 '''
 
 
@@ -89,7 +88,7 @@ class SourceFiles(object):
     @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps  + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
@@ -125,6 +124,7 @@ class SourceFile(object):
         self.init = self._block(content, 'init')
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
+        self.max_fps = self._max_fps(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -144,6 +144,16 @@ class SourceFile(object):
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
+
+    def _max_fps(self, c):
+        max_fps = filter(lambda line: 'max_fps' in line['types'], c)
+
+        if len(max_fps):
+            i = int(max_fps[0]['content'].split()[-1].strip('\n'))
+
+            return str(int(1000.0 / (TICK_GRANULARITY * i)))
+
+        return '0'
 
 
 def find_globals(content):
@@ -168,6 +178,7 @@ def analyze(name, content):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
             ('typedef', 'typedef\s+struct\s*[{]'),
@@ -220,21 +231,27 @@ def analyze(name, content):
 
         return ret
 
-    content = remove_license_blocks(content)
+    content = remove_comments(content)
 
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
 
-def remove_license_blocks(lines):
-    i = 0
+def remove_comments(text):
+    # http://stackoverflow.com/a/241506
+    def replacer(match):
+        s = match.group(0)
 
-    for j, line in enumerate(lines):
-        if line == ' */\n':
-            i = j
-            break
+        return '' if s.startswith('/') else s
 
-    return lines[i + 1:]
+    pattern = re.compile(
+        r'//.*?$|/\*.*?\*/|\'(?:\\.|[^\\\'])*\'|"(?:\\.|[^\\"])*"',
+        re.DOTALL | re.MULTILINE
+    )
 
+    id = lambda a: a
+    add_newline = lambda a: a + '\n'
+    return map(add_newline , filter(id, re.sub(pattern, replacer,
+        ''.join(text)).split('\n')))
 
 def typedef_definition(name, line):
     return line['content']
