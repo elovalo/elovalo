@@ -41,6 +41,6 @@ void cube_shutdown(uint8_t unused)
 
 	/* Pulling BLANK down reduces current consumption to
 	 * 50mA. Doing that. We pull all other signals low, too. */
-	pin_low(BLANK);
+	pin_high(BLANK);
 	pin_low(XLAT);
 }

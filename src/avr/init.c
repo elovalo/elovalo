@@ -50,13 +50,15 @@
 
 void init_tlc5940(void)
 {
-	/* Set BLANK as output (The pin used as BLANK is also !SS pin,
-	 * thus it has to be an output to stay in master SPI mode). */
+	/* The pin used as BLANK is also !SS pin, thus it has to be an
+	 * output to stay in master SPI mode). */
 	DDRB |=
 		(1<<PB1)| // XLAT: output
 		(1<<PB2); // BLANK: output
 	DDRD |=
 		(1<<PD4); // Debug LED: output
+
+	pin_high(BLANK);
 }
 
 void init_spi(void)
