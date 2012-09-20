@@ -38,8 +38,8 @@ int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
 	// TODO: figure out what should happen if an effect is not found by name
-	if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]));
-	else printf("Missing effect and length arguments!\n");
+	if(argc < 3) printf("Missing effect and length arguments!\n");
+	else export_effect(find_effect(argv[1]), atoi(argv[2]));
 }
 
 void export_effect(const effect_t *effect, int length) {
