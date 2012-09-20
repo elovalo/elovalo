@@ -33,6 +33,7 @@ def effect_parser():
 def parser():
     p = argparse.ArgumentParser()
     p.add_argument('--hd', help='render in HD', action='store_true')
+    p.add_argument('--sensors', help='sensor data (.py) to use', type=str)
 
     return p
 
