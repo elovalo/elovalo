@@ -17,6 +17,6 @@
  *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset);
+void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset);
 void render_character(uint8_t index, uint8_t x, uint16_t intensity, int16_t offset);
 

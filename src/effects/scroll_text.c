@@ -1,4 +1,6 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
  *  This file is part of Elovalo.
@@ -21,8 +23,13 @@
 
 #include "common.h"
 
+PROGMEM const char default_text[] = "ERROR";
+
 void effect(void)
 {
+	// TODO: Should be asserted instead of just sending "ERROR"
+	const char *text = custom_data == NULL ?
+		default_text : (const char*)custom_data;
 	clear_buffer();
-	scroll_text("Elovalo loves U", 7, MAX_INTENSITY, 10-(ticks >> 3));
+	scroll_text(text, 7, MAX_INTENSITY, 10-(ticks >> 3));
 }
