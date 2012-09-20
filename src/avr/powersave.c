@@ -20,8 +20,7 @@
 #include <stdint.h>
 #include <avr/io.h>
 #include "pinMacros.h"
-
-#define PS_ON D,PD3
+#include "tlc5940.h"
 
 void init_ps(void)
 {
@@ -31,10 +30,17 @@ void init_ps(void)
 
 void cube_start(uint8_t unused)
 {
-	pin_high(PS_ON);
+	// Enable BLANK timer interrupt (starts SPI)
+	TIMSK0 |= (1 << OCIE0A);
 }
 
 void cube_shutdown(uint8_t unused)
 {
-	pin_low(PS_ON);
+	// Disable BLANK timer interrupt (stops SPI)
+	TIMSK0 &= ~(1 << OCIE0A);
+
+	/* Pulling BLANK down reduces current consumption to
+	 * 50mA. Doing that. We pull all other signals low, too. */
+	pin_high(BLANK);
+	pin_low(XLAT);
 }

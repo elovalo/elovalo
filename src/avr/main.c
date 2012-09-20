@@ -259,6 +259,7 @@ void process_cmd(void)
 			send_escaped(fp >> 8);
 
 			// Send action and arg name
+			send_string_from_pgm(&cron_actions[i].act_key);
 			send_string_from_pgm(&cron_actions[i].act_name);
 			send_string_from_pgm(&cron_actions[i].arg_name);
 		}

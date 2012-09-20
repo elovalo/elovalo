@@ -133,6 +133,7 @@ void clear_buffer(void);
 
 extern uint16_t ticks;
 extern sensors_t sensors;
+extern const void *custom_data;
 
 #define MAX_INTENSITY ((1<<GS_DEPTH)-1)
 

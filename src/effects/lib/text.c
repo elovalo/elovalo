@@ -28,7 +28,7 @@
 #include "utils.h"
 #include "text.h"
 
-void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset)
+void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset)
 {
 	uint8_t textLen = strlen(text);
 	uint8_t spacing = 8; // Seems like a good pick for this charset

@@ -20,7 +20,7 @@
 /**
  * Scrolls given text
  */
-void scroll_text(char text[], uint8_t x, uint16_t intensity, int16_t offset);
+void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset);
 
 /**
  * Renders character (index from font8x8_basic) at x with intensity.

@@ -50,17 +50,15 @@
 
 void init_tlc5940(void)
 {
-	/* Set BLANK high (The pin used as BLANK is also !SS pin, thus
-	 * it has to be an output to stay in master SPI mode). Setting
-	 * state before direction to avoid blinking. And, because we
-	 * don't use dot correction we may safely leave VPRG low on
-	 * init. */
-	PORTB |= (1<<PB2);
+	/* The pin used as BLANK is also !SS pin, thus it has to be an
+	 * output to stay in master SPI mode). */
 	DDRB |=
 		(1<<PB1)| // XLAT: output
 		(1<<PB2); // BLANK: output
 	DDRD |=
 		(1<<PD4); // Debug LED: output
+
+	pin_high(BLANK);
 }
 
 void init_spi(void)
@@ -88,10 +86,9 @@ void init_blank_timer(){
 	TCCR0A = (1 << WGM01);
 	// Interrupt generation interval is set by dimmer
 	tlc5940_set_dimming(255);
-	// Enable Timer Compare match A interrupt
-	TIMSK0 |= (1 << OCIE0A);
 	// Prescaler clk_io / 1024
 	TCCR0B |= (1 << CS02) | (1 << CS00);
+	// Not enabling interrupt. Done in powersave.c
 }
 
 void init_effect_timer(){

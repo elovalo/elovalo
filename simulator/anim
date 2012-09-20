@@ -14,7 +14,7 @@ if __name__ == '__main__':
     length = args.length or ''
     os.environ['length'] = str(length)
 
-    ok = utils.export(args.effect, args.output, length)
+    ok = utils.export(args.effect, args.output, length, sensors=args.sensors)
 
     if ok:
         utils.render_animation(args.effect, args.output, length)

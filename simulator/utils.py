@@ -37,11 +37,12 @@ def effect_parser():
 def parser():
     p = argparse.ArgumentParser()
     p.add_argument('--hd', help='render in HD', action='store_true')
+    p.add_argument('--sensors', help='sensor data (.py) to use', type=str)
 
     return p
 
 
-def export(effect, output, length=1.0):
+def export(effect, output, length=1.0, data='', sensors=''):
     """ Expects length in seconds!
     """
     length = os.environ.get('length', length) or 1.0
@@ -49,17 +50,53 @@ def export(effect, output, length=1.0):
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
 
-    os.chdir('..')
-    call('scons --no-avr', shell=True)
-    os.chdir('simulator')
-    call(['../build/exporter/exporter ' + effect + ' ' + length], shell=True)
-    return write_fps(effect, output)
-
-
-def write_fps(effect, output):
     if not os.path.exists(output):
         os.mkdir(output)
 
+    sensor_output = os.path.join(output, 'sensors.json')
+    sensor_file = write_sensor_data(sensors, sensor_output, length)
+
+    os.chdir('..')
+    call('scons --no-avr', shell=True)
+    os.chdir('simulator')
+    cmd = '../build/exporter/exporter ' + effect + ' ' + length + ' ' + \
+            sensor_output + ' ' + data
+    print 'executing ' + cmd
+    call([cmd], shell=True)
+    return write_fps(effect, output)
+
+
+def write_sensor_data(sensors, output, length):
+    data = parse_sensor_data(sensors, length)
+
+    with open(output, 'w') as f:
+        json.dump(data, f)
+
+
+def parse_sensor_data(sensors, length):
+    if not sensors:
+        return
+
+    length = int(length)
+    sensors = sensors.replace('/', '.')
+
+    try:
+        # XXX: works only for pkg.module combo
+        module = sensors.split('.')[1]
+        pkg = __import__(sensors)
+        mod = getattr(pkg, module)
+
+        ret = {}
+        for k, v in mod.sensors.items():
+            ret[k] = [v(i) for i in range(length)]
+
+        return ret
+    except ImportError:
+        # TODO: colorize this
+        print 'Invalid sensor module!'
+
+
+def write_fps(effect, output):
     with open(os.path.join(output, 'fps.json'), 'w') as f:
         p = os.path.join('exports', effect + '.json')
 
