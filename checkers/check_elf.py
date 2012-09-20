@@ -10,7 +10,16 @@ def main(args):
     assy = args[0]
     r_num = args[1]
 
-    print assy, r_num
+    with open(assy, 'r') as f:
+        name = ''
+
+        for line in f.readlines():
+            if not line.startswith(' '):
+                name = line
+
+            if line.find('r' + r_num + ',') >= 0 or \
+                    line.find('r' + r_num + '\n') >= 0:
+                print name, line
 
 
 if __name__ == '__main__':
