@@ -11,8 +11,10 @@ sys.path.append(os.path.join(os.getcwd(), '..'))
 from generators import playlists
 
 
-def seek(data, **kwargs):
-    return [k['playlist'] for k in data if filter(kwargs.get, k.keys())][0]
+def seek(data, name):
+    for d in data:
+        if d.get('name') == name:
+            return d.get('playlist')
 
 
 def main():
@@ -33,7 +35,8 @@ def main():
         frames = []
         for effect in playlist:
             l = float(effect['length']) / 1000.0
-            utils.export(effect['name'], args.output, l)
+            utils.export(effect['name'], args.output, l, effect.get('data'),
+                    args.sensors)
             length += l
 
             with open(os.path.join('exports', effect['name'] + '.json'),

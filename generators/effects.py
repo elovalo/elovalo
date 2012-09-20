@@ -48,6 +48,8 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.function_names)
         t.write('\n')
+        t.write(inp.union)
+        t.write('\n')
         t.write(inp.effects)
         t.write('\n')
         t.write('const uint8_t effects_len = sizeof(effects) / ' +
@@ -86,9 +88,21 @@ class SourceFiles(object):
         return '\n'.join([name(f.name) for f in self._files]) + '\n'
 
     @property
+    def union(self):
+        struct = lambda f: f.variables.replace('vars', f.name)
+
+        ret = ['static union {']
+
+        ret.extend([struct(f) for f in self._files if f.variables])
+
+        ret.append('} vars;')
+
+        return '\n'.join(ret) + '\n'
+
+    @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ', ' + f.max_fps  + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
@@ -125,6 +139,7 @@ class SourceFile(object):
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
         self.max_fps = self._max_fps(content)
+        self.variables = self._variables(content)
 
     def _globals(self, c):
         return '\n'.join(find_globals(c))
@@ -155,6 +170,12 @@ class SourceFile(object):
 
         return '0'
 
+    def _variables(self, c):
+        a = filter(lambda line: 'struct' in line['types'], c)
+
+        if a and a[0]['block'].endswith('vars;\n'):
+            return a[0]['block']
+
 
 def find_globals(content):
     ret = []
@@ -181,7 +202,8 @@ def analyze(name, content):
             ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
-            ('typedef', 'typedef\s+struct\s*[{]'),
+            ('typedef', '\s*typedef\s+struct\s*[{]'),
+            ('struct', '\s*struct\s*[{]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
             ('assignment', '[a-zA-Z]+(\s+\w+)'),
         )
@@ -202,11 +224,17 @@ def analyze(name, content):
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if 'flip' in ret['types']:
+        if 'flip' in ret['types'] or 'max_fps' in ret['types']:
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if ret['content'].startswith('typedef '):
+        if ret['content'].startswith('typedef ') \
+                and 'assignment' in ret['types']:
+            ret['types'].remove('assignment')
+
+        # TODO: fix the regex, matches too much
+        if ret['content'].startswith('struct ') \
+                and 'assignment' in ret['types']:
             ret['types'].remove('assignment')
 
         block = ''
@@ -226,12 +254,15 @@ def analyze(name, content):
                 block = parse_function(name, content, ret, i)
         elif 'typedef' in ret['types']:
             block = parse_typedef(name, content, ret, i)
+        elif 'struct' in ret['types']:
+            block = parse_typedef(name, content, ret, i)
 
         ret['block'] = block
 
         return ret
 
     content = remove_comments(content)
+    content = replace_variables(content, 'vars.', 'vars.' + name + '.')
 
     return [analyze_line(i, line) for i, line in enumerate(content)]
 
@@ -250,8 +281,13 @@ def remove_comments(text):
 
     id = lambda a: a
     add_newline = lambda a: a + '\n'
-    return map(add_newline , filter(id, re.sub(pattern, replacer,
+    return map(add_newline, filter(id, re.sub(pattern, replacer,
         ''.join(text)).split('\n')))
+
+
+def replace_variables(text, source, target):
+    return [line.replace(source, target) for line in text]
+
 
 def typedef_definition(name, line):
     return line['content']

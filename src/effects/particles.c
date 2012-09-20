@@ -19,19 +19,22 @@
 
 #include "common.h"
 
-const uint8_t particles_xyz_len = 5;
-xyz_t particles_xyz[5];
+struct {
+	xyz_t xyz[5];
+} vars;
+
+static const uint8_t xyz_len = 5;
 
 void init(void)
 {
-	for(uint8_t i = 0; i < particles_xyz_len; i++) {
+	for(uint8_t i = 0; i < xyz_len; i++) {
 		xyz_t p = {
 			.x=randint(0, LEDS_X),
 			.y=randint(0, LEDS_Y),
 			.z=randint(0, LEDS_Z)
 		};
 
-		particles_xyz[i] = p;
+		vars.xyz[i] = p;
 	}
 
 	clear_buffer();
@@ -42,8 +45,8 @@ void effect(void)
 
 	clear_buffer();
 
-	for(uint8_t i = 0; i < particles_xyz_len; i++) {
-		xyz_t p = particles_xyz[i];
+	for(uint8_t i = 0; i < xyz_len; i++) {
+		xyz_t p = vars.xyz[i];
 
 		set_led(p.x, p.y, p.z, MAX_INTENSITY);
 
@@ -51,6 +54,6 @@ void effect(void)
 		p.y = clamp(p.y + randint(-1, 1), 0, LEDS_Y - 1);
 		p.z = clamp(p.z + randint(-1, 1), 0, LEDS_Z - 1);
 
-		particles_xyz[i] = p;
+		vars.xyz[i] = p;
 	}
 }

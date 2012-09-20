@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     # XXX: it's possible the frame is not in export. figure out how
     # to deal with this!
-    ok = utils.export(args.effect, args.output)
+    ok = utils.export(args.effect, args.output, sensors=args.sensors)
 
     if ok:
         utils.render_frame(args.effect, args.output, args.frame)

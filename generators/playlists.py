@@ -104,8 +104,8 @@ def playlist_source(data):
         ret = ['const playlistitem_t master_playlist[' + effects_len +
             '] PROGMEM = {']
 
-        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + ' },')
-            for fx in effects]
+        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + \
+            ', "' + fx.get('data', '')  + '" },') for fx in effects]
 
         ret.append('};')
 
@@ -140,9 +140,11 @@ def load_xml(src):
     root = ET.fromstring(src)
 
     for effect in root.getchildren():
+        data = effect.findall('data')
         ret.append({
-            "name": effect.attrib["name"],
-            "length": effect.findall('length')[0].text
+            'name': effect.attrib['name'],
+            'length': effect.findall('length')[0].text,
+            'data': effect[0].text if len(data) else ''
         })
 
     return ret

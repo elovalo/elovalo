@@ -24,27 +24,61 @@
  */
 
 #include <assert.h>
+#include <jansson.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
 #include "../effect_utils.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect, int length);
+void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
 	// TODO: figure out what should happen if an effect is not found by name
-	if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]));
-	else printf("Missing effect and length arguments!\n");
+	if(argc < 3) printf("Missing effect and length arguments!\n");
+	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "", "");
+	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], "");
+	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], argv[4]);
 }
 
-void export_effect(const effect_t *effect, int length) {
+void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data) {
 	const int size = 50;
 	char filename[size];
+
+	// XXX: figure out how to fetch array size
+	int distance1[10000];
+	int distance2[10000];
+	int ambient_light[10000];
+	int sound_pressure[10000];
+
+	/* Attach custom data */
+	custom_data = data;
+
+	/* Parse sensor json */
+	if(strlen(sensor_path) > 0) {
+		json_error_t error;
+		json_t *root = json_load_file(sensor_path, 0, &error);
+
+		if(!root) {
+			fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+		}
+		else if(!json_is_object(root)) {
+			fprintf(stderr, "error: root is not an object\n");
+		}
+		else {
+			json_unpack(root, "{s:[i], s:[i], s:[i], s:[i]}",
+				"distance1", distance1,
+				"distance2", distance2,
+				"ambient_light", ambient_light,
+				"sound_pressure", sound_pressure
+			);
+		}
+	}
 
 	/* Increment frame counter always by 2 centiseconds
 	   to simulate slow drawing. */
@@ -82,6 +116,9 @@ void export_effect(const effect_t *effect, int length) {
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
 	for (ticks=0; ticks < length * 10; ticks += drawing_time) {
+ 		/* TODO fill in sensor data struct declared at
+		   src/effects/lib/utils.h */
+
 		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment
