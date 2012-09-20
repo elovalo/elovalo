@@ -32,17 +32,18 @@
 #include "../effect_utils.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect, int length);
+void export_effect(const effect_t *effect, int length, const char *data);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
 	// TODO: figure out what should happen if an effect is not found by name
 	if(argc < 3) printf("Missing effect and length arguments!\n");
-	else export_effect(find_effect(argv[1]), atoi(argv[2]));
+	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "");
+	else export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3]);
 }
 
-void export_effect(const effect_t *effect, int length) {
+void export_effect(const effect_t *effect, int length, const char *data) {
 	const int size = 50;
 	char filename[size];
 
