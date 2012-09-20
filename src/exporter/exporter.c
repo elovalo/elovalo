@@ -1,4 +1,6 @@
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
  *  
  *  This file is part of Elovalo.
@@ -116,6 +118,9 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
 	for (ticks=0; ticks < length * 10; ticks += drawing_time) {
+ 		/* TODO fill in sensor data struct declared at
+		   src/effects/lib/utils.h */
+
 		if(effect->draw != NULL) effect->draw();
 
 		// Flip buffers to better simulate the environment
