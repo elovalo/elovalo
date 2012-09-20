@@ -8,7 +8,7 @@ def main(args):
         return
 
     assy = args[0]
-    r_num = args[1]
+    reg = args[1]
 
     with open(assy, 'r') as f:
         name = ''
@@ -17,8 +17,8 @@ def main(args):
             if not line.startswith(' '):
                 name = line
 
-            if line.find('r' + r_num + ',') >= 0 or \
-                    line.find('r' + r_num + '\n') >= 0:
+            if line.find(reg + ',') >= 0 or \
+                    line.find(reg + '\n') >= 0:
                 print name, line
 
 
