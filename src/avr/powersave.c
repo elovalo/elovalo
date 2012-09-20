@@ -22,8 +22,6 @@
 #include "pinMacros.h"
 #include "tlc5940.h"
 
-#define PS_ON D,PD3
-
 void init_ps(void)
 {
 	DDRD |= (1<<PD3); // PS_ON: output
@@ -34,9 +32,6 @@ void cube_start(uint8_t unused)
 {
 	// Enable BLANK timer interrupt (starts SPI)
 	TIMSK0 |= (1 << OCIE0A);
-
-	// Power up 5V
-	pin_high(PS_ON);
 }
 
 void cube_shutdown(uint8_t unused)
@@ -44,11 +39,8 @@ void cube_shutdown(uint8_t unused)
 	// Disable BLANK timer interrupt (stops SPI)
 	TIMSK0 &= ~(1 << OCIE0A);
 
-	/* Pull all signals low to avoid passing voltages higher than
-	 * VCC when secondary PSU (+5V is powered down */
+	/* Pulling BLANK down reduces current consumption to
+	 * 50mA. Doing that. We pull all other signals low, too. */
 	pin_low(BLANK);
 	pin_low(XLAT);
-
-	// Power down 5V
-	pin_low(PS_ON);
 }
