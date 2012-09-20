@@ -5,7 +5,7 @@ env = Environment(ENV=os.environ)
 
 env['CC'] = 'avr-gcc'
 env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -O2 -Wall -std=gnu99 -fpack-struct -fshort-enums -flto')
-env.Append(LINKFLAGS = '-O2 -mmcu=atmega328p -flto')
+env.Append(LINKFLAGS = '-O2 -mmcu=atmega328p -flto -fwhole-program -flto-partition=none')
 if GetOption('use_asm'):
     env.Append(CPPDEFINES = 'ASM_ISRS')
 
