@@ -52,6 +52,7 @@ struct event {
 /* This structure holds information about the cron actions */
 struct action_info {
 	action_t act;         // Action function pointer
+	const char *act_key;  // Short name for function
 	const char *act_name; // Name for action
 	const char *arg_name; // Name of the argument. NULL if not used.
 };
