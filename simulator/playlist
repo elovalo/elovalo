@@ -35,7 +35,8 @@ def main():
         frames = []
         for effect in playlist:
             l = float(effect['length']) / 1000.0
-            utils.export(effect['name'], args.output, l, effect.get('data'))
+            utils.export(effect['name'], args.output, l, effect.get('data'),
+                    args.sensors)
             length += l
 
             with open(os.path.join('exports', effect['name'] + '.json'),

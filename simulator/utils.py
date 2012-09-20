@@ -38,13 +38,15 @@ def parser():
     return p
 
 
-def export(effect, output, length=1.0, data=''):
+def export(effect, output, length=1.0, data='', sensors=''):
     """ Expects length in seconds!
     """
     length = os.environ.get('length', length) or 1.0
     length = float(length)
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
+
+    # TODO: parse sensor data
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
