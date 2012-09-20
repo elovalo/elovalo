@@ -24,6 +24,7 @@
  */
 
 #include <assert.h>
+#include <jansson.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -49,11 +50,35 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	const int size = 50;
 	char filename[size];
 
-	// Attach custom data
+	// XXX: figure out how to fetch array size
+	int distance1[10000];
+	int distance2[10000];
+	int ambient_light[10000];
+	int sound_pressure[10000];
+
+	/* Attach custom data */
 	custom_data = data;
 
-	// parse sensor json
-	if(strlen(sensor_path) > 0) printf("got sensor data\n");
+	/* Parse sensor json */
+	if(strlen(sensor_path) > 0) {
+		json_error_t error;
+		json_t *root = json_load_file(sensor_path, 0, &error);
+
+		if(!root) {
+			fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+		}
+		else if(!json_is_object(root)) {
+			fprintf(stderr, "error: root is not an object\n");
+		}
+		else {
+			json_unpack(root, "{s:[i], s:[i], s:[i], s:[i]}",
+				"distance1", distance1,
+				"distance2", distance2,
+				"ambient_light", ambient_light,
+				"sound_pressure", sound_pressure
+			);
+		}
+	}
 
 	/* Increment frame counter always by 2 centiseconds
 	   to simulate slow drawing. */
