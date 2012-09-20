@@ -1,154 +1,101 @@
-#
-# Copyright 2012 Elovalo project group 
-# 
-# This file is part of Elovalo.
-# 
-# Elovalo is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# Elovalo is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
-#
-
-import binascii
 import cmd
-import json
-import os
+import readline
 import sys
-import struct
 import time
 
-import conn
-from conn import Message
-import conf
-import conv
-import resp
+import config
+import connection
+import parser
 
 class EloCmd(cmd.Cmd):
-
-    EFFECTS = {
-        'game_of_life': '\x01',
-        'heart':        '\x02',
-        'brownian':     '\x03',
-        'sine':         '\x04',
-        'wave':         '\x05',
-        'sphere':       '\x06',
-        'worm':         '\x07',
-        'const':        '\x08',
-        'layers':       '\x09',
-        'all_on':       '\x0a',
-    }
-
     intro  = 'Type help to see available commands'
     prompt = ' > '
 
     conn = None
+    
+    effects = []
+    actions = []
+
+    def init(self):
+        if self.conn is None:
+            self.conn = connection.Connection()
 
     def preloop(self):
-        if not self.conn:
-            self.conn = conn.Connection()
-            self.conn.send_message(conf.CMD_GET_TIME)
-            self._process_resps(self.conn.read_responses())
+        self.init()
+        r = self.response_parser()
+        r.parse_response()
+        time.sleep(2)
+        self.load_effects()
+        self.load_actions()
 
-    def postloop(self):
-        self.conn.close()
+    def response_parser(self):
+        line = self.conn.read()
+        return parser.EloParser(line)
 
-    def run_cmd(self, s):
-        self.precmd(s)
-        self.onecmd(s)
-        self.postcmd(False, s)
+    def do_stop(self, line):
+        self.conn.send_command(config.Command.STOP)
 
-    def do_time(self, param):
-        'Get the current time difference from the device'
-        self.conn.send_message(conf.CMD_GET_TIME)
-        return True
+    def load_effects(self):
+        self.conn.send_command(config.Command.LIST_EFFECTS)
+        p = self.response_parser()
+        self.effects = p.parse_effects()
+        print self.effects
 
-    def do_sync(self, line):
-        'Sync the device time to your computer time'
-        t = conv.intToLong(int(time.time()))
-        self.conn.send_message(conf.CMD_SET_TIME, t)
-        return True
-
-    def do_effect(self, effect):
-        "Runs an effect on the device, accepts either effect name, or a 'f1' formatted hexadecimal effect number"
-        e = ''
-        if  effect in self.EFFECTS:
-            e = self.EFFECTS[effect]
-        elif len(effect) == 2:
-            try:
-                e = binascii.unhexlify(effect)
-            except TypeError:
-                print('Incorrect hex effect')
+    def do_effect(self, line):
+        if line in self.effects:
+            e = self.effects[line]
+            self.conn.send_command(config.Command.LIST_EFFECTS, e)
         else:
-            print('No such effect')
-            return
-        self.conn.send_message(conf.CMD_CHANGE_EFFECT, e)
+            print("Unknown effect")
 
     def complete_effect(self, text, line, begidx, endidx):
-        if not text:
-            completions = self.EFFECTS.keys()
+        if text:
+            return [effect for effect in self.effects.keys()
+                    if effect.startswith(text)]
         else:
-            completions = [f
-                           for f in self.EFFECTS.keys()
-                           if f.startswith(text)
-                           ]
-        return completions
+            return self.effects.keys()
 
-    def do_sensor(self, sensor_file):
-        f = open(sensor_file)
-        sensor_data = json.load(f)
-        f.close()
-        self._send_sensor_data(sensor_data["frames"][0])
+    def load_actions(self):
+        self.conn.send_command(config.Command.LIST_ACTIONS)
+        p = self.response_parser()
+        self.actions = p.parse_actions()
 
-    def _send_sensor_data(self, data):
-        sdata = conv.sensor_data(data)
-        start = '\x00'
-        ln = '\x02'
+    def do_action(self, line):
+        line = line.split(' ', 1)
+        act_name = line[0]
 
-        for i in range(0, len(sdata), 2):
-            try:
-                d1 = sdata[i]
-                d2 = sdata[i+1]
-                self.conn.send_message(conf.CMD_SET_SENSOR,
-                    start + ln + d1 + d2)
-            except IndexError:
-                if conf.DEBUG:
-                    print("Error: Sensor data not dividable by 2")
+        try:
+            act_arg = chr(int(line[1]))
+        except IndexError:
+            act_arg = '\x00'
+        except ValueError:
+            print("Error: Incorrect argument")
+            return
 
-    def complete_sensor(self, text, line, begidx, endidx):
-        if not text:
-            return os.listdir(os.curdir)
+        if act_name in self.actions.keys():
+            act = self.actions[act_name]
+            self.conn.send_command(
+                config.Command.RUN_ACTION,
+                act.address + act_arg)
+
+        print(self.response_parser().parse_action())
+
+    def complete_action(self, text, line, begidx, endidx):
+        if text:
+            return [action for action in self.actions.keys()
+                    if action.startswith(text)]
         else:
-            return [f for f in os.listdir(os.curdir) if f.startswith(text)]
-    
-    def do_stop(self, line):
-        'Sets the device to idle-mode'
-        self.conn.send_message(conf.CMD_STOP)
+            return self.actions.keys()
+
+    def do_cron(self, line):
+        self.conn.send_command(config.Command.READ_CRONTAB)
 
     def do_quit(self, line):
-        'Quits this prompt'
-        sys.exit()
+        self.quit()
 
     def do_EOF(self, line):
-        return True
+        self.quit()
 
-    def precmd(self, line):
-        if not self.conn:
-            self.conn = conn.Connection()
-            self._process_resps(self.conn.read_responses())
-        return cmd.Cmd.precmd(self, line)
-
-    def postcmd(self, stop, line):
-        self._process_resps(self.conn.read_responses())
-        return False
-
-    def _process_resps(self, responses):
-        for r in responses:
-            resp.handle(r)
+    def quit(self):
+        self.conn.close()
+        sys.exit()

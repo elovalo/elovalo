@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #
 # Copyright 2012 Elovalo project group 
 # 
@@ -17,10 +18,9 @@
 # along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#!/usr/bin/python
 import argparse
 
-import conf
+import config
 import prompt
 
 def main():
@@ -42,23 +42,19 @@ def main():
     args = parser.parse_args()
 
     elo = prompt.EloCmd()
-    if len(args.command) > 0:
-        conf.TIMEOUT = 2 #FIXME: ugly, probably needed because of rebooting on connection
-        elo.run_cmd(' '.join(args.command))
-    else:
-        elo.cmdloop()
+    elo.cmdloop()
 
 class DebugOnAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        conf.DEBUG = True
+        config.DEBUG = True
 
 class PortAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        conf.PORT = values
+        config.PORT = values
 
 class BaudrateAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        conf.BAUDRATE = values
+        config.BAUDRATE = values
 
 if __name__ == '__main__':
     main()
