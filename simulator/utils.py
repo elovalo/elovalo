@@ -46,7 +46,7 @@ def export(effect, output, length=1.0, data='', sensors=''):
     length *= 1000  # convert to ms required by the exporter
     length = str(int(length))
 
-    sensor_file = write_sensor_data(sensors, output)
+    sensor_file = write_sensor_data(sensors, output, length)
 
     os.chdir('..')
     call('scons --no-avr', shell=True)
@@ -56,19 +56,21 @@ def export(effect, output, length=1.0, data='', sensors=''):
     write_fps(effect, output)
 
 
-def write_sensor_data(sensors, output):
+def write_sensor_data(sensors, output, length):
     if not os.path.exists(output):
         os.mkdir(output)
 
-    data = parse_sensor_data(sensors)
+    data = parse_sensor_data(sensors, length)
+
     with open(os.path.join(output, 'sensors.json'), 'w') as f:
         json.dump(data, f)
 
 
-def parse_sensor_data(sensors):
+def parse_sensor_data(sensors, length):
     if not sensors:
         return
 
+    length = int(length)
     sensors = sensors.replace('/', '.')
 
     try:
@@ -76,8 +78,12 @@ def parse_sensor_data(sensors):
         module = sensors.split('.')[1]
         pkg = __import__(sensors)
         mod = getattr(pkg, module)
-        sensors = mod.sensors
-        # TODO: create data and output
+
+        ret = {}
+        for k, v in mod.sensors.items():
+            ret[k] = [v(i) for i in range(length)]
+
+        return ret
     except ImportError:
         # TODO: colorize this
         print 'Invalid sensor module!'
