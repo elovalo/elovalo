@@ -27,28 +27,33 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
 #include "../effect_utils.h"
 #include "../cube.h"
 
-void export_effect(const effect_t *effect, int length, const char *data);
+void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data);
 
 int main(int argc, char **argv) {
 	mkdir("exports", S_IRWXU);
 
 	// TODO: figure out what should happen if an effect is not found by name
 	if(argc < 3) printf("Missing effect and length arguments!\n");
-	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "");
-	else export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3]);
+	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "", "");
+	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], "");
+	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], argv[4]);
 }
 
-void export_effect(const effect_t *effect, int length, const char *data) {
+void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data) {
 	const int size = 50;
 	char filename[size];
 
 	// Attach custom data
 	custom_data = data;
+
+	// parse sensor json
+	if(strlen(sensor_path) > 0) printf("got sensor data\n");
 
 	/* Increment frame counter always by 2 centiseconds
 	   to simulate slow drawing. */
