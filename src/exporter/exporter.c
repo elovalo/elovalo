@@ -48,7 +48,7 @@ void export_effect(const effect_t *effect, int length, const char *data) {
 	char filename[size];
 
 	// Attach custom data
-	custom_data = &data;
+	custom_data = data;
 
 	/* Increment frame counter always by 2 centiseconds
 	   to simulate slow drawing. */
