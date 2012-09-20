@@ -102,6 +102,7 @@ uint8_t clamp(uint8_t a, uint8_t min, uint8_t max);
 
 extern uint16_t ticks;
 extern sensors_t sensors;
+extern void *custom_data;
 
 #define MAX_INTENSITY ((1<<GS_DEPTH)-1)
 

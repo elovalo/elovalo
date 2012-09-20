@@ -42,6 +42,9 @@
  * started. This keeps ticks stable and removes tearing. */
 uint16_t ticks;
 
+/* custom data which effects may access and which may be set at playlists */
+void *custom_data;
+
 /* Sensor values are stored in this struct */ 
 sensors_t sensors = {MAX_INTENSITY};
 
