@@ -105,9 +105,9 @@ def playlist_source(data):
                 h = str(hex(len(d)))[2:]
 
                 if len(h) == 1:
-                    return '"\\x0' + h + d + '"'
+                    return '"\\x0' + h + "\"\"" + d + '"'
 
-                return '"\\x' + h + d +'"'
+                return '"\\x' + h + "\"\"" + d +'"'
 
             return '"\\x00"'  # NULL seems to fail (invalid initializer error)
 
