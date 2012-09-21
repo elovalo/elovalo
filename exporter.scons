@@ -1,7 +1,6 @@
 # -*- mode: python; coding: utf-8 -*-
-import os
 
-env = Environment(ENV=os.environ)
+env = Environment()
 
 # TODO move pkgconfig and configure boilerplate to another file
 

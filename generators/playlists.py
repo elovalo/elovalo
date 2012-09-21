@@ -104,7 +104,7 @@ def playlist_source(data):
             if d:
                 return '"\\' + str(hex(len(d)))[1:]  + d + '"'
 
-            return 'NULL'
+            return '""'  # NULL seems to fail (invalid initializer error)
 
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
         ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = ' + \
@@ -119,7 +119,7 @@ def playlist_source(data):
             '] PROGMEM = {']
 
         [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + \
-            ', s_playlist_item_' + str(i)  + ' },') for i, fx in enumerate(effects)]
+            ', &s_playlist_item_' + str(i)  + ' },') for i, fx in enumerate(effects)]
 
         ret.append('};')
 
