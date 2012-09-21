@@ -77,8 +77,10 @@
 #define MODE_EFFECT         0x01 // Draw effect
 #define MODE_PLAYLIST       0x02 // Playlist
 
-// Dirty tricks
+// Dirty trick to ease building of CMD handling blocks
 #define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
+// Fills in a variable and leaves handler if it cannot be read
+#define SERIAL_READ(x) if (serial_to_sram(&(x),sizeof(x)) < sizeof(x)) goto interrupted
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
@@ -186,8 +188,7 @@ void process_cmd(void)
 		mode = MODE_IDLE;
 	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
 		uint8_t i;
-		if (serial_to_sram(&i,sizeof(i)) < sizeof(i))
-			goto interrupted;
+		SERIAL_READ(i);
 		if (i >= effects_len)
 			goto bad_arg_a;
 
@@ -212,39 +213,36 @@ void process_cmd(void)
 		reset_time();
 	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
 		uint8_t i;
-		if (serial_to_sram(&i,sizeof(i)) < sizeof(i))
-			goto interrupted;
+		SERIAL_READ(i);
 		if (i >= playlists_len)
 			goto bad_arg_a;
 		// Change mode and run init
 		select_playlist_item(playlists[i]);
 		init_current_effect();
 	} ELSEIFCMD(CMD_SET_TIME) {
-		time_t tmp_time = 0;
-		if (serial_to_sram(&tmp_time,sizeof(tmp_time)) < sizeof(tmp_time))
-			goto interrupted;
+		time_t tmp_time;
+		SERIAL_READ(tmp_time);
 		stime(&tmp_time);
 	} ELSEIFCMD(CMD_GET_TIME) {
 		time_t tmp_time = time(NULL);
 		sram_to_serial(&tmp_time,sizeof(time_t));
 	} ELSEIFCMD(CMD_SET_SENSOR) {
-		read_t start = read_escaped();
-		read_t len = read_escaped();
-
-		// Check we get bytes and not escapes
-		if (!start.good || !len.good)
-			goto interrupted;
+		struct {
+			uint8_t start;
+			uint8_t len;
+		} data;
+		SERIAL_READ(data);
 
 		// Check boundaries
-		if (start.byte >= sizeof(sensors_t))
+		if (data.start >= sizeof(sensors_t))
 			goto bad_arg_a;
 
-		if (start.byte + len.byte > sizeof(sensors_t))
+		if (data.start + data.len > sizeof(sensors_t))
 			goto bad_arg_b;
 
 		// Fill in sensor structure
 		void *p = &sensors;
-		if (serial_to_sram(p+start.byte,len.byte) < len.byte)
+		if (serial_to_sram(p+data.start,data.len) < data.len)
 			goto interrupted;
 	} ELSEIFCMD(CMD_LIST_EFFECTS) {
 		// Print effect names separated by '\0' character
@@ -270,15 +268,14 @@ void process_cmd(void)
 			action_t act;
 			uint8_t arg;
 		} a;
-
-		if (serial_to_sram(&a,sizeof(a)) < sizeof(a))
-			goto interrupted;
+		SERIAL_READ(a);
 		if (!is_action_valid(a.act))
 			goto bad_arg_a;
 		a.act(a.arg);
 	} ELSEIFCMD(CMD_READ_CRONTAB) {
+		// Print all entries in crontab
 		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
-			// Read one crotab entry
+			// Read one crotab entry from EEPROM
 			struct event e;
 			get_crontab_entry(&e,i);
 
