@@ -53,6 +53,17 @@ class EloCmd(cmd.Cmd):
         line = self.conn.read()
         return parser.EloParser(line)
 
+    def do_playlist(self, line):
+        """Switch the devices current playlist"""
+        try:
+            pl = chr(int(line))
+        except ValueError:
+            print("Incorrect playlist number")
+            return
+
+        self.conn.send_command(config.Command.SELECT_PLAYLIST, pl)
+        self.response_parser().parse_ok()
+
     def do_time(self, line):
         """Get and synchronize device time"""
         local_t = int(time.time())
@@ -84,9 +95,10 @@ class EloCmd(cmd.Cmd):
         """Make the device run the specified action"""
         if line in self.effects:
             e = self.effects[line]
-            self.conn.send_command(config.Command.LIST_EFFECTS, e)
+            self.conn.send_command(config.Command.CHANGE_EFFECT, e)
         else:
-            print("Unknown effect")
+            print("Error: Unknown effect")
+        self.response_parser().parse_ok()
 
     def complete_effect(self, text, line, begidx, endidx):
         if text:

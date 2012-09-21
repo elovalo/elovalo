@@ -141,3 +141,13 @@ class EloParser():
         except IndexError:
             print("Received time value was too short")
             return time.localtime(0)
+
+    def parse_ok(self):
+        self.parse_response()
+        r = self.resp_data
+        if config.Response.INTERRUPTED in r:
+            print('Command interrupted')
+        if config.Response.BAD_ARG_A in r:
+            print('Bad argument A')
+        if config.Response.BAD_ARG_B in r:
+            print('Bad argument B')
