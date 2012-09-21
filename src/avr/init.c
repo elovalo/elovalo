@@ -38,7 +38,7 @@
 
 /* Timing accuracy with 8 data bits and 1 stop bit is about 4 percent:
    http://www.maximintegrated.com/app-notes/index.mvp/id/2141 */
-#define BAUD 115200
+#define BAUD 9600
 #define BAUD_TOL 4
 
 #include <avr/interrupt.h>
