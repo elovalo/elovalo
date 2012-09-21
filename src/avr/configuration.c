@@ -34,13 +34,13 @@ struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 	{ .kind = WEEKLY,
 	  .act = &cube_shutdown,
 	  .u = { .weekly = { .weekdays = EVERY_DAY,
-			     .minutes = TIME(2,0) },
+			     .minutes = TIME(23,15) },
 		}
 	},
 	{ .kind = WEEKLY,
 	  .act = &cube_start,
 	  .u = { .weekly = { .weekdays = EVERY_DAY,
-			     .minutes = TIME(19,0) },
+			     .minutes = TIME(15,0) },
 		}
 	},
 	END_OF_CRONTAB
