@@ -94,6 +94,7 @@ def write(path, data):
 def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
+#include <stdlib.h>
 #include "playlists.h"
 #include "pgmspace.h"
 '''
