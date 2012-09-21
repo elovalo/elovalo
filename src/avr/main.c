@@ -117,6 +117,11 @@ int main() {
 
 	hcsr04_start_continuous_meas();
 	adc_start();
+	
+	// Quick fix to start in kiosk mode
+	mode = MODE_PLAYLIST;
+	select_playlist_item(playlists[0]);
+	init_current_effect();
 
 	// Greet the serial user
 	report(REPORT_BOOT);
