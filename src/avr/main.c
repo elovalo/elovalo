@@ -197,20 +197,7 @@ void process_cmd(void)
 		effect = effects + i;
 
 		// Prepare running of the new effect
-		allow_flipping(false);
 		init_current_effect();
-		gs_buf_swap();
-		
-		/* Support NO_FLIP. Restore buffers to "normal state"
-		   (pointing to different locations) and then "broke"
-		   flipping if required by flip_buffers */
-		gs_restore_bufs();
-		if (pgm_get(effect->flip_buffers, byte) == NO_FLIP) {
-			gs_buf_back = gs_buf_front;
-		}
-
-		// Restart tick counter
-		reset_time();
 	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
 		uint8_t i;
 		SERIAL_READ(i);
@@ -356,8 +343,26 @@ static void select_playlist_item(uint8_t index) {
 }
 
 static void init_current_effect(void) {
+	// Disable flipping until first frame is drawn
+	allow_flipping(false);
+
+	/* Restore front and back buffer pointers to point to
+	 * different locations */
+	gs_restore_bufs();
+
+	// Run initializer
 	init_t init = (init_t)pgm_get(effect->init, word);
 	if (init != NULL) init();
+	gs_buf_swap();
+	
+	/* If NO_FLIP, we "broke" flipping if required by pointing
+	 * both buffers to the same location */
+	if (pgm_get(effect->flip_buffers, byte) == NO_FLIP) {
+		gs_buf_back = gs_buf_front;
+	}
+	
+	// Restart tick counter
+	reset_time();
 }
 
 
