@@ -185,14 +185,15 @@ void process_cmd(void)
 	} ELSEIFCMD(CMD_STOP) {
 		mode = MODE_IDLE;
 	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
-		read_t x = read_escaped();
-
-		if (!x.good) goto interrupted;
-		if (x.byte >= effects_len) goto bad_arg_a;
+		uint8_t i;
+		if (serial_to_sram(&i,sizeof(i)) < sizeof(i))
+			goto interrupted;
+		if (i >= effects_len)
+			goto bad_arg_a;
 
 		// Change mode and pick correct effect from the array.
 		mode = MODE_EFFECT;
-		effect = effects + x.byte;
+		effect = effects + i;
 
 		// Prepare running of the new effect
 		allow_flipping(false);
