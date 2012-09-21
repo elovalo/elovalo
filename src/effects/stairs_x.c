@@ -21,6 +21,7 @@
 
 void init(void)
 {
+	clear_buffer();
 	for(uint8_t i = 0; i < 8; i++) {
 		set_row(i, i, 0, 7, MAX_INTENSITY);
 	}
