@@ -49,13 +49,16 @@ class Connection():
             cmd.append(body)
 
         if config.DEBUG:
-            print("Sent: {0}".format(binascii.hexlify(cmd)))
+            print("Sent: {0} | {1}".format(cmd, binascii.hexlify(cmd)))
 
         self.ser.write(cmd)
 
     def read(self):
         time.sleep(0.5)
-        return self.ser.read(self.ser.inWaiting())
+        r = self.ser.read(self.ser.inWaiting())
+        if config.DEBUG:
+            print("Received: {0} | {1}".format(r, binascii.hexlify(r)))
+        return r
 
     def close(self):
         self.ser.close()

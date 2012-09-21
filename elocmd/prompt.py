@@ -1,5 +1,6 @@
 import cmd
 import readline
+import struct
 import sys
 import time
 
@@ -32,16 +33,35 @@ class EloCmd(cmd.Cmd):
         line = self.conn.read()
         return parser.EloParser(line)
 
+    def do_time(self, line):
+        """Get and synchronize device time"""
+        local_t = int(time.time())
+        if line == "sync":
+            t = struct.pack('<L', local_t)
+            self.conn.send_command(config.Command.SET_TIME, t)
+            return
+
+        self.conn.send_command(config.Command.GET_TIME)
+        device_t = self.response_parser().parse_time()
+
+        dtstr = time.strftime('%a %d.%m.%Y - %H:%M:%S', device_t)
+        print("device time off by {0} seconds ({1})".format(
+            time.mktime(device_t) - local_t, dtstr))
+    
+    def complete_time(self, text, line, begidx, endidx):
+        return ['sync']
+
     def do_stop(self, line):
+        """Send stop-signal to the device"""
         self.conn.send_command(config.Command.STOP)
 
     def load_effects(self):
         self.conn.send_command(config.Command.LIST_EFFECTS)
         p = self.response_parser()
         self.effects = p.parse_effects()
-        print self.effects
 
     def do_effect(self, line):
+        """Make the device run the specified action"""
         if line in self.effects:
             e = self.effects[line]
             self.conn.send_command(config.Command.LIST_EFFECTS, e)
@@ -61,6 +81,7 @@ class EloCmd(cmd.Cmd):
         self.actions = p.parse_actions()
 
     def do_action(self, line):
+        """Send the selected action with the specified byte parameter (0-255) to the device"""
         line = line.split(' ', 1)
         act_name = line[0]
 
@@ -77,8 +98,6 @@ class EloCmd(cmd.Cmd):
             self.conn.send_command(
                 config.Command.RUN_ACTION,
                 act.address + act_arg)
-
-        print(self.response_parser().parse_action())
 
     def complete_action(self, text, line, begidx, endidx):
         if text:

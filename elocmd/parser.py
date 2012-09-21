@@ -1,18 +1,19 @@
 import binascii
 import collections
+import struct
+import time
 
 import config
 
 Action = collections.namedtuple('Action', 'address description arg_desc')
 
 class EloParser():
-    index = -1
-    response = ''
-    current = ''
-    resp_data = ''
 
     def __init__(self, line):
         self.response = line
+        self.index = -1
+        self.current = ''
+        self.resp_data = bytearray()
 
     def next_byte(self):
         try:
@@ -36,7 +37,10 @@ class EloParser():
         return b
 
     def add_data(self, b):
-        self.resp_data = self.resp_data + b
+        self.resp_data.append(b)
+
+    def resp_string(self):
+        return str(self.resp_data)
 
     def unescape(self, data):
         return data.replace(
@@ -45,7 +49,6 @@ class EloParser():
 
     def parse_response(self):
         while self.next_byte() != '':
-            print self.current
             if self.current == config.Core.ESCAPE:
                 self.parse_esc()
 
@@ -78,7 +81,7 @@ class EloParser():
 
     def parse_effects(self):
         self.parse_response()
-        names = filter(None, self.resp_data.split('\x00'))
+        names = filter(None, self.resp_string().split('\x00'))
         effects = {}
         i = 0
         for name in names:
@@ -91,7 +94,7 @@ class EloParser():
         self.parse_response()
         actions = {}
 
-        ac_data = self.resp_data.split('\x00')
+        ac_data = self.resp_string().split('\x00')
         for i in range(0, len(ac_data), 3):
             try:
                 key = ac_data[i][2:]
@@ -101,10 +104,20 @@ class EloParser():
                 actions[key] = ac
             except IndexError:
                 break
-        print actions
         return actions
 
     def parse_action(self):
         self.parse_response()
-        return self.resp_data
-        
+        return self.resp_string()
+
+    def parse_time(self):
+        self.parse_response()
+        try:
+            print "parse_time"
+            print binascii.hexlify(self.resp_data)
+            dt = struct.unpack('<L', self.resp_string()[:4])[0]
+            print dt
+            return time.localtime(float(dt))
+        except IndexError:
+            print("Received time value was too short")
+            return time.localtime(0)
