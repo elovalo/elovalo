@@ -98,6 +98,13 @@ def playlist_source(data):
 #include "pgmspace.h"
 '''
 
+    def custom_data(data):
+        effects = list(itertools.chain(*[d['playlist'] for d in data]))
+        ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = "' + \
+            d.get('data', '') + '";' for i, d in enumerate(effects)]
+
+        return '\n'.join(ret) + '\n'
+
     def master_playlist(data):
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
         effects_len = str(len(effects))
@@ -105,7 +112,7 @@ def playlist_source(data):
             '] PROGMEM = {']
 
         [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + \
-            ', "' + fx.get('data', '')  + '" },') for fx in effects]
+            ', s_playlist_item_' + str(i)  + ' },') for i, fx in enumerate(effects)]
 
         ret.append('};')
 
@@ -130,6 +137,7 @@ def playlist_source(data):
 
     return '\n'.join([
         file_start,
+        custom_data(data),
         master_playlist(data),
         playlist_indices(data),
     ])
