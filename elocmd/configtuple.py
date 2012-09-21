@@ -14,24 +14,14 @@
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+# along with Elovalo.  If not, see <http:#www.gnu.org/licenses/>.
 #
 
-import json
-import random
+import collections
 
-j = {
-    "fps": 25,
-    "geometry": [8,8,8],
-    "frames": []
-}
-
-d = []
-for i in range(0, 100):
-    d.append(random.random())
-
-j["frames"].append(d)
-
-f = open('test.json', 'a')
-f.write(json.dumps(j))
-f.close()
+# Returns an immutable namedtuple with the keys and values of the given tuple
+# Useful for providing config options
+def ConfigTuple(name, dic):
+    conftuple = collections.namedtuple(name, dic.keys())
+    ct = conftuple(**dic)
+    return ct
