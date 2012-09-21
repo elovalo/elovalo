@@ -99,9 +99,15 @@ def playlist_source(data):
 '''
 
     def custom_data(data):
+        def get_str(d):
+            if d:
+                return '"\\' + str(hex(len(d)))[1:]  + d + '"'
+
+            return 'NULL'
+
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
-        ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = "' + \
-            d.get('data', '') + '";' for i, d in enumerate(effects)]
+        ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = ' + \
+            get_str(d.get('data', '')) + ';' for i, d in enumerate(effects)]
 
         return '\n'.join(ret) + '\n'
 
