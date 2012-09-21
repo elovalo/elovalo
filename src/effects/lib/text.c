@@ -27,16 +27,19 @@
 #include "font8x8_basic.h"
 #include "utils.h"
 #include "text.h"
+#include "../../pgmspace.h"
 
 void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset)
 {
-	uint8_t textLen = strlen(text);
+	// text format is ZCL octet string, where the length is at byte 0
+	const uint8_t textLen = pgm_get(*text++,byte);
 	uint8_t spacing = 8; // Seems like a good pick for this charset
 
 	offset %= (spacing + 1) * textLen;
 
 	for(uint8_t i = 0; i < textLen; i++) {
-		render_character(text[i], x, intensity, i * spacing + offset);
+		const char c = pgm_get(text[i],byte);
+		render_character(c, x, intensity, i * spacing + offset);
 	}
 }
 
