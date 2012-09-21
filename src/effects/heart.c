@@ -21,6 +21,10 @@
 
 #include "common.h"
 
+void init(void) {
+	clear_buffer();
+}
+
 void effect(void) {
 	heart_shape();
 }
