@@ -1,3 +1,23 @@
+#!/usr/bin/python
+#
+# Copyright 2012 Elovalo project group 
+# 
+# This file is part of Elovalo.
+# 
+# Elovalo is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Elovalo is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 import binascii
 import collections
 import struct
@@ -121,3 +141,13 @@ class EloParser():
         except IndexError:
             print("Received time value was too short")
             return time.localtime(0)
+
+    def parse_ok(self):
+        self.parse_response()
+        r = self.resp_data
+        if config.Response.INTERRUPTED in r:
+            print('Command interrupted')
+        if config.Response.BAD_ARG_A in r:
+            print('Bad argument A')
+        if config.Response.BAD_ARG_B in r:
+            print('Bad argument B')
