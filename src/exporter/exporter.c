@@ -54,7 +54,7 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	int distance1[10000];
 	int distance2[10000];
 	int ambient_light[10000];
-	int sound_pressure[10000];
+	int sound_pressure_level[10000];
 
 	/* Attach custom data */
 	custom_data = data;
@@ -75,7 +75,7 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 				"distance1", distance1,
 				"distance2", distance2,
 				"ambient_light", ambient_light,
-				"sound_pressure", sound_pressure
+				"sound_pressure", sound_pressure_level
 			);
 		}
 	}
@@ -115,9 +115,11 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
-	for (ticks=0; ticks < length * 10; ticks += drawing_time) {
- 		/* TODO fill in sensor data struct declared at
-		   src/effects/lib/utils.h */
+	for (int i = 0, ticks=0; ticks < length * 10; ticks += drawing_time, i++) {
+		sensors.distance1 = distance1[i];
+		sensors.distance2 = distance2[i];
+		sensors.ambient_light = ambient_light[i];
+		sensors.sound_pressure_level = sound_pressure_level[i];
 
 		if(effect->draw != NULL) effect->draw();
 
