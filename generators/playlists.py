@@ -102,9 +102,14 @@ def playlist_source(data):
     def custom_data(data):
         def get_str(d):
             if d:
-                return '"\\' + str(hex(len(d)))[1:]  + d + '"'
+                h = str(hex(len(d)))[2:]
 
-            return '""'  # NULL seems to fail (invalid initializer error)
+                if len(h) == 1:
+                    return '"\\x0' + h + d + '"'
+
+                return '"\\x' + h + d +'"'
+
+            return '"\\x00"'  # NULL seems to fail (invalid initializer error)
 
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
         ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = ' + \
