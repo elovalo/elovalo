@@ -203,7 +203,9 @@ void process_cmd(void)
 		SERIAL_READ(i);
 		if (i >= playlists_len)
 			goto bad_arg_a;
+
 		// Change mode and run init
+		mode = MODE_PLAYLIST;
 		select_playlist_item(playlists[i]);
 		init_current_effect();
 	} ELSEIFCMD(CMD_SET_TIME) {
@@ -337,9 +339,11 @@ static void next_effect() {
 
 static void select_playlist_item(uint8_t index) {
 	active_effect = index;
-	playlistitem_t item = master_playlist[index];
-	effect = &effects[item.id];
-	effect_length = item.length;
+	const playlistitem_t *item = master_playlist + index;
+	uint8_t e_id = pgm_get(item->id,byte);
+	effect = effects + e_id;
+	effect_length = pgm_get(item->length,word);
+	// TODO data
 }
 
 static void init_current_effect(void) {
