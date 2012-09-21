@@ -25,3 +25,4 @@
 #include "lib/utils.h"
 #include "lib/shapes.h"
 #include "lib/text.h"
+#include "../assert.h"
