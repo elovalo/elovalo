@@ -343,7 +343,7 @@ static void select_playlist_item(uint8_t index) {
 	uint8_t e_id = pgm_get(item->id,byte);
 	effect = effects + e_id;
 	effect_length = pgm_get(item->length,word);
-	// TODO data
+	custom_data = pgm_get(item->data,word);
 }
 
 static void init_current_effect(void) {
