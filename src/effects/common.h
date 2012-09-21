@@ -26,3 +26,4 @@
 #include "lib/shapes.h"
 #include "lib/text.h"
 #include "../assert.h"
+#include "../pgmspace.h"

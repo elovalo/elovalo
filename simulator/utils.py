@@ -59,8 +59,9 @@ def export(effect, output, length=1.0, data='', sensors=''):
     os.chdir('..')
     call('scons --no-avr', shell=True)
     os.chdir('simulator')
+    d = ' ' + data if data else ''
     cmd = '../build/exporter/exporter ' + effect + ' ' + length + ' ' + \
-            sensor_output + ' ' + data
+            sensor_output + d
     print 'executing ' + cmd
     call([cmd], shell=True)
     return write_fps(effect, output)

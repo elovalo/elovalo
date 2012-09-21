@@ -39,7 +39,7 @@ void set_leds(uint8_t x, uint8_t y, uint8_t z)
 {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
-	if(neighbours >= 9 && neighbours <= 14) set_led(x, y, z, MAX_INTENSITY);
+	if(neighbours >= 6 && neighbours <= 15) set_led(x, y, z, MAX_INTENSITY);
 	else set_led(x, y, z, 0);
 }
 
