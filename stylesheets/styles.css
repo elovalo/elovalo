@@ -866,3 +866,11 @@ footer ul li {
   padding: 2em;
   vertical-align: top;
 }
+
+#news .author {
+  margin-left: 1em;
+}
+
+#news dd {
+  margin-bottom: 1em;
+}
