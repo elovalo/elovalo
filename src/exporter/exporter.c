@@ -41,8 +41,8 @@ int main(int argc, char **argv) {
 
 	// TODO: figure out what should happen if an effect is not found by name
 	if(argc < 3) printf("Missing effect and length arguments!\n");
-	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "", "");
-	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], "");
+	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "", NULL);
+	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], NULL);
 	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], argv[4]);
 }
 
@@ -80,9 +80,9 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 		}
 	}
 
-	/* Increment frame counter always by 2 centiseconds
+	/* Increment frame counter always by 5 * 8 ms (25 fps)
 	   to simulate slow drawing. */
-	const uint16_t drawing_time = 2;
+	const uint16_t drawing_time = 5;
 	
 	int bytes = snprintf(filename, size, "exports/%s.json", effect->name);
 	assert(bytes <= size);
@@ -115,7 +115,8 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	// Draw the frames
 	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
 
-	for (int i = 0, ticks=0; ticks < length * 10; ticks += drawing_time, i++) {
+	int i;
+	for (i = 0, ticks = 0; ticks < length * 10; ticks += drawing_time, i++) {
 		sensors.distance1 = distance1[i];
 		sensors.distance2 = distance2[i];
 		sensors.ambient_light = ambient_light[i];
