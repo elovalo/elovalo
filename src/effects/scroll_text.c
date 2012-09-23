@@ -29,5 +29,5 @@ void effect(void)
 	const char *text = custom_data == NULL ?
 		default_text : (const char*)custom_data;
 	clear_buffer();
-	scroll_text(text, 7, MAX_INTENSITY, 10-(ticks >> 3));
+	scroll_text(text, 7, MAX_INTENSITY, ticks >> 3);
 }

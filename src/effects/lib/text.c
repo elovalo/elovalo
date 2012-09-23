@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "font8x8_basic.h"
 #include "utils.h"
@@ -32,14 +33,18 @@
 void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset)
 {
 	// text format is ZCL octet string, where the length is at byte 0
-	const uint8_t textLen = pgm_get(*text++,byte);
+	++text;
 	uint8_t spacing = 8; // Seems like a good pick for this charset
 
-	offset %= (spacing + 1) * textLen;
+	int16_t base_pos = (LEDS_X+1)-offset;
+	uint8_t i = 0;
 
-	for(uint8_t i = 0; i < textLen; i++) {
-		const char c = pgm_get(text[i],byte);
-		render_character(c, x, intensity, i * spacing + offset);
+	while (true) {
+		const char c = pgm_get(*text,byte);
+		if (c == '\0') break;
+		render_character(c, x, intensity, (int16_t)i * spacing + base_pos);
+		++i;
+		++text;
 	}
 }
 
