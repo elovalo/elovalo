@@ -48,7 +48,7 @@ void set_leds(uint8_t x, uint8_t y, uint8_t z)
 {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
-	if(neighbours >= 6 && neighbours <= 15) {
+	if((neighbours >= 6 && neighbours <= 15) || randint(0, 10) > 8) {
 		set_led(x, y, z, MAX_INTENSITY);
 		vars.is_alive = 1;
 	}
