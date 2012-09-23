@@ -25,6 +25,10 @@
 static uint8_t get_amount_of_neighbours(uint8_t x, uint8_t y, uint8_t z);
 static void set_leds(uint8_t x, uint8_t y, uint8_t z);
 
+struct {
+	uint8_t is_alive;
+} vars;
+
 void init(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
@@ -32,14 +36,22 @@ void init(void)
 }
 
 void effect(void) {
+	vars.is_alive = 0;
 	iterate_xyz(set_leds);
+
+	if(!vars.is_alive) {
+		heart_shape();
+	}
 }
 
 void set_leds(uint8_t x, uint8_t y, uint8_t z)
 {
 	uint8_t neighbours = get_amount_of_neighbours((int8_t)x, (int8_t)y, (int8_t)z);
 
-	if(neighbours >= 6 && neighbours <= 15) set_led(x, y, z, MAX_INTENSITY);
+	if(neighbours >= 6 && neighbours <= 15) {
+		set_led(x, y, z, MAX_INTENSITY);
+		vars.is_alive = 1;
+	}
 	else set_led(x, y, z, 0);
 }
 
