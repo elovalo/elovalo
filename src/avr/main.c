@@ -18,6 +18,7 @@
  */
 
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <avr/io.h>
 #include <stdlib.h>
@@ -137,6 +138,7 @@ int main() {
 		switch (mode) {
 		case MODE_IDLE:
 			// No operation
+			sleep_mode();
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
@@ -169,7 +171,7 @@ int main() {
 			uint16_t target_ticks =
 				ticks + pgm_get(effect->minimum_ticks,byte);
 			while (centisecs() < target_ticks ) {
-				// TODO go to sleep mode to save power
+				sleep_mode();
 			}
 
 			break;
