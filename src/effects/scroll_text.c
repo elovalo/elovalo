@@ -21,7 +21,7 @@
 
 #include "common.h"
 
-PROGMEM const char default_text[] = "\x05ERROR";
+PROGMEM const char default_text[] = "\x05""ERROR";
 
 void effect(void)
 {
