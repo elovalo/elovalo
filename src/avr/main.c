@@ -165,6 +165,13 @@ int main() {
 				allow_flipping(true);
 			}
 
+			// Slow down drawing if FPS is going to be too high
+			uint16_t target_ticks =
+				ticks + pgm_get(effect->minimum_ticks,byte);
+			while (centisecs() < target_ticks ) {
+				// TODO go to sleep mode to save power
+			}
+
 			break;
 		}
 	}
