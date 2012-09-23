@@ -10,7 +10,7 @@ These requirements are for building with SCons in Debian GNU/Linux or Ubuntu. Th
 
 To build on Ubuntu install the following packages from the Quantal repository:
 
-    avr-gcc gcc scons
+    avr-gcc gcc scons libjansson4
 
 In order to install Quantal(12.10) packages you have to enable Quantal repositories:
 
