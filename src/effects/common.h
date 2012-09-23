@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "../env.h"
 #include "lib/math.h"
 #include "lib/utils.h"
