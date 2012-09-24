@@ -18,23 +18,40 @@
  */
 
 # pragma FLIP
+# pragma MAX_FPS 1
 
 #include "common.h"
 
-static void scroll_render(uint8_t x, uint8_t y);
+static void cd_render_yz(uint8_t x, uint8_t y);
+static void cd_render_xy(uint8_t x, uint8_t y);
 
-PROGMEM const char default_text[] = "\x05""ERROR";
+struct {
+	uint8_t cur;
+} vars;
+
+void init(void) {
+	vars.cur = 60;
+}
 
 void effect(void)
 {
-	// TODO: Should be asserted instead of just sending "ERROR"
-	const char *text = custom_data == NULL? default_text: (const char*)custom_data;
+	char text[3];
+	text[0] = 2;
+	text[1] = '0' + (vars.cur / 10);
+	text[2] = '0' + (vars.cur % 10);
 
 	clear_buffer();
 
-	scroll_text(text, true, ticks >> 3, scroll_render);
+	scroll_text(text, false, 9, cd_render_yz);
+	scroll_text(text, false, 16, cd_render_xy);
+
+	if(vars.cur > 0) vars.cur--;
 }
 
-static void scroll_render(uint8_t x, uint8_t y) {
+static void cd_render_yz(uint8_t x, uint8_t y) {
 	set_led(7, x, y, MAX_INTENSITY);
+}
+
+static void cd_render_xy(uint8_t x, uint8_t y) {
+	set_led(LEDS_X - x - 1, 7, y, MAX_INTENSITY);
 }
