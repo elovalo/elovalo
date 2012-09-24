@@ -21,8 +21,6 @@
 
 #include "common.h"
 
-static void scroll_render(uint8_t x, uint8_t y);
-
 PROGMEM const char default_text[] = "\x05""ERROR";
 
 void effect(void)
@@ -32,9 +30,8 @@ void effect(void)
 
 	clear_buffer();
 
-	scroll_text(text, true, ticks >> 3, scroll_render);
+	int16_t pos = ticks >> 3;
+	scroll_text(text, true, pos, cd_render_xy);
+	scroll_text(text, true, pos-7, cd_render_yz);
 }
 
-static void scroll_render(uint8_t x, uint8_t y) {
-	set_led(7, x, y, MAX_INTENSITY);
-}
