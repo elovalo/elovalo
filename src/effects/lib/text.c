@@ -32,28 +32,28 @@
 
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset)
+void scroll_text(const char text[], uint8_t x, int16_t offset, render_t f)
 {
 	// text format is ZCL octet string, where the length is at byte 0
 	uint8_t text_len = pgm_get(*text++,byte);
 	int16_t base_pos = (LEDS_X+1)-offset;
-	uint16_t i = -base_pos / spacing;
+	int16_t i = -base_pos / spacing;
 	uint16_t pos = i*spacing + base_pos;
 
 	// Render only two characters which fit to screen
 
-	if (i >= 0 && i<text_len) {
+	if (i >= 0 && i < text_len) {
 		const char c = pgm_get(text[i],byte);
-		render_character(c, x, intensity, pos);
+		render_character(c, x, pos, f);
 	}
 
 	if (i+1 >= 0 && i+1<text_len) {
 		const char c = pgm_get(text[i+1],byte);
-		render_character(c, x, intensity, pos+spacing);
+		render_character(c, x, pos+spacing, f);
 	}
 }
 
-void render_character(uint8_t index, uint8_t x, uint16_t intensity, int16_t offset)
+void render_character(uint8_t index, uint8_t x, int16_t offset, render_t f)
 {
 	uint8_t bitmap[8];
 
@@ -70,8 +70,12 @@ void render_character(uint8_t index, uint8_t x, uint16_t intensity, int16_t offs
 
 			int8_t set = bitmap[z] & 1 << loc;
 
-			if(set) set_led_8_8_12(x, y, z, intensity);
+			if(set) f(x, y, z);
 		}
 	}
+}
+
+void render_yz(uint8_t x, uint8_t y, uint8_t z) {
+	set_led(x, y, z, MAX_INTENSITY);
 }
 
