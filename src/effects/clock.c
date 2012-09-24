@@ -17,16 +17,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "../env.h"
-#include "lib/math.h"
-#include "lib/utils.h"
-#include "lib/shapes.h"
-#include "lib/text.h"
-#include "../assert.h"
-#include "../pgmspace.h"
-#include "../time.h"
+# pragma FLIP
+
+#include "common.h"
+
+#define SECS_IN_DAY ((time_t)60*60*24)
+#define TIMEZONE_SECS (3*60*60)
+
+void effect(void)
+{
+	char text[9];
+	text[0] = 8;
+	text[3] = ':';
+	text[6] = ':';
+
+	time_t now = time(NULL);
+	time_t since_midnight = (now+TIMEZONE_SECS) % SECS_IN_DAY;
+
+	uint8_t secs = since_midnight%60;
+	uint8_t minutes = since_midnight/60%60;
+	uint8_t hours = since_midnight/60/60;
+
+	text[1] = '0'+(hours/10);
+	text[2] = '0'+(hours%10);
+	text[4] = '0'+(minutes/10);
+	text[5] = '0'+(minutes%10);
+	text[7] = '0'+(secs/10);
+	text[8] = '0'+(secs%10);
+
+	clear_buffer();
+
+	int16_t pos = ticks >> 3;
+
+	scroll_text(text, false, pos, cd_render_xy);
+	scroll_text(text, false, pos-7, cd_render_yz);
+}
