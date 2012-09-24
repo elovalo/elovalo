@@ -21,6 +21,8 @@
 
 #include "common.h"
 
+static void render(uint8_t x, uint8_t y);
+
 PROGMEM const char default_text[] = "\x05""ERROR";
 
 void effect(void)
@@ -29,5 +31,9 @@ void effect(void)
 	const char *text = custom_data == NULL ?
 		default_text : (const char*)custom_data;
 	clear_buffer();
-	scroll_text(text, 7, ticks >> 3, render_yz);
+	scroll_text(text, ticks >> 3, render);
+}
+
+static void render(uint8_t x, uint8_t y) {
+	set_led(7, x, y, MAX_INTENSITY);
 }

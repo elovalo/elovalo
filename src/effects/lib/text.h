@@ -17,17 +17,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-typedef void(*render_t)(uint8_t x, uint8_t y, uint8_t z);
+typedef void(*render_t)(uint8_t x, uint8_t y);
 
 /**
  * Scrolls given text using given callback
  */
-void scroll_text(const char text[], uint8_t x, int16_t offset, render_t f);
+void scroll_text(const char text[], int16_t offset, render_t f);
 
 /**
  * Renders character (index from font8x8_basic) using given callback
  */
-void render_character(uint8_t index, uint8_t x, int16_t offset, render_t f);
-
-/* Predefined cbs */
-void render_yz(uint8_t x, uint8_t y, uint8_t z);
+void render_character(uint8_t index, int16_t offset, render_t f);

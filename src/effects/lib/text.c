@@ -32,7 +32,7 @@
 
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const char text[], uint8_t x, int16_t offset, render_t f)
+void scroll_text(const char text[], int16_t offset, render_t f)
 {
 	// text format is ZCL octet string, where the length is at byte 0
 	uint8_t text_len = pgm_get(*text++,byte);
@@ -44,16 +44,16 @@ void scroll_text(const char text[], uint8_t x, int16_t offset, render_t f)
 
 	if (i >= 0 && i < text_len) {
 		const char c = pgm_get(text[i],byte);
-		render_character(c, x, pos, f);
+		render_character(c, pos, f);
 	}
 
 	if (i+1 >= 0 && i+1<text_len) {
 		const char c = pgm_get(text[i+1],byte);
-		render_character(c, x, pos+spacing, f);
+		render_character(c, pos+spacing, f);
 	}
 }
 
-void render_character(uint8_t index, uint8_t x, int16_t offset, render_t f)
+void render_character(uint8_t index, int16_t offset, render_t f)
 {
 	uint8_t bitmap[8];
 
@@ -62,20 +62,15 @@ void render_character(uint8_t index, uint8_t x, int16_t offset, render_t f)
 		bitmap[i] = pgm_get(font8x8_basic[index][i],byte);
 	}
 
-	for(uint8_t y = 0; y < 8; y++) {
-		for(uint8_t z = 0; z < 8; z++) {
-			int8_t loc = y - offset;
+	for(uint8_t x = 0; x < 8; x++) {
+		for(uint8_t y = 0; y < 8; y++) {
+			int8_t loc = x - offset;
 
 			if(loc < 0 || loc >= 8) continue;
 
-			int8_t set = bitmap[z] & 1 << loc;
+			int8_t set = bitmap[y] & 1 << loc;
 
-			if(set) f(x, y, z);
+			if(set) f(x, y);
 		}
 	}
 }
-
-void render_yz(uint8_t x, uint8_t y, uint8_t z) {
-	set_led(x, y, z, MAX_INTENSITY);
-}
-
