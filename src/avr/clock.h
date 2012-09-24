@@ -47,3 +47,8 @@ int stime(time_t *t);
  * interrupts disabled.
  */
 time_t unsafe_time(time_t *t);
+
+/**
+ * Initialize random number generator by setting seed from the clock.
+ */
+void srand_from_clock(void);

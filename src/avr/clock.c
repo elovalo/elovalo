@@ -141,3 +141,10 @@ void enable_interrupts_and_run_cron(void) {
 	run_cron(now);
 	cron_running = 0;
 }
+
+void srand_from_clock(void) {
+	/* Not caring about race conditions - they just make the
+	 * random more random :-) */
+	uint16_t seed = (rtc.time << 16) ^ rtc.time ^ ticks_volatile;
+	srand(seed);
+}

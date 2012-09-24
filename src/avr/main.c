@@ -369,6 +369,9 @@ static void init_current_effect(void) {
 	 * different locations */
 	gs_restore_bufs();
 
+	// Set up rng
+	srand_from_clock();
+
 	// Run initializer
 	init_t init = (init_t)pgm_get(effect->init, word);
 	if (init != NULL) init();
