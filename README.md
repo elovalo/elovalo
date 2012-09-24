@@ -1,16 +1,20 @@
 <!-- -*- mode: markdown; coding: utf-8 -*- -->
 
-# Elovalo LED Driver
+# Elovalo LED Cube Pedestal
 
-Documentation TODO.
+You should check out [elovalo.org](http://elovalo.org/) for more casual documentation. If you are interested in building the project and developing effects, read on.
 
-## Requirements
+## Dependencies
 
-These requirements are for building with SCons in Debian GNU/Linux or Ubuntu. This should compile with Windows and Eclipse. TODO add instructions for Windows.
+You should have at least gcc, avr-gcc, scons and preferably jansson and Blender installed in order to use the simulator.
+
+## Building
+
+### Ubuntu with SCons
 
 To build on Ubuntu install the following packages from the Quantal repository:
 
-    avr-gcc gcc scons
+    avr-gcc gcc scons libjansson4
 
 In order to install Quantal(12.10) packages you have to enable Quantal repositories:
 
@@ -38,7 +42,15 @@ If you want to generate animations, install the following packages as well:
 
 To be able to program the microcontroller, you'll need the programmer hardware and `avrdude` package.
 
-## Building in Eclipse
+### OS X with SCons
+
+Make sure you have at least gcc, avr-gcc and scons installed. Preferably you should have jansson and Blender (2.6x) as well if you wish to use the simulator.
+
+In order to render with Blender, you'll need to define an alias for. Just having it in your path isn't quite enough for some reason. Add something like this to your .bashrc or .bash\_profile:
+
+alias blender="path to blender/blender.app/Contents/MacOS/blender"
+
+### Eclipse
 
 Import project to Eclipse using Projects from Git thingy.
 
@@ -82,7 +94,7 @@ To program, run:
 
     scons --program
 
-## Size optimization
+## Size Optimization
 
 There is enough EEPROM but the SRAM usage is quite high because of
 front and back buffers uses 0x300 bytes each. This leaves very scarce
@@ -102,13 +114,9 @@ access. Also, read the following:
 
 - http://www.atmel.com/Images/doc8453.pdf
 
-## More information
+## Other
 
-For more information, feel free to contact Elovalo project group. You can visit the project website at http://hacklabjkl.org/projektit:living-light
-
-## Generating animations
-
-See file `simulator/README.md`.
+If you study the project further, you'll find more READMEs and more information related to specific parts. Have fun developing effects and whatnot!
 
 ## Credits
 

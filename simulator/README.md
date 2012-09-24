@@ -53,7 +53,7 @@ where 25 is the frame number you want.
 Note that you can pass --hd flag to either command. This make it output frames
 in HD (1080p) quality.
 
-## Converting pngs to something useful
+## Converting pngs to Something Useful
 
 If you have ffmpeg installed and available at your path, execute
 
@@ -61,3 +61,30 @@ If you have ffmpeg installed and available at your path, execute
 
 This will convert pngs from tmp into a test.avi which you can then playback
 using ffplay (ffplay test.avi) or some other app.
+
+## Passing Sensor Data
+
+If your effect happens to use sensor data, it can be handy to pass mock it.
+This is done by passing a Python file containing mock generators to a renderer.
+
+./frame sine tmp 25 --sensors sensors/data
+
+In this case "data" is a Python module residing in the sensors package. It is
+important this file contains a definition along this:
+
+```python
+def constant(i):
+    return lambda a: i
+
+sensors = {
+    "distance1": constant(1),
+    "distance2": constant(10),
+    "ambient_light": constant(5),
+    "sound_pressure": constant(8),
+}
+```
+
+As you can see sensors is a dictionary containing data definitions. Each key
+value pair has some sensor name and associated mock data generator. In this
+case the generators produce just constant values. You can easily pass something
+more random instead.

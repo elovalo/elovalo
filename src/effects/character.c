@@ -19,7 +19,13 @@
 
 #include "common.h"
 
+static void char_render(uint8_t x, uint8_t y);
+
 void effect(void)
 {
-	render_character('c', 0, MAX_INTENSITY, 0);
+	render_character('c', 0, char_render);
+}
+
+static void char_render(uint8_t x, uint8_t y) {
+	set_led(0, x, y, MAX_INTENSITY);
 }
