@@ -21,9 +21,9 @@ import os
 import re
 from glob import glob
 
-TICK_GRANULARITY = 8
+TICK_GRANULARITY = 0.008
 DEFAULT_FPS = 30
-DEFAULT_MINIMUM_TICKS = str(int(1000.0 / (TICK_GRANULARITY * DEFAULT_FPS)))
+DEFAULT_MINIMUM_TICKS = str(int(1.0 / (TICK_GRANULARITY * DEFAULT_FPS)))
 
 file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
  * Led cube effects
@@ -168,7 +168,7 @@ class SourceFile(object):
         if len(max_fps):
             i = int(max_fps[0]['content'].split()[-1].strip('\n'))
 
-            return str(int(1000.0 / (TICK_GRANULARITY * i)))
+            return str(int(1.0 / (TICK_GRANULARITY * i)))
 
         return DEFAULT_MINIMUM_TICKS
 

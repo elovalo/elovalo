@@ -24,6 +24,7 @@ import yaml
 import xml.etree.ElementTree as ET
 from glob import glob
 
+TICK_GRANULARITY = 0.008
 
 def generate(source, target, conf, effects=None):
     write(target, playlist_source(attach_ids(get_playlists(
@@ -123,7 +124,7 @@ def playlist_source(data):
         ret = ['const playlistitem_t master_playlist[' + effects_len +
             '] PROGMEM = {']
 
-        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(fx['length']) + \
+        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(int(fx['length']/TICK_GRANULARITY)) + \
             ', &s_playlist_item_' + str(i)  + ' },') for i, fx in enumerate(effects)]
 
         ret.append('};')
