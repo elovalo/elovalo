@@ -32,6 +32,7 @@
 #include "clock.h"
 #include "configuration.h"
 #include "powersave.h"
+#include "main.h"
 #include "../pgmspace.h"
 #include "../cube.h"
 #include "../effects.h"
@@ -72,11 +73,6 @@
 #define RESP_BAD_ARG_B      0x02
 
 #define CRON_ITEM_NOT_VALID 0x01
-
-// Operating modes
-#define MODE_IDLE           0x00 // Do not update display buffers
-#define MODE_EFFECT         0x01 // Draw effect
-#define MODE_PLAYLIST       0x02 // Playlist
 
 // Dirty trick to ease building of CMD handling blocks
 #define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
@@ -127,6 +123,9 @@ int main() {
 	// Greet the serial user
 	report(REPORT_BOOT);
 
+	// Go to powersave mode
+	cube_shutdown(0);
+
 	while(1) {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
@@ -136,6 +135,8 @@ int main() {
 		}
 
 		switch (mode) {
+		case MODE_SLEEP:
+			// Fall through to MODE_IDLE
 		case MODE_IDLE:
 			// No operation
 			sleep_mode();

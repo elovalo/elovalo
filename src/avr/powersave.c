@@ -19,8 +19,13 @@
 
 #include <stdint.h>
 #include <avr/io.h>
+#include <avr/sleep.h>
+#include <avr/power.h>
 #include "pinMacros.h"
 #include "tlc5940.h"
+#include "main.h"
+
+uint8_t old_mode;
 
 void init_ps(void)
 {
@@ -30,14 +35,27 @@ void init_ps(void)
 
 void cube_start(uint8_t unused)
 {
+	// Set sleep mode to lighter
+	mode = old_mode;
+
+	power_adc_enable();
+	power_spi_enable();
+	power_timer0_enable();
+	power_timer1_enable();
+
 	// Enable BLANK timer interrupt (starts SPI)
 	TIMSK0 |= (1 << OCIE0A);
 }
 
 void cube_shutdown(uint8_t unused)
 {
-	// Disable BLANK timer interrupt (stops SPI)
-	TIMSK0 &= ~(1 << OCIE0A);
+	// Set harder powersave mode
+	old_mode = mode;
+	mode = MODE_SLEEP;
+	power_adc_disable();
+	power_spi_disable();
+	power_timer0_disable();
+	power_timer1_disable();
 
 	/* Pulling BLANK down reduces current consumption to
 	 * 50mA. Doing that. We pull all other signals low, too. */
