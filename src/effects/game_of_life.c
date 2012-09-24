@@ -18,7 +18,7 @@
  */
 
 # pragma FLIP
-# pragma MAX_FPS 25
+# pragma MAX_FPS 10
 
 #include "common.h"
 
