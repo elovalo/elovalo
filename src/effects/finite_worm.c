@@ -19,13 +19,16 @@
 
 #include "common.h"
 
+#define WORM_LENGTH 10
+#pragma MAX_FPS 20
+
 struct {
 	uint16_t pos[3];
 	uint16_t dir;
 	int8_t speed;
 
-	uint16_t prev_dirs[4];
-	int8_t prev_speeds[4];
+	uint16_t prev_dirs[10]; // FIXME WORM_LENGTH
+	int8_t prev_speeds[10]; // FIXME WORM_LENGTH
 	uint8_t prev_dir_i;
 } vars;
 
@@ -37,7 +40,7 @@ void init(void)
 	vars.dir = 0;
 	vars.speed = 1;
 
-	memset(vars.prev_dirs, 10, 4);
+	memset(vars.prev_dirs, 10, WORM_LENGTH);
 	vars.prev_dir_i = 0;
 
 	clear_buffer();
@@ -54,8 +57,8 @@ void effect(void)
 		uint8_t j;
 		uint16_t tmp_pos[3] = {vars.pos[0], vars.pos[1], vars.pos[2]};
 
-		for(i = vars.prev_dir_i - 1, j = 0; j < 4; i--, j++) {
-			if(i == -1) i = 3;
+		for(i = vars.prev_dir_i - 1, j = 0; j < WORM_LENGTH; i--, j++) {
+			if(i == -1) i = WORM_LENGTH-1;
 
 			tmp_pos[vars.prev_dirs[i]] -= vars.prev_speeds[i];
 
@@ -74,7 +77,7 @@ void effect(void)
 	vars.prev_dirs[vars.prev_dir_i] = vars.dir;
 	vars.prev_speeds[vars.prev_dir_i] = vars.speed;
 
-	if(vars.prev_dir_i < 3) {
+	if(vars.prev_dir_i < WORM_LENGTH-1) {
 		vars.prev_dir_i++;
 	}
 	else {
