@@ -25,4 +25,4 @@
 #include "avr/clock.h"
 #else
 #include <time.h>
-#elseif
+#endif
