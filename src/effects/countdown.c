@@ -30,7 +30,7 @@ struct {
 } vars;
 
 void init(void) {
-	vars.cur = 60;
+	vars.cur = 15;
 }
 
 void effect(void)
