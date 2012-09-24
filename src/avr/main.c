@@ -18,6 +18,7 @@
  */
 
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <avr/io.h>
 #include <stdlib.h>
@@ -137,6 +138,7 @@ int main() {
 		switch (mode) {
 		case MODE_IDLE:
 			// No operation
+			sleep_mode();
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
@@ -163,6 +165,13 @@ int main() {
 			if (draw != NULL) {
 				draw();
 				allow_flipping(true);
+			}
+
+			// Slow down drawing if FPS is going to be too high
+			uint16_t target_ticks =
+				ticks + pgm_get(effect->minimum_ticks,byte);
+			while (centisecs() < target_ticks ) {
+				sleep_mode();
 			}
 
 			break;

@@ -20,6 +20,7 @@
 /* Functions for USART access */
 
 #include <avr/interrupt.h>
+#include <avr/sleep.h>
 #include <util/atomic.h>
 #include "serial.h"
 
@@ -136,7 +137,9 @@ void serial_send_nonblocking(uint8_t data)
 }
 
 uint8_t serial_read_blocking(void) {
-	while(!serial_available());
+	while(!serial_available()) {
+		sleep_mode();
+	}
 	return serial_read();
 }
 

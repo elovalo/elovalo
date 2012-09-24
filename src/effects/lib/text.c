@@ -23,23 +23,33 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include "font8x8_basic.h"
 #include "utils.h"
 #include "text.h"
 #include "../../pgmspace.h"
 
+static const uint8_t spacing = 8; // Seems like a good pick for this charset
+
 void scroll_text(const char text[], uint8_t x, uint16_t intensity, int16_t offset)
 {
 	// text format is ZCL octet string, where the length is at byte 0
-	const uint8_t textLen = pgm_get(*text++,byte);
-	uint8_t spacing = 8; // Seems like a good pick for this charset
+	uint8_t text_len = pgm_get(*text++,byte);
+	int16_t base_pos = (LEDS_X+1)-offset;
+	uint16_t i = -base_pos / spacing;
+	uint16_t pos = i*spacing + base_pos;
 
-	offset %= (spacing + 1) * textLen;
+	// Render only two characters which fit to screen
 
-	for(uint8_t i = 0; i < textLen; i++) {
+	if (i >= 0 && i<text_len) {
 		const char c = pgm_get(text[i],byte);
-		render_character(c, x, intensity, i * spacing + offset);
+		render_character(c, x, intensity, pos);
+	}
+
+	if (i+1 >= 0 && i+1<text_len) {
+		const char c = pgm_get(text[i+1],byte);
+		render_character(c, x, intensity, pos+spacing);
 	}
 }
 
