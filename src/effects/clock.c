@@ -49,6 +49,6 @@ void effect(void)
 
 	int16_t pos = ticks >> 3;
 
-	scroll_text(text, false, pos, cd_render_xy);
-	scroll_text(text, false, pos-7, cd_render_yz);
+	scroll_text(text, false, pos, render_xy);
+	scroll_text(text, false, pos-7, render_yz);
 }

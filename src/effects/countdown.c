@@ -22,9 +22,6 @@
 
 #include "common.h"
 
-static void cd_render_yz(uint8_t x, uint8_t y);
-static void cd_render_xy(uint8_t x, uint8_t y);
-
 struct {
 	uint8_t cur;
 } vars;
@@ -42,16 +39,8 @@ void effect(void)
 
 	clear_buffer();
 
-	scroll_text(text, false, 9, cd_render_yz);
-	scroll_text(text, false, 16, cd_render_xy);
+	scroll_text(text, false, 9, render_yz);
+	scroll_text(text, false, 16, render_xy);
 
 	if(vars.cur > 0) vars.cur--;
-}
-
-static void cd_render_yz(uint8_t x, uint8_t y) {
-	set_led(7, x, y, MAX_INTENSITY);
-}
-
-static void cd_render_xy(uint8_t x, uint8_t y) {
-	set_led(LEDS_X - x - 1, 7, y, MAX_INTENSITY);
 }

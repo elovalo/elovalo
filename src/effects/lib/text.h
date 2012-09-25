@@ -28,3 +28,10 @@ void scroll_text(const char text[], bool progmem, int16_t offset, render_t f);
  * Renders character (index from font8x8_basic) using given callback
  */
 void render_character(uint8_t index, int16_t offset, render_t f);
+
+/**
+ * Render helpers
+ * */
+
+void render_yz(uint8_t x, uint8_t y);
+void render_xy(uint8_t x, uint8_t y);

@@ -76,3 +76,11 @@ void render_character(uint8_t index, int16_t offset, render_t f)
 		}
 	}
 }
+
+void render_yz(uint8_t x, uint8_t y) {
+	set_led(7, x, y, MAX_INTENSITY);
+}
+
+void render_xy(uint8_t x, uint8_t y) {
+	set_led(LEDS_X - x - 1, 7, y, MAX_INTENSITY);
+}
