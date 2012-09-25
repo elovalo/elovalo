@@ -27,8 +27,8 @@ struct {
 	uint16_t dir;
 	int8_t speed;
 
-	uint16_t prev_dirs[10]; // FIXME WORM_LENGTH
-	int8_t prev_speeds[10]; // FIXME WORM_LENGTH
+	uint16_t prev_dirs[WORM_LENGTH];
+	int8_t prev_speeds[WORM_LENGTH];
 	uint8_t prev_dir_i;
 } vars;
 

@@ -50,6 +50,10 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.function_names)
         t.write('\n')
+        t.write(inp.defines)
+        t.write('\n')
+        t.write(inp.function_declarations)
+        t.write('\n')
         t.write(inp.union)
         t.write('\n')
         t.write(inp.effects)
@@ -67,6 +71,14 @@ class SourceFiles(object):
 
     def _read(self, files):
         return [SourceFile(f) for f in files]
+
+    @property
+    def defines(self):
+        return '\n'.join([f.defines for f in self._files]) + '\n'
+
+    @property
+    def function_declarations(self):
+        return '\n'.join([f.function_declarations for f in self._files]) + '\n'
 
     @property
     def init_definitions(self):
@@ -119,7 +131,7 @@ class SourceFiles(object):
 
     @property
     def functions(self):
-        merge = lambda f: f.typedefs + f.globs + f.function_declarations + \
+        merge = lambda f: f.typedefs + f.globs + \
             f.functions + f.init + f.effect
 
         return '\n'.join(merge(f) for f in self._files) + '\n'
@@ -133,6 +145,7 @@ class SourceFile(object):
         with open(path, 'r') as f:
             content = analyze(self.name, f.readlines())
 
+        self.defines = self._block(content, 'define')
         self.typedefs = self._block(content, 'typedef')
         self.globs = self._globals(content)
         self.function_declarations = self._function_declarations(content)
@@ -204,6 +217,7 @@ def analyze(name, content):
             ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
+            ('define', '\s*#define\s+[a-zA-Z_0-9]+\s*[a-zA-Z0-9]*\s*'),
             ('typedef', '\s*typedef\s+struct\s*[{]'),
             ('struct', '\s*struct\s*[{]'),
             ('function', '\s*' + types + '(\s+\w+\s*[(])'),
@@ -239,6 +253,10 @@ def analyze(name, content):
                 and 'assignment' in ret['types']:
             ret['types'].remove('assignment')
 
+        # TODO: fix the regex, matches too much
+        if 'define' in ret['types']:
+            ret['types'].remove('assignment')
+
         block = ''
         # TODO: fix the regex. does not match enough
         if 'effect' in ret['types'] and 'function' not in ret['types']:
@@ -255,9 +273,11 @@ def analyze(name, content):
             else:
                 block = parse_function(name, content, ret, i)
         elif 'typedef' in ret['types']:
-            block = parse_typedef(name, content, ret, i)
+            block = parse_generic(name, content, ret, i)
         elif 'struct' in ret['types']:
-            block = parse_typedef(name, content, ret, i)
+            block = parse_generic(name, content, ret, i)
+        elif 'define' in ret['types']:
+            block = parse_generic(name, content, ret, i)
 
         ret['block'] = block
 
@@ -291,12 +311,12 @@ def replace_variables(text, source, target):
     return [line.replace(source, target) for line in text]
 
 
-def typedef_definition(name, line):
+def generic_definition(name, line):
     return line['content']
 
 
-def parse_typedef(name, lines, line, index):
-    return _parse(name, lines, line, index, typedef_definition)
+def parse_generic(name, lines, line, index):
+    return _parse(name, lines, line, index, generic_definition)
 
 
 def parse_xy(name, lines, line, index):
