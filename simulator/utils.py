@@ -19,7 +19,7 @@
 import argparse
 import json
 import os
-from subprocess import call, Popen
+import subprocess
 
 
 ERROR = '\033[91m'
@@ -57,18 +57,28 @@ def export(effect, output, length=1.0, data='', sensors=''):
     sensor_file = write_sensor_data(sensors, sensor_output, length)
 
     os.chdir('..')
-    call('scons --no-avr', shell=True)
+
+    try:
+        subprocess.check_call('scons --no-avr', shell=True)
+    except subprocess.CalledProcessError:
+        error('Build failed!')
+
+        return
+
     os.chdir('simulator')
     d = ' ' + data if data else ''
     cmd = '../build/exporter/exporter ' + effect + ' ' + length + ' ' + \
             sensor_output + d
     print 'executing ' + cmd
-    ret = call([cmd], shell=True)
 
-    if ret:
-        return write_fps(effect, output)
+    try:
+        subprocess.check_call([cmd], shell=True)
+    except subprocess.CalledProcessError:
+        error('Export failed!')
 
-    error('Build failed!')
+        return
+
+    return write_fps(effect, output)
 
 
 def write_sensor_data(sensors, output, length):
@@ -132,7 +142,7 @@ def render_animation(effect, output, length):
     os.environ['output'] = output
     os.environ['length'] = str(length)
 
-    sp = Popen(["/bin/bash", "-i", "-c",
+    sp = subprocess.Popen(["/bin/bash", "-i", "-c",
         "blender -b blender/simulator.blend -P blender/sim.py -a"])
     sp.communicate()
 
@@ -141,7 +151,7 @@ def render_frame(effect, output, frame):
     os.environ['effect'] = effect
     os.environ['output'] = output
 
-    sp = Popen(["/bin/bash", "-i", "-c",
+    sp = subprocess.Popen(["/bin/bash", "-i", "-c",
         "blender -b blender/simulator.blend -P blender/sim.py -f " +
         frame]
     )
