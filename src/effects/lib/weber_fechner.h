@@ -17,17 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include "../env.h"
-#include "lib/math.h"
-#include "lib/utils.h"
-#include "lib/shapes.h"
-#include "lib/text.h"
-#include "lib/weber_fechner.h"
-#include "../assert.h"
-#include "../pgmspace.h"
-#include "../time.h"
+#define WEBER_FECHNER_BITS 8
+
+/**
+ * Converts values from human perception range to PWM cycle length.
+ */
+uint16_t weber_fechner(uint8_t i);

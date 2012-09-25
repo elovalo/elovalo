@@ -32,7 +32,7 @@
 #endif
 
 /* Maximum intensity returned from the 2D plotting function */
-#define MAX_2D_PLOT_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
+#define MAX_2D_PLOT_INTENSITY ((LEDS_Z-1)*((1<<WEBER_FECHNER_BITS)-1))
 
 /* Generates wrapper function for two dimensional plots to make the
  * implementations much simpler */
