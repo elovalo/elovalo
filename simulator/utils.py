@@ -22,7 +22,7 @@ import os
 from subprocess import call, Popen
 
 
-WARNING = '\033[91m'
+ERROR = '\033[91m'
 ENDC = '\033[0m'
 
 
@@ -63,8 +63,12 @@ def export(effect, output, length=1.0, data='', sensors=''):
     cmd = '../build/exporter/exporter ' + effect + ' ' + length + ' ' + \
             sensor_output + d
     print 'executing ' + cmd
-    call([cmd], shell=True)
-    return write_fps(effect, output)
+    ret = call([cmd], shell=True)
+
+    if ret:
+        return write_fps(effect, output)
+
+    error('Build failed!')
 
 
 def write_sensor_data(sensors, output, length):
@@ -93,8 +97,7 @@ def parse_sensor_data(sensors, length):
 
         return ret
     except ImportError:
-        # TODO: colorize this
-        print 'Invalid sensor module!'
+        error('Invalid sensor module!')
 
 
 def write_fps(effect, output):
@@ -102,8 +105,7 @@ def write_fps(effect, output):
         p = os.path.join('exports', effect + '.json')
 
         if not os.path.exists(p):
-            print WARNING + \
-                'Missing export json. Check out your effect code!' + ENDC
+            error('Missing export json. Check out your effect code!')
             return False
 
         with open(p, 'r') as jf:
@@ -117,6 +119,10 @@ def write_fps(effect, output):
         )
 
     return True
+
+
+def error(msg):
+    print ERROR + msg + ENDC
 
 
 def render_animation(effect, output, length):
