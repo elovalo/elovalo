@@ -5,12 +5,23 @@ module WeberFechner (weberFechnerTable,cTable) where
 
 import Data.List (intercalate)
 
+humanBits :: Integer
+pwmBits   :: Integer
+s0        :: Integer
+
 humanBits  = 8   -- ^Input value range
 pwmBits    = 12  -- ^Output value range
+s0         = 0   -- ^Threshold of stimulus below which it is not perceived
 
-a = log(2^pwmBits-1)/(2^humanBits-1)
+a = log(2^pwmBits-fromIntegral s0)/(2^humanBits-1)
 
-weberFechner x = round $ exp (a*x)
+-- |Modified Weber–Fechner algorithm which saves energy when stimulus can not be
+-- perceived.
+weberFechner :: Integer -> Integer
+weberFechner x_i | alg == s0 = 0
+                 | otherwise = alg
+  where alg = round (exp (a*x)) + (s0-1)
+        x = fromIntegral x_i
 
 weberFechnerTable = map weberFechner [0..2^humanBits-1]
 
