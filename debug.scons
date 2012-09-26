@@ -1,21 +1,12 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
+from generators.build import *
 
-env = Environment(ENV=os.environ)
-
-env['CC'] = 'avr-gcc'
-env.Append(CCFLAGS = '-g -mmcu=atmega328p -DF_CPU=16000000UL -O0 -Wall -std=gnu99 -fpack-struct -fshort-enums -flto')
-env.Append(LINKFLAGS = '-g -mmcu=atmega328p -O0 -flto -flto-partition=none')
-if GetOption('use_asm'):
-    env.Append(CPPDEFINES = 'ASM_ISRS')
-
-Elf = 'firmware.elf'
-Sources = [ Glob('src/*.c'),
-            Glob('src/effects/lib/*.c'),
-            Glob('src/avr/*.c') ]
+# Build default environment with no optimization and debug
+env = avr_build_env(flags = '-O0 -g')
 
 # Make elf
-env.Program(Elf, Sources, LIBS='m')
+env.Program(Elf, avr_source_files())
 
 # Dump assembly code
 env.Command("firmware.lss", Elf, 'avr-objdump -h -S $SOURCE >$TARGET')
