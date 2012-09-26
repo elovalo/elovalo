@@ -19,8 +19,7 @@
 
 /* Functions for USART access */
 
-#include <avr/interrupt.h>
-#include <avr/sleep.h>
+#include "sleep.h"
 #include <util/atomic.h>
 #include "serial.h"
 

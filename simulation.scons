@@ -1,0 +1,13 @@
+# -*- mode: python; coding: utf-8 -*-
+import os
+from generators.build import *
+
+# Build default environment with no optimization and debug
+env = avr_build_env(flags = '-O2')
+env.Append(CPPDEFINES = 'SIMU')
+
+# Make elf
+env.Program(Elf, avr_source_files())
+
+# Dump assembly code
+env.Command("assembly.lss", Elf, 'avr-objdump -h -S $SOURCE >$TARGET')

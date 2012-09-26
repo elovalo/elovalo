@@ -24,12 +24,6 @@ AddOption('--no-avr',
           default=True,
           help='Do not build to AVR architecture')
 
-AddOption('--no-release',
-          dest='build_release',
-          action='store_false',
-          default=True,
-          help='Do not build release target')
-
 AddOption('--program',
           dest='program',
           action='store_true',
@@ -50,8 +44,7 @@ AddOption('--no-asm',
 
 if GetOption('build_avr'):
     SConscript('debug.scons', variant_dir='build/debug', duplicate=0)
-
-if GetOption('build_avr') and GetOption('build_release'):
+    SConscript('simulation.scons', variant_dir='build/simulation', duplicate=0)
     SConscript('release.scons', variant_dir='build/release', duplicate=0)
 
 if GetOption('build_exporter'):

@@ -40,9 +40,19 @@ static volatile struct {
 static uint8_t is_time_valid(void);
 static uint8_t calc_posix_time_cksum(void);
 static void enable_interrupts_and_run_cron(void);
+static void stop_simulation_periodically(void);
 
 /* Dividing 8 ms interval with 125 to get exactly 1 second */
 #define POSIX_DIVIDER 125
+
+/* Trick to support simulator stopping every 25 fps */
+static void stop_simulation_periodically(void) {
+#ifdef SIMU
+	if (ticks_volatile % 5 == 0) {
+		asm volatile("break");
+	}
+#endif
+}
 
 /**
  * Timer interrupt increments RTC and tick counter
@@ -53,6 +63,8 @@ ISR(TIMER2_COMPA_vect)
 	 * is reached to avoid messing the effect */
 	if (ticks_volatile != ~0)
 		ticks_volatile++;
+
+	stop_simulation_periodically();
 
 	// Run real time clock if it is set
 	if (!--rtc.div && is_time_valid()) {

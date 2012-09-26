@@ -18,7 +18,6 @@
  */
 
 #include <avr/interrupt.h>
-#include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <avr/io.h>
 #include <stdlib.h>
@@ -37,6 +36,7 @@
 #include "../cube.h"
 #include "../effects.h"
 #include "../playlists.h"
+#include "sleep.h"
 
 /* Serial communication constants. Please note when allocating new CMD
  * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
@@ -86,6 +86,11 @@ uint16_t effect_length; // Length of the current effect. Used for playlist
 // It might be nice to use this for single effect too (set via serial).
 uint8_t active_effect; // Index of the active effect. Used for playlist
 
+// Variables used only in simulation mode
+#ifdef SIMU
+uint8_t simulation_mode __attribute__ ((section (".noinit")));
+uint8_t simulation_effect __attribute__ ((section (".noinit")));
+#endif
 
 // Private functions
 static void process_cmd(void);
@@ -95,6 +100,7 @@ static void init_playlist(void);
 static void next_effect();
 static void select_playlist_item(uint8_t index);
 static void init_current_effect(void);
+static void pick_startup_mode(void);
 
 int main() {
 	cli();
@@ -115,16 +121,11 @@ int main() {
 	hcsr04_start_continuous_meas();
 	adc_start();
 	
-	// Quick fix to start in kiosk mode
-	mode = MODE_PLAYLIST;
-	select_playlist_item(playlists[0]);
-	init_current_effect();
-
 	// Greet the serial user
 	report(REPORT_BOOT);
 
-	// Go to powersave mode
-	cube_shutdown(0);
+	// Select correct startup mode
+	pick_startup_mode();
 
 	while(1) {
 		if(serial_available()) {
@@ -342,6 +343,39 @@ out:
 	// All commands should be ended, successful or not
 	report(REPORT_READY);
 }
+
+#ifdef SIMU
+static void pick_startup_mode(void)
+{
+	// Start normally
+	cube_start(0);
+
+	mode = simulation_mode;
+	switch (mode) {
+	case MODE_EFFECT:
+		effect = effects + simulation_effect;
+		init_current_effect();
+		break;
+	case MODE_PLAYLIST:
+		select_playlist_item(playlists[0]);
+		init_current_effect();
+		break;
+	default:
+		mode = MODE_IDLE;
+	}
+}
+#else
+static void pick_startup_mode(void)
+{
+	// Shut down the cube at the beginning
+	cube_shutdown(0);
+
+	// Quick fix to start in kiosk mode
+	mode = MODE_PLAYLIST;
+	select_playlist_item(playlists[0]);
+	init_current_effect();
+}
+#endif
 
 static void init_playlist(void) {
 	select_playlist_item(0);
