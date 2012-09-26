@@ -4,13 +4,18 @@ import os
 env = Environment(ENV=os.environ)
 
 env['CC'] = 'avr-gcc'
-env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -O0 -Wall -std=gnu99 -fpack-struct')
-env.Append(LINKFLAGS = '-mmcu=atmega328p')
+env.Append(CCFLAGS = '-g -mmcu=atmega328p -DF_CPU=16000000UL -O0 -Wall -std=gnu99 -fpack-struct -fshort-enums -flto')
+env.Append(LINKFLAGS = '-g -mmcu=atmega328p -O0 -flto -flto-partition=none')
+if GetOption('use_asm'):
+    env.Append(CPPDEFINES = 'ASM_ISRS')
 
-Target = 'ledcube'
+Elf = 'firmware.elf'
+Sources = [ Glob('src/*.c'),
+            Glob('src/effects/lib/*.c'),
+            Glob('src/avr/*.c') ]
 
 # Make elf
-env.Program(Target+'.elf', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/avr/*.c')], LIBS='m')
+env.Program(Elf, Sources, LIBS='m')
 
 # Dump assembly code
-env.Command(Target+".lss", Target+".elf", 'avr-objdump -h -S $SOURCE >$TARGET')
+env.Command("firmware.lss", Elf, 'avr-objdump -h -S $SOURCE >$TARGET')
