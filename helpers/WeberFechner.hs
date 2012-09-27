@@ -11,7 +11,7 @@ s0        :: Integer
 
 humanBits  = 8   -- ^Input value range
 pwmBits    = 12  -- ^Output value range
-s0         = 0   -- ^Threshold of stimulus below which it is not perceived
+s0         = 10  -- ^Threshold of stimulus below which it is not perceived
 
 a = log(2^pwmBits-fromIntegral s0)/(2^humanBits-1)
 
