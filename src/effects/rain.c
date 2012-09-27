@@ -20,6 +20,15 @@
 
 #include "common.h"
 
+struct {
+	uint16_t seed;
+} vars;
+
+void init(void)
+{
+	vars.seed = rand();
+}
+
 void effect(void)
 {
 	// TODO use real kernels instead of loops!
@@ -28,7 +37,7 @@ void effect(void)
 
 	for (uint8_t x=0; x<8; x++) {
 		for (uint8_t y=0; y<8; y++) {
-			srand(3*(x*LEDS_Y+y));
+			srand(vars.seed+(x*LEDS_Y+y));
 			set_led(x,y,((ticks >> 3)+rand()) & 7, MAX_INTENSITY >> 3);
 		}
 	}
@@ -46,7 +55,7 @@ void effect(void)
 
 	for (uint8_t x=0; x<8; x++) {
 		for (uint8_t y=0; y<8; y++) {
-			set_led(x,y,8-water, surface << 5);
+			set_led(x,y,8-water, weber_fechner(surface << 1));
 		}
 	}
 }
