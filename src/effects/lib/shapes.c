@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include "math.h"
 #include "utils.h"
+#include "weber_fechner.h"
 
 void circle_shape(int8_t xi, int8_t yi, int8_t zi, float rsq_min, float rsq_max, uint16_t intensity)
 {
@@ -52,19 +53,20 @@ void fish_shape(uint8_t xi, uint8_t yi, uint8_t zi, uint16_t intensity)
 	if(xi < LEDS_X - 1) set_row(xi + 1, zi + 1, yi + 1, yi + 4, intensity);
 }
 
-static void heart_layer(uint8_t x, uint16_t intensity);
+static void heart_layer(uint8_t x, uint8_t raw);
 
-void heart_shape(void)
+void heart_shape(uint8_t i)
 {
-	heart_layer(1, (float)MAX_INTENSITY / 100);
-	heart_layer(2, (float)MAX_INTENSITY / 25);
-	heart_layer(3, MAX_INTENSITY);
-	heart_layer(4, MAX_INTENSITY);
-	heart_layer(5, (float)MAX_INTENSITY / 25);
-	heart_layer(6, (float)MAX_INTENSITY / 100);
+	heart_layer(1, i >> 2);
+	heart_layer(2, i >> 1);
+	heart_layer(3, i);
+	heart_layer(4, i);
+	heart_layer(5, i >> 1);
+	heart_layer(6, i >> 2);
 }
 
-static void heart_layer(uint8_t x, uint16_t intensity) {
+static void heart_layer(uint8_t x, uint8_t raw_i) {
+	uint16_t intensity = weber_fechner(raw_i);
 	set_row(x, 0, 1, 2, intensity);
 	set_row(x, 0, 5, 6, intensity);
 	set_row(x, 1, 0, 7, intensity);

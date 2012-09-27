@@ -18,6 +18,7 @@
  */
 
 #define WEBER_FECHNER_BITS 8
+#define WEBER_FECHNER_MAX ((1<<8)-1)
 
 /**
  * Converts values from human perception range to PWM cycle length.

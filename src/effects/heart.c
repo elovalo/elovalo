@@ -21,5 +21,5 @@
 
 void init(void) {
 	clear_buffer();
-	heart_shape();
+	heart_shape(WEBER_FECHNER_MAX);
 }

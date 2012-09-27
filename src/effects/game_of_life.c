@@ -32,7 +32,7 @@ struct {
 void init(void)
 {
 	// TODO: might want to use some other seed. using heart for testing
-	heart_shape();
+	heart_shape(WEBER_FECHNER_MAX);
 }
 
 void effect(void) {
@@ -40,7 +40,7 @@ void effect(void) {
 	iterate_xyz(set_leds);
 
 	if(!vars.is_alive) {
-		heart_shape();
+		heart_shape(WEBER_FECHNER_MAX);
 	}
 }
 
