@@ -367,13 +367,13 @@ static void pick_startup_mode(void)
 #else
 static void pick_startup_mode(void)
 {
-	// Shut down the cube at the beginning
-	cube_shutdown(0);
-
 	// Quick fix to start in kiosk mode
 	mode = MODE_PLAYLIST;
 	select_playlist_item(playlists[0]);
 	init_current_effect();
+
+	// Shut down the cube at the beginning
+	cube_shutdown(0);
 }
 #endif
 
