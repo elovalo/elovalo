@@ -21,10 +21,20 @@
 
 #include "common.h"
 
+struct {
+	float avg;
+} vars;
+
+init(void) {
+	vars.avg = 0;
+}
+
 XY(effect)
 {
+	vars.avg = (0.9*vars.avg)+(0.1*(float)sensors.distance1);
+
 	float scaler = (float)MAX_2D_PLOT_INTENSITY / 4;
-	uint16_t i = scaler * (2 + sin((float)x * 50 + (float)ticks / 15));
+	uint16_t i = scaler * (2 + sin((float)x * 50 + (float)ticks / 15 + vars.avg/10));
 
 	set_z(x, y, i);
 }
