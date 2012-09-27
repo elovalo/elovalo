@@ -6,6 +6,8 @@
   length: 8
 - name: cube
   length: 4
+- name: heart
+  length: 40
 - name: scroll_text
   data: "In the game of life you either win, or you die."
   length: 25
@@ -13,8 +15,6 @@
   length: 10
 - name: gradient
   length: 10
-- name: heart
-  length: 5
 - name: clock
   length: 5.2
 - name: worm
@@ -25,17 +25,19 @@
   length: 25
 - name: scroll_text
   data: "Winter is coming..."
-  length: 15
+  length: 14
 - name: rain
-  length: 15
+  length: 16
 - name: finite_worm
   length: 15
 - name: tornado
   length: 10
+- name: heart
+  length: 40
 - name: tube
   length: 5
 - name: wave
-  length: 10
+  length: 40
 - name: scroll_text
   data: "Credits: bebraw, enyone, Icchan^, ile-, marant, namtab, Zouppen, katis, LasseS, Tugge"
   length: 45
