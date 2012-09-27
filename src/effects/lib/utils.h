@@ -32,7 +32,7 @@
 #endif
 
 /* Maximum intensity returned from the 2D plotting function */
-#define MAX_2D_PLOT_INTENSITY ((LEDS_Z-1)*((1<<WEBER_FECHNER_BITS)-1))
+#define MAX_2D_PLOT_INTENSITY ((LEDS_Z-1)*(1 << GS_DEPTH)-1)
 
 /* Generates wrapper function for two dimensional plots to make the
  * implementations much simpler */
@@ -86,7 +86,8 @@ typedef struct {
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity);
 
 /**
- * TODO: API
+ * Do linear interpolation and set z coordinate accordingly. Intensity
+ * must be between 0 and MAX_2D_PLOT_INTENSITY, inclusively.
  */
 void set_z(uint8_t x, uint8_t y, uint16_t intensity);
 

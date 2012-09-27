@@ -27,7 +27,6 @@
 #include <string.h>
 #include "../../env.h"
 #include "../../cube.h"
-#include "weber_fechner.h"
 #include "utils.h"
 
 /* If you are changing LED count make sure you are not using set_led
@@ -44,8 +43,6 @@ const void *custom_data;
 /* Sensor values are stored in this struct */ 
 sensors_t sensors = {MAX_INTENSITY};
 
-#define WEBER_FECHNER_PAT ((1<<WEBER_FECHNER_BITS)-1)
-
 void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
 {
 	for(uint8_t i = y1; i <= y2; i++) {
@@ -58,12 +55,12 @@ void set_z(uint8_t x, uint8_t y, uint16_t intensity)
 	assert(intensity <= MAX_2D_PLOT_INTENSITY);
 
 	// Do linear interpolation (two voxels per x-y pair)
-	uint8_t lower_z = intensity >> WEBER_FECHNER_BITS;
-	uint16_t upper_i = intensity & WEBER_FECHNER_PAT;
-	uint16_t lower_i = WEBER_FECHNER_PAT - upper_i;
+	uint8_t lower_z = intensity >> GS_DEPTH;
+	uint16_t upper_i = intensity & MAX_INTENSITY;
+	uint16_t lower_i = MAX_INTENSITY - upper_i;
 	
-	set_led_8_8_12(x,y,lower_z,weber_fechner(lower_i));
-	set_led_8_8_12(x,y,lower_z + 1,weber_fechner(upper_i));
+	set_led_8_8_12(x,y,lower_z,lower_i);
+	set_led_8_8_12(x,y,lower_z + 1,upper_i);
 }
 
 void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
