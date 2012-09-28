@@ -25,7 +25,7 @@
   length: 25
 - name: scroll_text
   data: "Winter is coming..."
-  length: 14
+  length: 13
 - name: rain
   length: 16
 - name: finite_worm
