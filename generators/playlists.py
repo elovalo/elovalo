@@ -164,7 +164,7 @@ def load_xml(src):
         data = effect.findall('data')
         ret.append({
             'name': effect.attrib['name'],
-            'length': effect.findall('length')[0].text,
+            'length': int(effect.findall('length')[0].text),
             'data': effect[0].text if len(data) else ''
         })
 
