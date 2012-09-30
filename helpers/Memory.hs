@@ -3,11 +3,7 @@ module Memory where
 
 import Data.Array
 import GdbParser (RawDump(..))
-
-ledsX = 8
-ledsY = 8
-ledsZ = 8
-voxelBits = 12
+import Parameters
 
 -- |Divides integral number and returns the ceiling of the result
 divCeil :: Integral a => a -> a -> a
@@ -24,3 +20,4 @@ frameToArray frame = foldl arrayUpdate empty frame
     missingList = map missing [0..]
     missing i = error $ "Frame dump is missing value for "++show i
     arrayUpdate a x = a//dumpToAssoc x
+
