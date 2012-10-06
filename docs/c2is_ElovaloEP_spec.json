@@ -5,7 +5,7 @@
 		CLUSTERID_BASIC : 0x00,
 		CLUSTERID_ELOVALO : 0x500
 	},	
-	attributes : [
+	attributes : [	
 		{
 			clusterid : CLUSTERID_BASIC,
 			attributeid : 0x0012,
@@ -15,10 +15,31 @@
 		},
 		{
 			clusterid : CLUSTERID_BASIC,
-			attributeid : 0x0012,
+			attributeid : 0x0013,
 			name : "alarmMask",
 			zcltype : ZCLBooleanValue,
 			io : "RW"
+		},
+		{
+			clusterid : CLUSTERID_COMMISSIONING,
+			attributeid : 0x0401,
+			name : "deviceaddress",
+			zcltype : ZCLIEEEAddress,
+			io : "RW"
+		},
+		{
+			clusterid : CLUSTERID_COMMISSIONING,
+			attributeid : 0x01,
+			name : "hwversion",
+			zcltype : ZCLOctetString,
+			io : "R"
+		},
+		{
+			clusterid : CLUSTERID_COMMISSIONING,
+			attributeid : 0x02,
+			name : "swversion",
+			zcltype : ZCLOctectString,
+			io : "R"
 		},
 		{
 			clusterid : CLUSTERID_ELOVALO,
@@ -71,6 +92,6 @@
 			name : "playlistnames",
 			zcltype : ZCLLongOctectString,
 			io : "R"
-		}		
+		}
 	]
 }
