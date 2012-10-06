@@ -1,0 +1,55 @@
+- name: countdown
+  length: 15
+- name: scroll_text
+  data: "Elovalo has arrived"
+  length: 10
+- name: sine
+  length: 60
+- name: scroll_text
+  data: "Elovalo invasion spreads terror and confusion across Protomo!!!"
+  length: 35
+- name: scroll_text
+  data: "Step closer my friend, give me a hug. Make my heart flutter!"
+  length: 35
+- name: heart
+  length: 120
+- name: scroll_text
+  data: "In the game of elovalo you either win, or you die."
+  length: 25
+- name: game_of_life
+  length: 10
+- name: gradient
+  length: 60
+- name: scroll_text
+  data: "What is elovalo?"
+  length: 10
+- name: clock
+  length: 5.2
+- name: sine
+  length: 120
+- name: scroll_text
+  data: "Baby don't Hertz me!"
+  length: 13
+- name: scroll_text
+  data: "Winter is coming..."
+  length: 13
+- name: rain
+  length: 60
+- name: scroll_text
+  data: "Come on, we've been friends for a long time now. I think it's time to take the next step....."
+  length: 40
+- name: heart
+  length: 120
+- name: tube
+  length: 5
+- name: wave
+  length: 40
+- name: scroll_text
+  data: "Credits: bebraw, enyone, Icchan^, ile-, marant, namtab, Zouppen, katis, LasseS, Tugge"
+  length: 45
+- name: scroll_text
+  data: "Hire me if you want your expo booth to be the #1 talk of the show!"
+  lenght: 40
+- name: scroll_text
+  data: "http://elovalo.org . We have come to stay."
+  length: 35
