@@ -57,6 +57,20 @@
 			name : "time",
 			zcltype : ZCLUTCtime,
 			io : "RW"
+		},		
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x06,
+			name : "effectnames",
+			zcltype : ZCLLongOctectString,
+			io : "R"
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x07,
+			name : "playlistnames",
+			zcltype : ZCLLongOctectString,
+			io : "R"
 		}		
 	]
 }
