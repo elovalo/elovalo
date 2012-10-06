@@ -1,0 +1,62 @@
+{
+	name : "ElovaloEP",
+	endpointid: 70,
+	clusters : {
+		CLUSTERID_BASIC : 0x00,
+		CLUSTERID_ELOVALO : 0x500
+	},	
+	attributes : [
+		{
+			clusterid : CLUSTERID_BASIC,
+			attributeid : 0x0012,
+			name : "deviceEnabled",
+			zcltype : ZCLBooleanValue,
+			io : "RW"
+		},
+		{
+			clusterid : CLUSTERID_BASIC,
+			attributeid : 0x0012,
+			name : "alarmMask",
+			zcltype : ZCLBooleanValue,
+			io : "RW"
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x01,
+			name : "operatingmode",
+			zcltype : ZCLEnum8[OFF,SINGLEEFFECT,PLAYLIST],
+			io : "RW"
+			comment : 'Ledikuution ohjausmoodit: OFF=ledikuutio kiinni, SINGLEEFFECT=näytetään samaa efektiä, PLAYLIST=Suoritetaan soittolistaa',
+		},				
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x02,
+			name : effecttext,
+			zcltype : ZCLOctetStringValue,
+			io : "RW",
+			comment : 'Personoitava efektiteksti jota ledikuutio näyttää',
+		},		
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x03,
+			name : playlist,
+			zcltype : ZCLUint8,			
+			io : "RW",
+			comment : 'Soittolista käytössä tällä hetkellä',
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x04,
+			name : "timezone",
+			zcltype : ZCLUint8,
+			io : "RW"
+		},		
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x05,
+			name : "time",
+			zcltype : ZCLUTCtime,
+			io : "RW"
+		}		
+	]
+}
