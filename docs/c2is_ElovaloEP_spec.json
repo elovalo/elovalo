@@ -3,7 +3,8 @@
 	endpointid: 70,
 	clusters : {
 		CLUSTERID_BASIC : 0x00,
-		CLUSTERID_ELOVALO : 0x500
+		CLUSTERID_ELOVALO : 0x500,
+		CLUSTERID_COMMISSIONING : 0x15
 	},	
 	attributes : [	
 		{
@@ -69,7 +70,7 @@
 			clusterid : CLUSTERID_ELOVALO,
 			attributeid : 0x04,
 			name : "timezone",
-			zcltype : ZCLUint8,
+			zcltype : ZCLUint32,
 			io : "RW"
 		},		
 		{
