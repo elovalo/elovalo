@@ -70,7 +70,7 @@
 			clusterid : CLUSTERID_ELOVALO,
 			attributeid : 0x04,
 			name : "timezone",
-			zcltype : ZCLUint32,
+			zcltype : ZCLint32,
 			io : "RW"
 		},		
 		{
@@ -85,14 +85,32 @@
 			attributeid : 0x06,
 			name : "effectnames",
 			zcltype : ZCLLongOctectString,
-			io : "R"
+			io : "R",
+			 "Kaikkien mahdollisten efektien nimet. Data palautetaan JSON muodossa ["sine","cube","rain"] "
 		},
 		{
 			clusterid : CLUSTERID_ELOVALO,
 			attributeid : 0x07,
 			name : "playlistnames",
 			zcltype : ZCLLongOctectString,
-			io : "R"
+			io : "R",
+			comment : "Tämän hetkisen soittolistan efektit voidaan lukea tästä attribuutista. Data palautetaan JSON muodossa ["sine","cube","rain"] "
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x08,
+			name :"playlisteffects",
+			zcltype : ZCLOctectString,
+			io : "R",
+			comment : "Tämän hetkisen soittolistan efektit voidaan lukea tästä attribuutista. Data palautetaan muodossa [0,3,2,5,1] "
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x09,
+			name :"effect",
+			zcltype : ZCLUint8,
+			io : "RW",
+			comment : "Tämän hetkinen effekti"
 		}
 	]
 }
