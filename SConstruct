@@ -2,7 +2,7 @@
 import os
 from glob import glob
 
-from generators import effects, playlists
+from generators import effects, playlists, gperf
 
 cwd = GetLaunchDir()
 
@@ -17,6 +17,8 @@ playlists.generate(
     os.path.join(cwd, 'src', 'playlists.json'),
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
+
+gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
 
 AddOption('--no-avr',
           dest='build_avr',

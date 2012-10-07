@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "font8x8_basic.h"
+#include "font8x8.h"
 #include "utils.h"
 #include "text.h"
 #include "../../pgmspace.h"
@@ -57,12 +57,12 @@ void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
 
 void render_character(uint8_t index, int16_t offset, render_t f)
 {
-	uint8_t bitmap[8];
+	const uint8_t *bitmap = get_glyph_utf8(index,1); // hard-coded ASCII
 
 	// Read character from the font in PROGMEM
-	for (uint8_t i=0; i<8; i++) {
-		bitmap[i] = pgm_get(font8x8_basic[index][i],byte);
-	}
+	//for (uint8_t i=0; i<8; i++) {
+	//	bitmap[i] = pgm_get(font8x8_basic[index][i],byte);
+	//}
 
 	for(uint8_t x = 0; x < 8; x++) {
 		for(uint8_t y = 0; y < 8; y++) {
