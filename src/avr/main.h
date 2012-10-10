@@ -17,10 +17,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../effects.h"
+
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers
 #define MODE_EFFECT         0x01 // Draw effect
 #define MODE_PLAYLIST       0x02 // Playlist
 #define MODE_SLEEP          0x03 // Same as idle, but cube must be started first
 
+const effect_t *effect; // Current effect. Note: points to PGM
 extern uint8_t mode; // If you need to change the running effeet
+
+void select_playlist_item(uint8_t index);
