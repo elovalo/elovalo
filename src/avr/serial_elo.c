@@ -95,25 +95,15 @@ void serial_elo_process(uint8_t cmd) {
 	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
 		uint8_t i;
 		SERIAL_READ(i);
-		if (i >= effects_len)
-			goto bad_arg_a;
-
-		// Change mode and pick correct effect from the array.
-		mode = MODE_EFFECT;
-		effect = effects + i;
-
-		// Prepare running of the new effect
-		init_current_effect();
+        if ( change_current_effect(i) ) {
+            goto bad_arg_a;
+        }
 	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
 		uint8_t i;
 		SERIAL_READ(i);
-		if (i >= playlists_len)
-			goto bad_arg_a;
-
-		// Change mode and run init
-		mode = MODE_PLAYLIST;
-		select_playlist_item(playlists[i]);
-		init_current_effect();
+        if ( change_playlist(i) ) {
+            goto bad_arg_a;
+        }
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time;
 		SERIAL_READ(tmp_time);

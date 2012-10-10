@@ -212,6 +212,30 @@ void init_current_effect(void) {
 	reset_time();
 }
 
+uint8_t change_current_effect(uint8_t i) {
+    if (i >= effects_len) { return 1; }
+
+    // Change mode and pick correct effect from the array.
+    mode = MODE_EFFECT;
+    effect = effects + i;
+
+    // Prepare running of the new effect
+    init_current_effect();
+
+    return 0;
+}
+
+uint8_t change_playlist(uint8_t i) {
+    if (i >= playlists_len) { return 1; }
+
+    // Change mode and run init
+    mode = MODE_PLAYLIST;
+    select_playlist_item(playlists[i]);
+    init_current_effect();
+
+    return 0;
+}
+
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
 {
