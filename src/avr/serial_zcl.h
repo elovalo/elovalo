@@ -1,67 +1,64 @@
-/* -*- mode: c; c-file-style: "linux" -*-
- *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
- *
+/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
+ * vi: set shiftwidth=8 tabstop=8 expandtab:
+ * :indentSize=8:tabSize=8:noTabs=true:
+ */
+/*
  *  Copyright 2012 Elovalo project group 
  *  
- *  This program is free software: you can redistribute it and/or modify
+ *  This file is part of Elovalo.
+ *  
+ *  Elovalo is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *  
- *  This program is distributed in the hope that it will be useful,
+ *  Elovalo is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *  
  *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define NOT_HEX 254
-#define NOT_NUM 0
-
-typedef struct {
-	uint8_t good;
-	uint8_t byte;
-} read_t;
+#define ATI     'A'
+#define ZCL_ACK 'K' // Successfully received last packet
+#define ZCL_NAK 'N' // Error, please resend last packet
+#define ZCL_STX 'S' // Sending a new packet
+#define ZCL_CHAN 1 // ZCL message channel
 
 /**
- * Send n bytes of hex encoded data starting from
- * SRAM pointer src to serial port
+ * Reads serial port for ZCL frames
  */
-void sram_to_serial_hex(void *src, uint16_t n);
+void receive(void);
 
 /**
- * Sends value to the serial port encoded as two hex ASCII bytes
+ * Processes a ZCL packet, sends NAK if CRC check fails
  */
-void send_hex_encoded(uint8_t byte);
+void process_packet(void);
 
 /**
- * Reads and hex decodes n bytes of data from serial port to given SRAM
- * location. If data is encoded incorrectly, stop reading. Function returns
- * the number of bytes read. If reading was interrupted due to incorrect
- * encoding return value may be less than n.
+ * Processes a single ZCL message, returning its CRC code
  */
-uint16_t serial_hex_to_sram(void *dest, uint16_t n);
+uint16_t process_message(uint16_t len);
 
-/*
- * Reads and hex decodes two bytes to a single value from the serial port.
+/**
+ * Reads a packets length from serial port
  */
-read_t serial_read_hex_encoded(void);
+uint16_t read_packet_length(void);
 
-/*
- * Reads and hex decodes a single byte from the serial port.
+/**
+ * Checks if an ATI response is being sent,
+ * and responds with identity information if one is found
  */
-read_t serial_read_hex_char(void);
+void check_ATI(void);
 
-/*
- * Converts an ASCII hex char to a corresponding number value.
- * Returns NOT_HEX if incorrect value given.
+/**
+ * Send a NAK error frame to serial port
  */
-uint8_t hex_to_num(uint8_t);
+void send_error(void);
 
-/*
- * Converts a number to a single hex ASCII char.
- * Returns NOT_NUM if given value is not between 0-15.
+/**
+ * Send ACK frame to serial port, signaling that the message was received successfully
  */
-uint8_t num_to_hex(uint8_t);
+void send_ok(void);
