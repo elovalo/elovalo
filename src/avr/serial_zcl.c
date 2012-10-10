@@ -24,45 +24,81 @@
 #include "serial_hex.h"
 #include "serial_zcl.h"
 
+// Frame types
+#define ZCL_ACK 'K' // Successfully received last packet
+#define ZCL_NAK 'N' // Error, please resend last packet
+#define ZCL_STX 'S' // Sending a new packet
+
+// Message defines
+#define ZCL_CHAN 1 // ZCL message channel
+
+
 //TODO: replace with eeprom read
 #define ATI_LEN 35
 uint8_t ep_id = 70;
-uint8_t ati_resp[] = "C2IS,elovalo,v1.0,01:23:45:67:89:AB\n";
+uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
 uint8_t mac[] = "\x01\x23\x45\x67\x89\xAB";
 
-void receive(void) {
-	if(serial_available()) {
-        check_ATI();
-		uint8_t frame = serial_read();
-		
-		switch (frame) {
-			case ZCL_ACK:
-				break;
-			case ZCL_NAK:
-				break;
-			case ZCL_STX:
-				process_packet();
-				break;
-		}
-	}
+// Private
+static void process_packet(void);
+static uint16_t read_packet_length(void);
+static uint16_t process_message(uint16_t len);
+static void send_error(void);
+static void send_ok(void);
+static void check_ATI(void);
+
+void serial_zcl_process(uint8_t cmd) {
+    serial_ungetc(cmd); //Don't need it right now
+    check_ATI();
+
+    uint8_t frame = serial_read();
+    switch (frame) {
+        case ZCL_ACK:
+            break;
+        case ZCL_NAK:
+            break;
+        case ZCL_STX:
+            process_packet();
+            break;
+    }
 }
 
+/**
+ * Checks if an ATI response is being sent,
+ * and responds with identity information if one is found
+ */
 void check_ATI(void) {
     uint8_t b = serial_read_blocking();
-    if (b != 'A') { serial_ungetc(b); return; }
+    uint8_t err = 0;
+
+    if (b != 'A') {
+        serial_ungetc(b);
+        err = 1;
+    }
 
     b = serial_read_blocking();
-    if (b != 'T') { serial_ungetc(b); return; }
+    if (b != 'T') {
+        serial_ungetc(b);
+        err = 1;
+    }
 
     b = serial_read_blocking();
-    if (b != 'I') { serial_ungetc(b); return; }
+    if (b != 'I') {
+        serial_ungetc(b);
+        err = 1;
+    }
+    
+    if (err) { return; }
 
     for (uint8_t i = 0; i < ATI_LEN; i++) {
         serial_send(ati_resp[i]);
     }
 }
 
-void process_packet(void) {
+/**
+ * Processes a ZCL packet, sends NAK if CRC check fails
+ */
+static void process_packet(void) {
 	uint16_t len;
 	uint16_t crc;
     uint16_t msg_crc;
@@ -86,7 +122,10 @@ void process_packet(void) {
     }
 }
 
-uint16_t process_message(uint16_t len) {
+/**
+ * Processes a single ZCL message, returning its CRC code
+ */
+static uint16_t process_message(uint16_t len) {
     read_t read;
     uint16_t crc;
     crc = 0xffff;
@@ -118,8 +157,10 @@ uint16_t process_message(uint16_t len) {
     return crc;
 }
 
-
-uint16_t read_packet_length(void) {
+/**
+ * Reads a packets length from serial port
+ */
+static uint16_t read_packet_length(void) {
 	uint16_t len;
 	read_t read;
 
@@ -132,10 +173,16 @@ uint16_t read_packet_length(void) {
     return len;
 }
 
-void send_error(void) {
+/**
+ * Send a NAK error frame to serial port
+ */
+static void send_error(void) {
     serial_send(ZCL_NAK);
 }
 
-void send_ok(void) {
+/**
+ * Send ACK frame to serial port, signaling that the message was received successfully
+ */
+static void send_ok(void) {
     serial_send(ZCL_ACK);
 }

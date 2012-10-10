@@ -17,44 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define ATI     'A'
-#define ZCL_ACK 'K' // Successfully received last packet
-#define ZCL_NAK 'N' // Error, please resend last packet
-#define ZCL_STX 'S' // Sending a new packet
-#define ZCL_CHAN 1 // ZCL message channel
-
 /**
- * Reads serial port for ZCL frames
+ * Reads serial port for ZCL frames and processes them
  */
-void receive(void);
-
-/**
- * Processes a ZCL packet, sends NAK if CRC check fails
- */
-void process_packet(void);
-
-/**
- * Processes a single ZCL message, returning its CRC code
- */
-uint16_t process_message(uint16_t len);
-
-/**
- * Reads a packets length from serial port
- */
-uint16_t read_packet_length(void);
-
-/**
- * Checks if an ATI response is being sent,
- * and responds with identity information if one is found
- */
-void check_ATI(void);
-
-/**
- * Send a NAK error frame to serial port
- */
-void send_error(void);
-
-/**
- * Send ACK frame to serial port, signaling that the message was received successfully
- */
-void send_ok(void);
+void serial_zcl_process(uint8_t cmd);
