@@ -27,7 +27,7 @@ void scroll_text(const char text[], bool progmem, int16_t offset, render_t f);
 /**
  * Renders character (index from font8x8_basic) using given callback
  */
-void render_character(uint8_t index, int16_t offset, render_t f);
+void render_character(const char index, int16_t offset, render_t f);
 
 /**
  * Render helpers

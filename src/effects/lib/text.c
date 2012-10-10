@@ -55,14 +55,15 @@ void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
 	}
 }
 
-void render_character(uint8_t index, int16_t offset, render_t f)
+void render_character(const char index, int16_t offset, render_t f)
 {
-	const uint8_t *bitmap = get_glyph_utf8(index,1); // hard-coded ASCII
+	uint8_t bitmap[8];
 
 	// Read character from the font in PROGMEM
-	//for (uint8_t i=0; i<8; i++) {
-	//	bitmap[i] = pgm_get(font8x8_basic[index][i],byte);
-	//}
+	uint8_t *glyph = get_glyph_utf8(&index,1);
+	for (uint8_t i=0; i<8; i++) {
+		bitmap[i] = pgm_get(glyph[i],byte);
+	}
 
 	for(uint8_t x = 0; x < 8; x++) {
 		for(uint8_t y = 0; y < 8; y++) {

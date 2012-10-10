@@ -17,8 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdint.h>
+#include "../../pgmspace.h"
+
 /**
  * Get glyph for given UTF-8 encoded string. You must pass character
  * length in bytes to get correct result.
  */
-uint8_t *get_glyph_utf8(const char *p, uint8_t char_len);
+uint8_t *get_glyph_utf8(register const char *str, register unsigned int len);
