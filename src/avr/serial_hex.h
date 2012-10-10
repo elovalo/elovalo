@@ -58,10 +58,10 @@ read_t serial_read_hex_char(void);
  * Converts an ASCII hex char to a corresponding number value.
  * Returns NOT_HEX if incorrect value given.
  */
-uint8_t hex_to_num(uint8_t);
+uint8_t hex_to_num(uint8_t c);
 
 /*
  * Converts a number to a single hex ASCII char.
  * Returns NOT_NUM if given value is not between 0-15.
  */
-uint8_t num_to_hex(uint8_t);
+uint8_t num_to_hex(uint8_t i);

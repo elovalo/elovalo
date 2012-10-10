@@ -18,7 +18,7 @@
  */
 
 #include "serial.h"
-#include "serial_zcl.h"
+#include "serial_hex.h"
 
 void sram_to_serial_hex(void *src, uint16_t n)
 {
