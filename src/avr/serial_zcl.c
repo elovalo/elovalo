@@ -21,8 +21,8 @@
 #include <util/crc16.h>
 
 #include "serial.h"
+#include "serial_hex.h"
 #include "serial_zcl.h"
-#include "zcl.h"
 
 //TODO: replace with eeprom read
 #define ATI_LEN 35
