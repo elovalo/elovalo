@@ -2,24 +2,15 @@
  * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
  * the values in serial_escaped.h .
  */
-#include <avr/interrupt.h>
-#include <avr/wdt.h>
 #include <avr/io.h>
 #include <stdlib.h>
 
-#include "pinMacros.h"
 #include "main.h"
-#include "init.h"
 #include "configuration.h"
-#include "cron.h"
-#include "hcsr04.h"
-#include "serial_elo.h"
-#include "powersave.h"
 #include "serial.h"
 #include "serial_escaped.h"
-#include "../effects.h"
-#include "../playlists.h"
 #include "../pgmspace.h"
+#include "serial_elo.h"
 
 // Commands issued by the sender
 #define CMD_STOP            '.'
