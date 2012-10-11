@@ -22,7 +22,7 @@ typedef void(*render_t)(uint8_t x, uint8_t y);
 /**
  * Scrolls given text using given callback
  */
-void scroll_text(const char text[], bool progmem, int16_t offset, render_t f);
+void scroll_text(const char text[], int16_t offset, render_t f);
 
 /**
  * Renders character (index from font8x8_basic) using given callback

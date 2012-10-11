@@ -39,8 +39,8 @@ void effect(void)
 
 	clear_buffer();
 
-	scroll_text(text, false, 9, render_yz);
-	scroll_text(text, false, 16, render_xy);
+	scroll_text(text, 9, render_yz);
+	scroll_text(text, 16, render_xy);
 
 	if(vars.cur > 0) vars.cur--;
 }

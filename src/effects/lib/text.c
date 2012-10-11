@@ -30,14 +30,12 @@
 #include "text.h"
 #include "../../pgmspace.h"
 
-#define mb_pgm_get(a,b,progmem) progmem? pgm_get(a,b): a
-
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
+void scroll_text(const char text[], int16_t offset, render_t f)
 {
 	// text format is ZCL octet string, where the length is at byte 0
-	uint8_t text_len = mb_pgm_get(*text++, byte, progmem);
+	uint8_t text_len = mb_pgm_get(*text++, byte);
 	int16_t base_pos = (LEDS_X+1)-offset;
 	int16_t i = -base_pos / spacing;
 	uint16_t pos = i*spacing + base_pos;
@@ -45,12 +43,12 @@ void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
 	// Render only two characters which fit to screen
 
 	if (i >= 0 && i < text_len) {
-		const char c = mb_pgm_get(text[i], byte, progmem);
+		const char c = mb_pgm_get(text[i], byte);
 		render_character(c, pos, f);
 	}
 
 	if (i+1 >= 0 && i+1<text_len) {
-		const char c = mb_pgm_get(text[i+1], byte, progmem);
+		const char c = mb_pgm_get(text[i+1], byte);
 		render_character(c, pos+spacing, f);
 	}
 }

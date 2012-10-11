@@ -17,34 +17,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * Functions for program space manipulation. When not built for AVR
- * environment (like building to x86), use stubs which skip program
- * space manipulation.
- */
+#include <stdint.h>
+#include "pgm_tricks.h"
 
-#ifdef AVR
-// On AVR use the provided library and define some helpers, too.
-
-#include <avr/pgmspace.h>
-#include "avr/pgm_tricks.h"
-
-/* Usage example: (init_t)pgm_get(effects[3].init,word); For more
-   information about type parameter, see avr-libc user manual about
-   pgmspace. */
-#define pgm_get(var,type)			\
-	pgm_read_ ## type ## _near(&(var))
-
-#define mb_pgm_get(var,type)			\
-	(is_pgm_ptr(&(var)) ? pgm_get(var,type) : var)
-
-#else
-// On other platforms, implement some dummy macros
-
-#define PROGMEM
-#define PGM_P const char *
-
-#define pgm_get(var,type) var
-#define mb_pgm_get(var,type) var
-
-#endif
+bool is_pgm_ptr(const void *p) {
+	/* In ATmega328p the PROGMEM is not memory mapped but PROGMEM
+	 * uses different start address anyway. Using that trick to
+	 * find out whether the variable is in SRAM or in PROGMEM. See
+	 * more info at
+	 * http://uzebox.org/wiki/index.php?title=Emulator#Variables_in_flash_.28PROGMEM.29 */
+	return (uint16_t)p >= 0x8000000;
+}

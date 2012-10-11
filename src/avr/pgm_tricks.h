@@ -17,34 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdbool.h>
+
 /**
- * Functions for program space manipulation. When not built for AVR
- * environment (like building to x86), use stubs which skip program
- * space manipulation.
+ * Determine if the pointer is in PROGMEM or in SRAM. True is returned
+ * when the variable is in PROGMEM. This function is tested only on
+ * ATmega328p.
  */
-
-#ifdef AVR
-// On AVR use the provided library and define some helpers, too.
-
-#include <avr/pgmspace.h>
-#include "avr/pgm_tricks.h"
-
-/* Usage example: (init_t)pgm_get(effects[3].init,word); For more
-   information about type parameter, see avr-libc user manual about
-   pgmspace. */
-#define pgm_get(var,type)			\
-	pgm_read_ ## type ## _near(&(var))
-
-#define mb_pgm_get(var,type)			\
-	(is_pgm_ptr(&(var)) ? pgm_get(var,type) : var)
-
-#else
-// On other platforms, implement some dummy macros
-
-#define PROGMEM
-#define PGM_P const char *
-
-#define pgm_get(var,type) var
-#define mb_pgm_get(var,type) var
-
-#endif
+bool is_pgm_ptr(const void *p);
