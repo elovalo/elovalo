@@ -18,7 +18,7 @@ To build on Ubuntu install the following packages from the Quantal repository:
 
 In order to install Quantal(12.10) packages you have to enable Quantal repositories:
 
-Add the following lines to <tt>/etc/apt/preferences/</tt>
+Add the following lines to <tt>/etc/apt/preferences.d/10-quantal</tt>
 
     Package: *
     Pin: release a=quantal
@@ -31,6 +31,13 @@ And add the following line to <tt>/etc/apt/sources.list</tt>
 Now you can install packages from the Quantal repository like this:
 
     sudo apt-get install avr-gcc/quantal avr-libc/quantal
+
+This has only been verified on Kubuntu. You can also skip the above steps and download the packages straight from the quantal launchpad:
+	
+	https://launchpad.net/ubuntu/quantal/amd64/avr-libc/1:1.8.0-2
+	https://launchpad.net/ubuntu/quantal/amd64/gcc-avr
+
+If you have a 32bit system (tell 2002 we said hi), replace the amd64 from the url to i386
 
 You can compile the program by running
 
