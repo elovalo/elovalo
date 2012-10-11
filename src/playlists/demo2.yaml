@@ -1,7 +1,7 @@
 - name: game_of_life
-  length: 1000
+  length: 8
 - name: scroll_text
   data: "This works!"
-  length: 2000
+  length: 16
 - name: sine
-  length: 5000
+  length: 8
