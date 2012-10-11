@@ -18,7 +18,7 @@ playlists.generate(
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
 
-gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.c')
+gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
 
 AddOption('--no-avr',
           dest='build_avr',

@@ -14,10 +14,8 @@
 %language=ANSI-C
 %readonly-tables
 %struct-type
-%define lookup-function-name get_glyph_utf8
-%{
-	#include "font8x8.h"
-%}
+%global-table
+%define word-array-name glyphs
 struct glyph { char *name; uint8_t pixmap[8]; };
 %%
 " ",{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}

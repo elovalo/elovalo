@@ -37,7 +37,9 @@ def pgm_wrap(var,s):
 
 def generate(source, target):
     """This function runs gperf and mangles it output so it allows
-    placing look-up table to PROGMEM"""
+    placing look-up table to PROGMEM. This implementation allows false
+    negatives, i.e. if a glyph is not found then it returns
+    anything."""
 
     # Get gperf output
     p = subprocess.Popen(["gperf",source],
@@ -46,21 +48,22 @@ def generate(source, target):
     if not p.returncode == 0:
         raise Exception('gperf failed with '+str(p.returncode))
     
-    # Wrap asso_values and wordlist inside pgmspace
+    # Wrap asso_values and wordlist inside pgmspace and tune the
+    # visibility of glyphs
     out = pgm_wrap('asso_values',out)
-    out = out.replace("static const",
-                      "PROGMEM static const")
+    out = out.replace("static const unsigned char asso_values",
+                      "PROGMEM static const unsigned char asso_values")
+    out = out.replace("static const struct glyph",
+                      "PROGMEM const struct glyph")
 
     # Remove strings from wordlist, no need for verification
-    out = re.sub(r'\{\".*\",({.*})}',r'\1',out)
+    out = re.sub(r'{".*",',r'{',out)
     out = out.replace('{""}','{}')
-    out = out.replace("struct glyph wordlist[]",
-                      "uint8_t wordlist[][8]")
+    out = out.replace('char *name;','')
 
-    # Mangle in_word_set not to compare the contents
-    out = out.replace('const struct glyph *','uint8_t *')
-    out = out.replace('register const char *s = wordlist[key].name;','')
-    out = out.replace('if (*str == *s && !strcmp (str + 1, s + 1))','')
+    # Remove in_word_set to keep it compiling. It's not useful for us.
+    out = out.replace('\nconst struct glyph *','\n#if 0')
+    out = out + '\n#endif'
 
     # Write to target file
     f = open(target,'w')

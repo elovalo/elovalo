@@ -17,17 +17,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include <stdint.h>
 #include "../../pgmspace.h"
+#include "font8x8_generated.h"
 
-struct glyph {
-	uint8_t pixmap[8];
-};
+const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len)
+{
+	if (char_len > MAX_WORD_LENGTH || char_len < MIN_WORD_LENGTH)
+		return glyphs; // return anything
 
-extern const struct glyph glyphs[];
+	const int key = hash(p,char_len);
 
-/**
- * Get glyph for given UTF-8 encoded string. You must pass character
- * length in bytes to get correct result.
- */
-const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len);
+	if (key > MAX_HASH_VALUE || key < 0)
+		return glyphs; // return anything
+
+	/* Allow false negatives - do not even validate because we
+	 * don't have any strings for comparison */
+	return &glyphs[key];
+}
