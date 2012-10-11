@@ -22,25 +22,11 @@
 			io : "RW"
 		},
 		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x0401,
-			name : "deviceaddress",
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x401,
+			name : "ieeaddress",
 			zcltype : ZCLIEEEAddress,
 			io : "RW"
-		},
-		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x01,
-			name : "hwversion",
-			zcltype : ZCLOctetString,
-			io : "R"
-		},
-		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x02,
-			name : "swversion",
-			zcltype : ZCLOctectString,
-			io : "R"
 		},
 		{
 			clusterid : CLUSTERID_ELOVALO,
@@ -111,6 +97,20 @@
 			zcltype : ZCLUint8,
 			io : "RW",
 			comment : "Tämänhetkinen efekti"
-		}
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x10,
+			name : "hwversion",
+			zcltype : ZCLOctetString,
+			io : "R"
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x11,
+			name : "swversion",
+			zcltype : ZCLOctectString,
+			io : "R"
+		},		
 	]
 }
