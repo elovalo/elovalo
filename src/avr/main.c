@@ -29,6 +29,7 @@
 #include "serial.h"
 #include "serial_escaped.h"
 #include "serial_elo.h"
+#include "serial_zcl.h"
 #include "clock.h"
 #include "configuration.h"
 #include "powersave.h"
@@ -84,7 +85,15 @@ int main() {
 	while(1) {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
+#if defined AVR_ZCL
+			serial_zcl_process(cmd);
+#elif defined AVR_ELO
 			serial_elo_process(cmd);
+#elif defined SIMU
+			// Do nothing
+#else
+#error Unsupported serial communication type
+#endif
 		}
 
 		switch (mode) {

@@ -5,6 +5,10 @@ from generators.build import *
 # Build default environment with no optimization and debug
 env = avr_build_env(flags = '-O0 -g')
 
+# Add AVR variant name
+Import('build_type')
+env.Append(CPPDEFINES = 'AVR_'+build_type.upper())
+
 # Make elf
 env.Program(Elf, avr_source_files())
 
