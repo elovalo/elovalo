@@ -13,33 +13,33 @@
 #include "serial_elo.h"
 
 // Commands issued by the sender
-#define CMD_STOP            '.'
-#define CMD_LIST_EFFECTS    'e'
+#define CMD_STOP			'.'
+#define CMD_LIST_EFFECTS	'e'
 #define CMD_CHANGE_EFFECT   'E'
-#define CMD_SERIAL_FRAME    'F'
-#define CMD_GET_TIME        't'
-#define CMD_SET_TIME        'T'
-#define CMD_SET_SENSOR      'S'
-#define CMD_LIST_ACTIONS    'a'
-#define CMD_RUN_ACTION      'A'
-#define CMD_READ_CRONTAB    'c'
+#define CMD_SERIAL_FRAME	'F'
+#define CMD_GET_TIME		't'
+#define CMD_SET_TIME		'T'
+#define CMD_SET_SENSOR	  'S'
+#define CMD_LIST_ACTIONS	'a'
+#define CMD_RUN_ACTION	  'A'
+#define CMD_READ_CRONTAB	'c'
 #define CMD_WRITE_CRONTAB   'C'
 #define CMD_SELECT_PLAYLIST 'P'
-#define CMD_NOTHING         '*' // May be used to end binary transmission
+#define CMD_NOTHING		 '*' // May be used to end binary transmission
 
 // Autonomous responses. These may occur anywhere, anytime
-#define REPORT_JUNK_CHAR    '@' // Unsolicited data received
+#define REPORT_JUNK_CHAR	'@' // Unsolicited data received
 #define REPORT_INVALID_CMD  '?' // Unknown command type
-#define REPORT_ANSWERING    '(' // Command received, starting to process input
-#define REPORT_READY        ')' // Processing of command is ready
-#define REPORT_BOOT         'B' // Device has been (re)booted
-#define REPORT_FLIP         '%' // Frame has been flipped, ready to receive new
+#define REPORT_ANSWERING	'(' // Command received, starting to process input
+#define REPORT_READY		')' // Processing of command is ready
+#define REPORT_BOOT		 'B' // Device has been (re)booted
+#define REPORT_FLIP		 '%' // Frame has been flipped, ready to receive new
 
 // Typical answers to commands. Use of these is command-specific
 
-#define RESP_INTERRUPTED    0x00
-#define RESP_BAD_ARG_A      0x01
-#define RESP_BAD_ARG_B      0x02
+#define RESP_INTERRUPTED	0x00
+#define RESP_BAD_ARG_A	  0x01
+#define RESP_BAD_ARG_B	  0x02
 
 #define CRON_ITEM_NOT_VALID 0x01
 
@@ -66,10 +66,10 @@ void serial_elo_init(void) {
  * that is okay for now.
  */
 void serial_elo_process(uint8_t cmd) {
-    if (cmd != ESCAPE) {
-        report(REPORT_JUNK_CHAR);
-        return;
-    }
+	if (cmd != ESCAPE) {
+		report(REPORT_JUNK_CHAR);
+		return;
+	}
 
 	cmd = serial_read_blocking();
 
@@ -86,15 +86,15 @@ void serial_elo_process(uint8_t cmd) {
 	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
 		uint8_t i;
 		SERIAL_READ(i);
-        if ( change_current_effect(i) ) {
-            goto bad_arg_a;
-        }
+		if ( change_current_effect(i) ) {
+			goto bad_arg_a;
+		}
 	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
 		uint8_t i;
 		SERIAL_READ(i);
-        if ( change_playlist(i) ) {
-            goto bad_arg_a;
-        }
+		if ( change_playlist(i) ) {
+			goto bad_arg_a;
+		}
 	} ELSEIFCMD(CMD_SET_TIME) {
 		time_t tmp_time;
 		SERIAL_READ(tmp_time);

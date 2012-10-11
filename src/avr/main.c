@@ -76,7 +76,7 @@ int main() {
 	hcsr04_start_continuous_meas();
 	adc_start();
 
-    serial_elo_init();
+	serial_elo_init();
 	
 	// Select correct startup mode
 	pick_startup_mode();
@@ -84,7 +84,7 @@ int main() {
 	while(1) {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
-            serial_elo_process(cmd);
+			serial_elo_process(cmd);
 		}
 
 		switch (mode) {
@@ -214,27 +214,27 @@ void init_current_effect(void) {
 }
 
 uint8_t change_current_effect(uint8_t i) {
-    if (i >= effects_len) { return 1; }
+	if (i >= effects_len) { return 1; }
 
-    // Change mode and pick correct effect from the array.
-    mode = MODE_EFFECT;
-    effect = effects + i;
+	// Change mode and pick correct effect from the array.
+	mode = MODE_EFFECT;
+	effect = effects + i;
 
-    // Prepare running of the new effect
-    init_current_effect();
+	// Prepare running of the new effect
+	init_current_effect();
 
-    return 0;
+	return 0;
 }
 
 uint8_t change_playlist(uint8_t i) {
-    if (i >= playlists_len) { return 1; }
+	if (i >= playlists_len) { return 1; }
 
-    // Change mode and run init
-    mode = MODE_PLAYLIST;
-    select_playlist_item(playlists[i]);
-    init_current_effect();
+	// Change mode and run init
+	mode = MODE_PLAYLIST;
+	select_playlist_item(playlists[i]);
+	init_current_effect();
 
-    return 0;
+	return 0;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

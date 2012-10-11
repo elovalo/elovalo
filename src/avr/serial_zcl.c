@@ -48,19 +48,19 @@ static void send_ok(void);
 static void check_ATI(void);
 
 void serial_zcl_process(uint8_t cmd) {
-    serial_ungetc(cmd); //Don't need it right now
-    check_ATI();
+	serial_ungetc(cmd); //Don't need it right now
+	check_ATI();
 
-    uint8_t frame = serial_read();
-    switch (frame) {
-        case ZCL_ACK:
-            break;
-        case ZCL_NAK:
-            break;
-        case ZCL_STX:
-            process_packet();
-            break;
-    }
+	uint8_t frame = serial_read();
+	switch (frame) {
+		case ZCL_ACK:
+			break;
+		case ZCL_NAK:
+			break;
+		case ZCL_STX:
+			process_packet();
+			break;
+	}
 }
 
 /**
@@ -68,31 +68,31 @@ void serial_zcl_process(uint8_t cmd) {
  * and responds with identity information if one is found
  */
 void check_ATI(void) {
-    uint8_t b = serial_read_blocking();
-    uint8_t err = 0;
+	uint8_t b = serial_read_blocking();
+	uint8_t err = 0;
 
-    if (b != 'A') {
-        serial_ungetc(b);
-        err = 1;
-    }
+	if (b != 'A') {
+		serial_ungetc(b);
+		err = 1;
+	}
 
-    b = serial_read_blocking();
-    if (b != 'T') {
-        serial_ungetc(b);
-        err = 1;
-    }
+	b = serial_read_blocking();
+	if (b != 'T') {
+		serial_ungetc(b);
+		err = 1;
+	}
 
-    b = serial_read_blocking();
-    if (b != 'I') {
-        serial_ungetc(b);
-        err = 1;
-    }
-    
-    if (err) { return; }
+	b = serial_read_blocking();
+	if (b != 'I') {
+		serial_ungetc(b);
+		err = 1;
+	}
+	
+	if (err) { return; }
 
-    for (uint8_t i = 0; i < ATI_LEN; i++) {
-        serial_send(ati_resp[i]);
-    }
+	for (uint8_t i = 0; i < ATI_LEN; i++) {
+		serial_send(ati_resp[i]);
+	}
 }
 
 /**
@@ -101,60 +101,60 @@ void check_ATI(void) {
 static void process_packet(void) {
 	uint16_t len;
 	uint16_t crc;
-    uint16_t msg_crc;
+	uint16_t msg_crc;
 	read_t read;
 
-    read.byte = serial_read_blocking();
+	read.byte = serial_read_blocking();
 	if (read.byte != '0') { send_error(); } // Not a ZCL compliant packet
 
-    len = read_packet_length();
-    crc = process_message(len);
+	len = read_packet_length();
+	crc = process_message(len);
 
-    read = serial_read_hex_encoded();
-    msg_crc = (read.byte << 8);
-    read = serial_read_hex_encoded();
-    msg_crc |= read.byte;
+	read = serial_read_hex_encoded();
+	msg_crc = (read.byte << 8);
+	read = serial_read_hex_encoded();
+	msg_crc |= read.byte;
 
-    if (crc != msg_crc) {
-        send_error();
-    } else {
-        send_ok();
-    }
+	if (crc != msg_crc) {
+		send_error();
+	} else {
+		send_ok();
+	}
 }
 
 /**
  * Processes a single ZCL message, returning its CRC code
  */
 static uint16_t process_message(uint16_t len) {
-    read_t read;
-    uint16_t crc;
-    crc = 0xffff;
+	read_t read;
+	uint16_t crc;
+	crc = 0xffff;
 
-    for (uint16_t i = 0; i < len; i++) {
-        read = serial_read_hex_encoded();
-        if (!read.good) { send_error(); return 0; }
+	for (uint16_t i = 0; i < len; i++) {
+		read = serial_read_hex_encoded();
+		if (!read.good) { send_error(); return 0; }
 
-        crc = _crc_ccitt_update(crc, read.byte);
+		crc = _crc_ccitt_update(crc, read.byte);
 
-        if (i == 0) {
-            // Only ZCL messages supported, no FT
-            if (read.byte != ZCL_CHAN) { return 0; }
-        } else if (i >= 1 && i <= 9) {
-            // MAC
-            if (read.byte != mac[i]) { send_error(); return 0; }
-        } else if (i == 9) {
-            // End point ID
-            if (read.byte != ep_id) { send_error(); return 0; }
-        } else if (i >= 10 && i <= 11) {
-            // TODO: Profile
-        } else if (i >= 12 && i <= 13) {
-            // TODO: Cluster
-        } else {
-            // TODO: Payload
-        }
-    }
+		if (i == 0) {
+			// Only ZCL messages supported, no FT
+			if (read.byte != ZCL_CHAN) { return 0; }
+		} else if (i >= 1 && i <= 9) {
+			// MAC
+			if (read.byte != mac[i]) { send_error(); return 0; }
+		} else if (i == 9) {
+			// End point ID
+			if (read.byte != ep_id) { send_error(); return 0; }
+		} else if (i >= 10 && i <= 11) {
+			// TODO: Profile
+		} else if (i >= 12 && i <= 13) {
+			// TODO: Cluster
+		} else {
+			// TODO: Payload
+		}
+	}
 
-    return crc;
+	return crc;
 }
 
 /**
@@ -164,25 +164,25 @@ static uint16_t read_packet_length(void) {
 	uint16_t len;
 	read_t read;
 
-    read = serial_read_hex_encoded();
-    len = (read.byte << 8);
+	read = serial_read_hex_encoded();
+	len = (read.byte << 8);
 
-    read = serial_read_hex_encoded();
-    len |= read.byte;
+	read = serial_read_hex_encoded();
+	len |= read.byte;
 
-    return len;
+	return len;
 }
 
 /**
  * Send a NAK error frame to serial port
  */
 static void send_error(void) {
-    serial_send(ZCL_NAK);
+	serial_send(ZCL_NAK);
 }
 
 /**
  * Send ACK frame to serial port, signaling that the message was received successfully
  */
 static void send_ok(void) {
-    serial_send(ZCL_ACK);
+	serial_send(ZCL_ACK);
 }

@@ -28,12 +28,12 @@ void sram_to_serial_hex(void *src, uint16_t n)
 }
 
 void send_hex_encoded(uint8_t byte) {
-    uint8_t send;
-    send = num_to_hex(byte >> 4);
-    serial_send(send);
+	uint8_t send;
+	send = num_to_hex(byte >> 4);
+	serial_send(send);
 
-    send = num_to_hex(byte & 0x0f);
-    serial_send(send);
+	send = num_to_hex(byte & 0x0f);
+	serial_send(send);
 }
 
 uint16_t serial_hex_to_sram(void *dest, uint16_t n)
@@ -50,28 +50,28 @@ uint16_t serial_hex_to_sram(void *dest, uint16_t n)
 }
 
 read_t serial_read_hex_encoded(void) {
-    read_t ret;
-    uint8_t val;
+	read_t ret;
+	uint8_t val;
 
-    ret = serial_read_hex_char();
-    val = (ret.byte << 4);
-    if (!ret.good) { return ret; }
+	ret = serial_read_hex_char();
+	val = (ret.byte << 4);
+	if (!ret.good) { return ret; }
 
-    ret = serial_read_hex_char();
-    val |= ret.byte;
-    ret.byte = val;
+	ret = serial_read_hex_char();
+	val |= ret.byte;
+	ret.byte = val;
 
-    return ret;
+	return ret;
 }
 
 read_t serial_read_hex_char(void) {
-    read_t ret = {1,0};
-    ret.byte = hex_to_num(serial_read_blocking());
-    if (ret.byte == NOT_HEX) {
-        serial_ungetc(ret.byte);
-        ret.good = 0;
-    }
-    return ret;
+	read_t ret = {1,0};
+	ret.byte = hex_to_num(serial_read_blocking());
+	if (ret.byte == NOT_HEX) {
+		serial_ungetc(ret.byte);
+		ret.good = 0;
+	}
+	return ret;
 }
 
 uint8_t hex_to_num(uint8_t c) {
@@ -86,11 +86,11 @@ uint8_t hex_to_num(uint8_t c) {
 }
 
 uint8_t num_to_hex(uint8_t i) {
-    if (i >= 0 && i <= 9) {
-        return i + '0';
-    } else if (i >= 10 && i <= 15) {
-        return i + 'A' - 10;
-    }
+	if (i >= 0 && i <= 9) {
+		return i + '0';
+	} else if (i >= 10 && i <= 15) {
+		return i + 'A' - 10;
+	}
 
-    return NOT_NUM;
+	return NOT_NUM;
 }
