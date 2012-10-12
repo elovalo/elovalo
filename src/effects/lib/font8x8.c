@@ -17,10 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
-#include <stdint.h>
+#include "font8x8.h"
 #include "../../pgmspace.h"
 #include "font8x8_generated.h"
+
+#define BIT_NOT_SET(x,y) (!((x) & (1 << (y))))
 
 const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len)
 {
@@ -35,4 +36,49 @@ const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len)
 	/* Allow false negatives - do not even validate because we
 	 * don't have any strings for comparison */
 	return &glyphs[key];
+}
+
+bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest)
+{
+	const char *end = src+src_len;
+	const struct glyph **dest_p = dest->buf;
+
+	while (src < end) {
+		// Is there enough room to store one glyph
+		if (dest_p >= dest->buf + dest->len)
+			return false;
+
+		char x = *src;
+		uint8_t bytes;
+		
+		if (BIT_NOT_SET(x,7))
+			bytes = 1;
+		else if (BIT_NOT_SET(x,6))
+			return false; // UTF-8 decoding error
+		else if (BIT_NOT_SET(x,5))
+			bytes = 2;
+		else if (BIT_NOT_SET(x,4))
+			bytes = 3;
+		else if (BIT_NOT_SET(x,3))
+			bytes = 4;
+		else if (BIT_NOT_SET(x,2))
+			bytes = 5;
+		else if (BIT_NOT_SET(x,1))
+			bytes = 6;
+		else
+			return false; // Reserved
+
+		if (src+bytes > end)
+			return false; // End was malformedly truncated
+
+		*dest_p = get_glyph_utf8(src,bytes);
+
+		// Advance pointers. *dest has always length of single item
+		dest_p++;
+		src += bytes;
+	}
+
+	// Update array data length
+	dest->len = dest_p - dest->buf;
+	return true;
 }

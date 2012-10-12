@@ -59,7 +59,6 @@ def generate(source, target):
     # Remove strings from wordlist, no need for verification
     out = re.sub(r'{".*",',r'{',out)
     out = out.replace('{""}','{}')
-    out = out.replace('char *name;','')
 
     # Remove in_word_set to keep it compiling. It's not useful for us.
     out = out.replace('\nconst struct glyph *','\n#if 0')

@@ -18,10 +18,16 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "../../pgmspace.h"
 
 struct glyph {
-	uint8_t pixmap[8];
+	const uint8_t pixmap[8];
+};
+
+struct glyph_buf {
+	uint16_t len;
+	const struct glyph **buf;
 };
 
 extern const struct glyph glyphs[];
@@ -31,3 +37,8 @@ extern const struct glyph glyphs[];
  * length in bytes to get correct result.
  */
 const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len);
+
+/**
+ * Converts given UTF-8 string to glyph array.
+ */
+bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest);

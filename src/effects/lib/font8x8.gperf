@@ -15,6 +15,7 @@
 %readonly-tables
 %struct-type
 %global-table
+%omit-struct-type
 %define word-array-name glyphs
 struct glyph { char *name; uint8_t pixmap[8]; };
 %%
