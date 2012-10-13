@@ -19,7 +19,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../pgmspace.h"
 
 struct glyph {
 	const uint8_t pixmap[8];

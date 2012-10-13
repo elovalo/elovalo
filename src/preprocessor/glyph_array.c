@@ -42,23 +42,23 @@ int main(int argc, char **argv)
 			return 0;
 		}
 
-		// Convert to glyphs
-		bool ret = utf8_string_to_glyphs(line, len, &result);
+		// Convert to glyphs. Omit \0 in the end
+		bool ret = utf8_string_to_glyphs(line, len-1, &result);
 		if (!ret) {
 			printf("UTF-8 decoding error\n");
 			continue;
 		}
 		
 		// Convert glyphs to C array
-		putchar('{');
-		for (int i=0; i<result.len-1; i++) {
+		printf("{%d,{",result.len);
+		for (int i=0; i<result.len; i++) {
 			if (i)
 				putchar(',');
 			const struct glyph *g = result.buf[i];
 			int pos = g-glyphs; // calculate correct memory position
 			printf("glyphs+%d",pos);
 		}
-		printf("}\n");
+		printf("}}\n");
 	}
 	// Does never end
 }
