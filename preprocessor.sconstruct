@@ -1,0 +1,2 @@
+# Build preprocessor only. VariantDir() doesn't work in single directory
+SConscript('preprocessor.scons', variant_dir='build/preprocessor', duplicate=0)

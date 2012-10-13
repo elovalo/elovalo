@@ -1,8 +1,11 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
 from glob import glob
-
+import subprocess
 from generators import effects, playlists, gperf
+
+# Compile preprocessor first
+subprocess.check_call(["scons","-s","-f","preprocessor.sconstruct"])
 
 cwd = GetLaunchDir()
 

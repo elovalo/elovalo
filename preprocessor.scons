@@ -1,0 +1,10 @@
+# -*- mode: python; coding: utf-8 -*-
+import os
+
+env = Environment(ENV=os.environ)
+env.Append(CCFLAGS = "-O2 -Wall -std=gnu99 -flto")
+env.Append(LINKFLAGS = '-flto -fwhole-program -flto-partition=none')
+env.Append(LIBS='m')
+
+# Make glyph array converter
+env.Program('convert_glyphs', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/preprocessor/glyph_array.c')])
