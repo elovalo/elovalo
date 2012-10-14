@@ -51,10 +51,10 @@ def generate(source, target):
     # Wrap asso_values and wordlist inside pgmspace and tune the
     # visibility of glyphs
     out = pgm_wrap('asso_values',out)
-    out = out.replace("static const unsigned char asso_values",
-                      "PROGMEM static const unsigned char asso_values")
+    out = out.replace("static const ",
+                      "PROGMEM static const ")
     out = out.replace("static const struct glyph",
-                      "PROGMEM const struct glyph")
+                      "const struct glyph")
 
     # Remove strings from wordlist, no need for verification
     out = re.sub(r'{".*",',r'{',out)
