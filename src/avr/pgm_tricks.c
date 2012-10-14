@@ -18,13 +18,26 @@
  */
 
 #include <stdint.h>
+#include <avr/pgmspace.h>
 #include "pgm_tricks.h"
 
-bool is_pgm_ptr(const void *p) {
+bool is_pgm_ptr(const void *p)
+{
 	/* In ATmega328p the PROGMEM is not memory mapped but PROGMEM
 	 * uses different start address anyway. Using that trick to
 	 * find out whether the variable is in SRAM or in PROGMEM. See
 	 * more info at
 	 * http://uzebox.org/wiki/index.php?title=Emulator#Variables_in_flash_.28PROGMEM.29 */
 	return (uint16_t)p >= 0x8000000;
+}
+
+void pgm_aware_copy(void *dst, const void *src, const int n)
+{
+	const uint8_t *p = (uint8_t*)src;
+	const uint8_t *end = p+n;
+	uint8_t *dst_u8 = (uint8_t*)dst;
+
+	while (p < end) {
+		*dst_u8++ = pgm_read_byte_near(p++);
+	}
 }

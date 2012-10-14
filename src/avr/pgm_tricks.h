@@ -25,3 +25,9 @@
  * ATmega328p.
  */
 bool is_pgm_ptr(const void *p);
+
+/**
+ * Copies stuff from program memory to SRAM. This functions is not
+ * intended to be called directly but via pgmspace.h macros.
+ */
+void pgm_aware_copy(void *dst, const void *src, const int len);

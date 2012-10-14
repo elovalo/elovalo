@@ -38,6 +38,12 @@
 #define mb_pgm_get(var,type)			\
 	(is_pgm_ptr(&(var)) ? pgm_get(var,type) : var)
 
+#define pgm_copy(target,var)			\
+	pgm_aware_copy(&(target),&(var),sizeof(var))
+
+#define mb_pgm_copy(target,var)					\
+	(is_pgm_ptr(&(var)) ? pgm_copy(target,var) : memcpy(&(target),&(var),sizeof(var)))
+	
 #else
 // On other platforms, implement some dummy macros
 
@@ -46,5 +52,7 @@
 
 #define pgm_get(var,type) var
 #define mb_pgm_get(var,type) var
+#define pgm_copy(target,var) memcpy(&(target),&(var),sizeof(var))
+#define mb_pgm_copy(target,var) pgm_copy(target,var)
 
 #endif
