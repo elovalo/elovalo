@@ -1,0 +1,9 @@
+Kuinkas käytän debuggeria? 
+
+Käyttäjä: test
+Salasana: test
+
+1. Kirjaudu sisään C2IS käyttöliittymään autentikaatiota varten.
+2. Navigoidu debuggerin osoitteeseen: (lähiverkon osoite) 
+http://10.54.5.75:8080/c2is/rest/debug
+3. Siellä voit debuggailla viestejä kopypastettamalla viestejä lootaan.
