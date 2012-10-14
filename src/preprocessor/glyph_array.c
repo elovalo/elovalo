@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "../effects/lib/font8x8.h"
 
 #define GLYPH_ARRAY_LEN 200
@@ -28,12 +29,16 @@ int main(int argc, char **argv)
 	size_t buf_len = 0;
 
 	// Allocate glyph array
-	const struct glyph *glyph_buf[GLYPH_ARRAY_LEN];
-	struct glyph_buf result = { GLYPH_ARRAY_LEN, glyph_buf };
+	struct glyph_buf *result =
+		(struct glyph_buf *)malloc(sizeof(struct glyph_buf) + GLYPH_ARRAY_LEN);
+	result->len = GLYPH_ARRAY_LEN;
+
+	// Change buffering mode
+	setlinebuf(stdout);
 
 	while (true) {
 		// Restore buffer
-		result.len = GLYPH_ARRAY_LEN;
+		result->len = GLYPH_ARRAY_LEN;
 
 		// Read line from user
 		ssize_t len = getline(&line, &buf_len, stdin);
@@ -43,18 +48,18 @@ int main(int argc, char **argv)
 		}
 
 		// Convert to glyphs. Omit \0 in the end
-		bool ret = utf8_string_to_glyphs(line, len-1, &result);
+		bool ret = utf8_string_to_glyphs(line, len-1, result);
 		if (!ret) {
 			printf("UTF-8 decoding error\n");
 			continue;
 		}
 		
 		// Convert glyphs to C array
-		printf("{%d,{",result.len);
-		for (int i=0; i<result.len; i++) {
+		printf("{%d,{",result->len);
+		for (int i=0; i<result->len; i++) {
 			if (i)
 				putchar(',');
-			const struct glyph *g = result.buf[i];
+			const struct glyph *g = result->buf[i];
 			int pos = g-glyphs; // calculate correct memory position
 			printf("glyphs+%d",pos);
 		}
