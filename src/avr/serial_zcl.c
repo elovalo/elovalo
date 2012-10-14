@@ -47,11 +47,13 @@ static void process_payload(uint16_t length);
 static void process_zcl_message(uint16_t length);
 static void send_error(void);
 static void send_ok(void);
-static void check_ATI(void);
+static uint8_t check_ATI(void);
 
 void serial_zcl_process(uint8_t cmd) {
 	serial_ungetc(cmd); //Don't need it right now
-	check_ATI();
+	if (check_ATI()) {
+		return;
+	}
 
 	uint8_t frame = serial_read();
 	switch (frame) {
@@ -69,7 +71,7 @@ void serial_zcl_process(uint8_t cmd) {
  * Checks if an ATI response is being sent,
  * and responds with identity information if one is found
  */
-void check_ATI(void) {
+static uint8_t check_ATI(void) {
 	uint8_t b = serial_read_blocking();
 	uint8_t err = 0;
 
@@ -90,11 +92,13 @@ void check_ATI(void) {
 		err = 1;
 	}
 	
-	if (err) { return; }
+	if (err) { return 0; }
 
 	for (uint8_t i = 0; i < ATI_LEN; i++) {
 		serial_send(ati_resp[i]);
 	}
+	
+	return 1;
 }
 
 /**
