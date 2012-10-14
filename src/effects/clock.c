@@ -24,10 +24,14 @@
 #define SECS_IN_DAY ((time_t)60*60*24)
 #define TIMEZONE_SECS (3*60*60)
 
+struct {
+	struct glyph_buf text;
+} vars;
+
 void effect(void)
 {
-	const struct glyph *buf[8];
-	struct glyph_buf text = {8,buf};
+	vars.text.len=8;
+	const struct glyph **buf = vars.text.buf;
 
 	time_t now = time(NULL);
 	time_t since_midnight = (now+TIMEZONE_SECS) % SECS_IN_DAY;
@@ -49,6 +53,6 @@ void effect(void)
 
 	int16_t pos = ticks >> 3;
 
-	scroll_text(&text, pos, render_xy);
-	scroll_text(&text, pos-7, render_yz);
+	scroll_text(&vars.text, pos, render_xy);
+	scroll_text(&vars.text, pos-7, render_yz);
 }

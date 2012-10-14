@@ -29,7 +29,7 @@ struct glyph {
 
 struct glyph_buf {
 	uint16_t len;
-	const struct glyph **buf;
+	const struct glyph *buf[];
 };
 
 extern const struct glyph glyphs[];
