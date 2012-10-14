@@ -20,6 +20,7 @@
 import os
 import json
 import itertools
+import subprocess
 import yaml
 import xml.etree.ElementTree as ET
 from glob import glob
@@ -98,23 +99,31 @@ def playlist_source(data):
 #include <stdlib.h>
 #include "playlists.h"
 #include "pgmspace.h"
+#include "effects/lib/font8x8.h"
 '''
 
     def custom_data(data):
+        process = subprocess.Popen(["build/preprocessor/convert_glyphs"],
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE)
+
+        def glyph_convert(s):
+            process.stdin.write(s)
+            process.stdin.write('\n')
+            process.stdin.flush()
+            return process.stdout.readline()
+
         def get_str(d):
             if d:
-                h = str(hex(len(d)))[2:]
+                return glyph_convert(d)
 
-                if len(h) == 1:
-                    return '"\\x0' + h + "\"\"" + d + '"'
-
-                return '"\\x' + h + "\"\"" + d +'"'
-
-            return '"\\x00"'  # NULL seems to fail (invalid initializer error)
+            return '{0}'
 
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
-        ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = ' + \
+        ret = ['PROGMEM const struct glyph_buf s_playlist_item_' + str(i) + ' = ' + \
             get_str(d.get('data', '')) + ';' for i, d in enumerate(effects)]
+
+        process.terminate()
 
         return '\n'.join(ret) + '\n'
 
