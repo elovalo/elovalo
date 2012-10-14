@@ -5,6 +5,7 @@ import subprocess
 from generators import effects, playlists, gperf
 
 # Compile preprocessor first
+gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
 subprocess.check_call(["scons","-s","-f","preprocessor.sconstruct"])
 
 cwd = GetLaunchDir()
@@ -20,8 +21,6 @@ playlists.generate(
     os.path.join(cwd, 'src', 'playlists.json'),
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )
-
-gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
 
 AddOption('--no-avr',
           dest='build_avr',
