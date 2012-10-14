@@ -108,7 +108,8 @@ def playlist_source(data):
                                    stdout=subprocess.PIPE)
 
         def glyph_convert(s):
-            process.stdin.write(s)
+            sutf8 = s.encode('UTF-8')
+            process.stdin.write(sutf8)
             process.stdin.write('\n')
             process.stdin.flush()
             return process.stdout.readline()

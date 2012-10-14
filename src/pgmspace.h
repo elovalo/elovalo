@@ -39,7 +39,7 @@
 	pgm_aware_copy(&(target),&(var),sizeof(var))
 
 #define mb_pgm_copy(target,var,progmem)					\
-	(progmem ? pgm_copy(target,var) : memcpy(&(target),&(var),sizeof(var)))
+	((progmem) ? pgm_copy(target,var) : memcpy(&(target),&(var),sizeof(var)))
 	
 #else
 // On other platforms, implement some dummy macros

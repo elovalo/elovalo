@@ -21,5 +21,5 @@
 
 void effect(void)
 {
-	render_character(get_glyph_ascii('c'), false, 0, render_yz);
+	render_character(get_glyph_ascii('c'), 0, render_yz);
 }
