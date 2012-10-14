@@ -21,46 +21,44 @@
 #include "serial_hex.h"
 
 // Command Identifier Field Values
-#define CMDID_READ_ATTRS			0x00
-#define CMDID_READ_ATTRS_RESP		0x01
-#define CMDID_WRITE_ATTRS			0x02
-#define CMDID_WRITE_ATTRS_UNDIVIDED	0x03
-#define CMDID_WRITE_ATTRS_RESP		0x04
-#define CMDID_WRITE_ATTRS_NO_RESP	0x05
-#define CMDID_CONF_REP				0x06
-#define CMDID_CONF_REP_RESP			0x07
-#define CMDID_READ_REP_CONF			0x08
-#define CMDID_READ_REP_CONF_RESP	0x09
-#define CMDID_REP_ATTRS				0x0a
+#define CMDID_READ_ATTRS            0x00
+#define CMDID_READ_ATTRS_RESP       0x01
+#define CMDID_WRITE_ATTRS           0x02
+#define CMDID_WRITE_ATTRS_UNDIVIDED 0x03
+#define CMDID_WRITE_ATTRS_RESP      0x04
+#define CMDID_WRITE_ATTRS_NO_RESP   0x05
+#define CMDID_CONF_REP              0x06
+#define CMDID_CONF_REP_RESP         0x07
+#define CMDID_READ_REP_CONF         0x08
+#define CMDID_READ_REP_CONF_RESP    0x09
+#define CMDID_REP_ATTRS             0x0a
 
 // Cluster IDs
-#define CLUSTERID_BASIC			0x00
-#define CLUSTERID_ELOVALO		0x500
+#define CLUSTERID_BASIC   0x00
+#define CLUSTERID_ELOVALO 0x500
 
 // Attribute IDs
 // CLUSTERID_BASIC
-#define ATTR_DEVICE_ENABLED	0x0012
-#define ATTR_ALARM_MASK		0x0013
+#define ATTR_DEVICE_ENABLED 0x0012
+#define ATTR_ALARM_MASK     0x0013
 
 // CLUSTERID_ELOVALO
-#define ATTR_IEEE_ADDR			0x401
-#define ATTR_OPERATING_MODE		0x01
-#define ATTR_EFFECT_TEXT		0x02
-#define ATTR_PLAYLIST			0x03
-#define ATTR_TIMEZONE			0x04
-#define ATTR_TIME				0x05
-#define ATTR_EFFECT_NAMES		0x06
-#define ATTR_PLAYLIST_NAMES		0x07
-#define ATTR_PLAYLIST_EFFECTS	0x08
-#define ATTR_EFFECT				0x09
-#define ATTR_HW_VERSION			0x10
-#define ATTR_SW_VERSION			0x11
+#define ATTR_IEEE_ADDR        0x401
+#define ATTR_OPERATING_MODE   0x01
+#define ATTR_EFFECT_TEXT      0x02
+#define ATTR_PLAYLIST         0x03
+#define ATTR_TIMEZONE         0x04
+#define ATTR_TIME             0x05
+#define ATTR_EFFECT_NAMES     0x06
+#define ATTR_PLAYLIST_NAMES   0x07
+#define ATTR_PLAYLIST_EFFECTS 0x08
+#define ATTR_EFFECT           0x09
+#define ATTR_HW_VERSION       0x10
+#define ATTR_SW_VERSION       0x11
 
 // Command directions
 #define DIR_SERVER_TO_CLIENT 1
 #define DIR_CLIENT_TO_SERVER 0
-
-
 
 // Private
 static uint8_t frame_type(uint8_t fc);
