@@ -38,6 +38,11 @@ const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len)
 	return &glyphs[key];
 }
 
+const struct glyph *get_glyph_ascii(const char c)
+{
+	return get_glyph_utf8(&c,1);
+}
+
 bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest)
 {
 	const char *end = src+src_len;

@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef FONT8x8_H_
+#define FONT8x8_H_
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -38,6 +41,14 @@ extern const struct glyph glyphs[];
 const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len);
 
 /**
+ * Shorthand for converting single ASCII character to glyph. Makes
+ * life easier in countdown and such simple renderers.
+ */
+const struct glyph *get_glyph_ascii(const char c);
+
+/**
  * Converts given UTF-8 string to glyph array.
  */
 bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest);
+
+#endif /* FONT8x8_H_ */
