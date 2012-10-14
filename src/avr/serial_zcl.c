@@ -18,11 +18,11 @@
  */
 
 #include <avr/wdt.h>
-#include <util/crc16.h>
 
 #include "serial.h"
 #include "serial_hex.h"
 #include "serial_zcl.h"
+#include "zcl_commands.h"
 
 // Frame types
 #define ZCL_ACK 'K' // Successfully received last packet
@@ -30,19 +30,21 @@
 #define ZCL_STX 'S' // Sending a new packet
 
 // Message defines
-#define ZCL_CHAN 1 // ZCL message channel
+#define ZCL_CHANNEL 1 // ZCL message channel
 
+#define ZCL_MESSAGE_HEADER_SIZE 13
+
+#define ELOVALO_ENDPOINT 70
 
 //TODO: replace with eeprom read
 #define ATI_LEN 35
-uint8_t ep_id = 70;
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
 uint8_t mac[] = "\x01\x23\x45\x67\x89\xAB";
 
 // Private
 static void process_packet(void);
-static uint16_t read_packet_length(void);
-static uint16_t process_message(uint16_t len);
+static void process_payload(uint16_t length);
+static void process_zcl_message(uint16_t length);
 static void send_error(void);
 static void send_ok(void);
 static void check_ATI(void);
@@ -99,23 +101,25 @@ void check_ATI(void) {
  * Processes a ZCL packet, sends NAK if CRC check fails
  */
 static void process_packet(void) {
-	uint16_t len;
-	uint16_t crc;
-	uint16_t msg_crc;
-	read_t read;
+	uint16_t length;
+	uint16_t message_crc;
+	read16_t read16;
 
-	read.byte = serial_read_blocking();
-	if (read.byte != '0') { send_error(); } // Not a ZCL compliant packet
+	if (serial_read_blocking() != '0') {
+		send_error();
+		return;
+	}
 
-	len = read_packet_length();
-	crc = process_message(len);
+	read16 = serial_read_hex_uint16();
+	length = read16.val;
 
-	read = serial_read_hex_encoded();
-	msg_crc = (read.byte << 8);
-	read = serial_read_hex_encoded();
-	msg_crc |= read.byte;
+	reset_crc();
+	process_payload(length);
 
-	if (crc != msg_crc) {
+	read16 = serial_read_hex_uint16();
+	message_crc = read16.val;
+
+	if (message_crc != get_crc()) {
 		send_error();
 	} else {
 		send_ok();
@@ -123,54 +127,51 @@ static void process_packet(void) {
 }
 
 /**
- * Processes a single ZCL message, returning its CRC code
+ * Processes a single ZCL payload
  */
-static uint16_t process_message(uint16_t len) {
-	read_t read;
-	uint16_t crc;
-	crc = 0xffff;
+static void process_payload(uint16_t length) {
+	read_t read = serial_read_hex_encoded_crc();
+	length--;
 
-	for (uint16_t i = 0; i < len; i++) {
-		read = serial_read_hex_encoded();
-		if (!read.good) { send_error(); return 0; }
+	switch (read.byte) {
+		case ZCL_CHANNEL:
+			process_zcl_message(length);
+			break;
+		default:
+			// TODO: check correct way to handle
+			break;
+	}
+}
 
-		crc = _crc_ccitt_update(crc, read.byte);
+static void process_zcl_message(uint16_t length) {
+	read_t   read;
+	read16_t read16;
+	uint16_t profile;
+	uint16_t cluster;
 
-		if (i == 0) {
-			// Only ZCL messages supported, no FT
-			if (read.byte != ZCL_CHAN) { return 0; }
-		} else if (i >= 1 && i <= 9) {
-			// MAC
-			if (read.byte != mac[i]) { send_error(); return 0; }
-		} else if (i == 9) {
-			// End point ID
-			if (read.byte != ep_id) { send_error(); return 0; }
-		} else if (i >= 10 && i <= 11) {
-			// TODO: Profile
-		} else if (i >= 12 && i <= 13) {
-			// TODO: Cluster
-		} else {
-			// TODO: Payload
+	// Checks if MAC address matches
+	for (uint8_t i = 0; i < 8; i++) {
+		read = serial_read_hex_encoded_crc();
+		if (read.byte != mac[i]) {
+			// TODO: Check correct way to handle
+			return;
 		}
 	}
 
-	return crc;
-}
+	// Checking endpoint ID
+	read = serial_read_hex_encoded_crc();
+	if (read.byte != ELOVALO_ENDPOINT) {
+		return;
+	}
 
-/**
- * Reads a packets length from serial port
- */
-static uint16_t read_packet_length(void) {
-	uint16_t len;
-	read_t read;
+	read16 = serial_read_hex_uint16_crc();
+	profile = read16.val;
 
-	read = serial_read_hex_encoded();
-	len = (read.byte << 8);
+	read16 = serial_read_hex_uint16_crc();
+	cluster = read16.val;
 
-	read = serial_read_hex_encoded();
-	len |= read.byte;
-
-	return len;
+	length -= ZCL_MESSAGE_HEADER_SIZE;
+	process_command_frame(length);
 }
 
 /**

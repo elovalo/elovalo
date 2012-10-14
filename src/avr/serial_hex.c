@@ -17,8 +17,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <util/crc16.h>
+
 #include "serial.h"
 #include "serial_hex.h"
+
+//Internal calculated CRC value
+uint16_t crc_val = 0xffff;
 
 void sram_to_serial_hex(void *src, uint16_t n)
 {
@@ -49,22 +54,75 @@ uint16_t serial_hex_to_sram(void *dest, uint16_t n)
 	return i;
 }
 
+read16_t serial_read_hex_uint16_crc(void) {
+	read16_t ret = {1, 0};
+	read_t read = serial_read_hex_byte_crc();
+	ret.val = read.byte << 4;
+	if (!read.good) {
+		ret.good = 0;
+		return ret;
+	}
+
+	read = serial_read_hex_byte_crc();
+	ret.val |= read.byte;
+	ret.good = read.good;
+
+	return ret;
+}
+
+read_t serial_read_hex_encoded_crc(void) {
+	read_t read = serial_read_hex_encoded();
+	crc_val = _crc_ccitt_update(crc_val, read.byte);
+	return read;
+}
+
+read_t serial_read_hex_byte_crc(void) {
+	read_t read = serial_read_hex_byte();
+	crc_val = _crc_ccitt_update(crc_val, read.byte);
+	return read;
+}
+
+void reset_crc(void) {
+	crc_val = 0xffff;
+}
+
+uint16_t get_crc(void) {
+	return crc_val;
+}
+
+read16_t serial_read_hex_uint16(void) {
+	read16_t ret = {1, 0};
+	read_t read = serial_read_hex_encoded();
+	ret.val = read.byte << 4;
+	if (!read.good) {
+		ret.good = 0;
+		return ret;
+	}
+
+	read = serial_read_hex_encoded();
+	ret.val |= read.byte;
+	ret.good = read.good;
+
+	return ret;
+}
+
 read_t serial_read_hex_encoded(void) {
 	read_t ret;
 	uint8_t val;
 
-	ret = serial_read_hex_char();
+	ret = serial_read_hex_byte();
+
 	val = (ret.byte << 4);
 	if (!ret.good) { return ret; }
 
-	ret = serial_read_hex_char();
+	ret = serial_read_hex_byte();
 	val |= ret.byte;
 	ret.byte = val;
 
 	return ret;
 }
 
-read_t serial_read_hex_char(void) {
+read_t serial_read_hex_byte(void) {
 	read_t ret = {1,0};
 	ret.byte = hex_to_num(serial_read_blocking());
 	if (ret.byte == NOT_HEX) {

@@ -20,10 +20,17 @@
 #define NOT_HEX 254
 #define NOT_NUM 0
 
+//8 bit read value
 typedef struct {
 	uint8_t good;
 	uint8_t byte;
 } read_t;
+
+//16 bit read value
+typedef struct {
+	uint8_t good;
+	uint16_t val;
+} read16_t;
 
 /**
  * Send n bytes of hex encoded data starting from
@@ -44,23 +51,54 @@ void send_hex_encoded(uint8_t byte);
  */
 uint16_t serial_hex_to_sram(void *dest, uint16_t n);
 
-/*
+/**
+ * Reads and hex decodes four bytes to a uint16_t value and updates the internal CRC value
+ */
+read16_t serial_read_hex_uint16_crc(void);
+
+/**
+ * Reads and hex decodes four bytes to a uint16_t value
+ */
+read16_t serial_read_hex_uint16(void);
+
+/**
+ * Resets the internal CRC value.
+ * Use this function before beginning CRC reads
+ */
+void reset_crc(void);
+
+/**
+ * Returns the currently calculated CRC value
+ */
+uint16_t get_crc(void);
+
+/**
+ * Reads and hex decodes two bytes to a single value from the serial port. Also updates internal CRC value (call reset_crc before starting calls to this function).
+ */
+read_t serial_read_hex_encoded_crc(void);
+
+/**
+ * Reads and hex decodes a single byte from the serial port. Also updates internal CRC value (call reset_crc before starting calls to this function).
+ */
+read_t serial_read_hex_byte_crc(void);
+
+/**
  * Reads and hex decodes two bytes to a single value from the serial port.
  */
 read_t serial_read_hex_encoded(void);
 
-/*
+/**
  * Reads and hex decodes a single byte from the serial port.
  */
-read_t serial_read_hex_char(void);
+read_t serial_read_hex_byte(void);
 
-/*
+/**
  * Converts an ASCII hex char to a corresponding number value.
  * Returns NOT_HEX if incorrect value given.
  */
 uint8_t hex_to_num(uint8_t c);
 
-/*
+/**
  * Converts a number to a single hex ASCII char.
  * Returns NOT_NUM if given value is not between 0-15.
  */
