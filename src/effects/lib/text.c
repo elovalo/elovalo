@@ -32,36 +32,34 @@
 
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const char text[], int16_t offset, render_t f)
+void scroll_text(const struct glyph_buf *text_p, int16_t offset, render_t f)
 {
-	// text format is ZCL octet string, where the length is at byte 0
-	uint8_t text_len = mb_pgm_get(*text++, byte);
 	int16_t base_pos = (LEDS_X+1)-offset;
 	int16_t i = -base_pos / spacing;
 	uint16_t pos = i*spacing + base_pos;
+	const struct glyph *c;
+	struct glyph_buf text;
+	mb_pgm_copy(text,*text_p); // Copy buffer struct to SRAM
 
 	// Render only two characters which fit to screen
 
-	if (i >= 0 && i < text_len) {
-		const char c = mb_pgm_get(text[i], byte);
+	if (i >= 0 && i < text.len) {
+		mb_pgm_copy(c,text.buf[i]);
 		render_character(c, pos, f);
 	}
 
-	if (i+1 >= 0 && i+1<text_len) {
-		const char c = mb_pgm_get(text[i+1], byte);
+	if (i+1 >= 0 && i+1<text.len) {
+		mb_pgm_copy(c,text.buf[i+1]);
 		render_character(c, pos+spacing, f);
 	}
 }
 
-void render_character(const char index, int16_t offset, render_t f)
+void render_character(const struct glyph *glyph_p, int16_t offset, render_t f)
 {
-	uint8_t bitmap[8];
+	struct glyph glyph;
 
 	// Read character from the font in PROGMEM
-	const struct glyph *g = get_glyph_utf8(&index,1);
-	for (uint8_t i=0; i<8; i++) {
-		bitmap[i] = pgm_get(g->pixmap[i],byte);
-	}
+	mb_pgm_copy(glyph,*glyph_p);
 
 	for(uint8_t x = 0; x < 8; x++) {
 		for(uint8_t y = 0; y < 8; y++) {
@@ -69,7 +67,7 @@ void render_character(const char index, int16_t offset, render_t f)
 
 			if(loc < 0 || loc >= 8) continue;
 
-			int8_t set = bitmap[y] & 1 << loc;
+			int8_t set = glyph.pixmap[y] & 1 << loc;
 
 			if(set) f(x, y);
 		}

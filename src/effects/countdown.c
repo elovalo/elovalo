@@ -32,15 +32,16 @@ void init(void) {
 
 void effect(void)
 {
-	char text[3];
-	text[0] = 2;
-	text[1] = '0' + (vars.cur / 10);
-	text[2] = '0' + (vars.cur % 10);
+	const struct glyph *buf[2];
+	struct glyph_buf text = {2,buf};
+
+	buf[0] = get_glyph_ascii('0' + (vars.cur / 10));
+	buf[1] = get_glyph_ascii('0' + (vars.cur % 10));
 
 	clear_buffer();
 
-	scroll_text(text, 9, render_yz);
-	scroll_text(text, 16, render_xy);
+	scroll_text(&text, 9, render_yz);
+	scroll_text(&text, 16, render_xy);
 
 	if(vars.cur > 0) vars.cur--;
 }
