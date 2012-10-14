@@ -17,9 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common.h"
+#include <stdint.h>
+#include <avr/pgmspace.h>
+#include "pgm_tricks.h"
 
-void effect(void)
+void pgm_aware_copy(void *dst, const void *src, const int n)
 {
-	render_character(get_glyph_ascii('c'), 0, render_yz);
+	const uint8_t *p = (uint8_t*)src;
+	const uint8_t *end = p+n;
+	uint8_t *dst_u8 = (uint8_t*)dst;
+
+	while (p < end) {
+		*dst_u8++ = pgm_read_byte_near(p++);
+	}
 }

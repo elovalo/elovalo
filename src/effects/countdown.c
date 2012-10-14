@@ -24,6 +24,7 @@
 
 struct {
 	uint8_t cur;
+	struct glyph_buf text;
 } vars;
 
 void init(void) {
@@ -32,15 +33,14 @@ void init(void) {
 
 void effect(void)
 {
-	char text[3];
-	text[0] = 2;
-	text[1] = '0' + (vars.cur / 10);
-	text[2] = '0' + (vars.cur % 10);
+	vars.text.len = 2;
+	vars.text.buf[0] = get_glyph_ascii('0' + (vars.cur / 10));
+	vars.text.buf[1] = get_glyph_ascii('0' + (vars.cur % 10));
 
 	clear_buffer();
 
-	scroll_text(text, false, 9, render_yz);
-	scroll_text(text, false, 16, render_xy);
+	scroll_text(&vars.text, false, 9, render_yz);
+	scroll_text(&vars.text, false, 16, render_xy);
 
 	if(vars.cur > 0) vars.cur--;
 }

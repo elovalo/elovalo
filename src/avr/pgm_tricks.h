@@ -17,9 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common.h"
-
-void effect(void)
-{
-	render_character(get_glyph_ascii('c'), 0, render_yz);
-}
+/**
+ * Copies stuff from program memory to SRAM. This functions is not
+ * intended to be called directly but via pgmspace.h macros.
+ */
+void pgm_aware_copy(void *dst, const void *src, const int len);

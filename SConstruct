@@ -1,8 +1,12 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
 from glob import glob
+import subprocess
+from generators import effects, playlists, gperf
 
-from generators import effects, playlists
+# Compile preprocessor first
+gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
+subprocess.check_call(["scons","-s","-f","preprocessor.sconstruct"])
 
 cwd = GetLaunchDir()
 

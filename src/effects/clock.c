@@ -24,12 +24,14 @@
 #define SECS_IN_DAY ((time_t)60*60*24)
 #define TIMEZONE_SECS (3*60*60)
 
+struct {
+	struct glyph_buf text;
+} vars;
+
 void effect(void)
 {
-	char text[9];
-	text[0] = 8;
-	text[3] = ':';
-	text[6] = ':';
+	vars.text.len=8;
+	const struct glyph **buf = vars.text.buf;
 
 	time_t now = time(NULL);
 	time_t since_midnight = (now+TIMEZONE_SECS) % SECS_IN_DAY;
@@ -38,17 +40,19 @@ void effect(void)
 	uint8_t minutes = since_midnight/60%60;
 	uint8_t hours = since_midnight/60/60;
 
-	text[1] = '0'+(hours/10);
-	text[2] = '0'+(hours%10);
-	text[4] = '0'+(minutes/10);
-	text[5] = '0'+(minutes%10);
-	text[7] = '0'+(secs/10);
-	text[8] = '0'+(secs%10);
+	buf[0] = get_glyph_ascii('0'+(hours/10));
+	buf[1] = get_glyph_ascii('0'+(hours%10));
+	buf[2] = get_glyph_ascii(':');
+	buf[3] = get_glyph_ascii('0'+(minutes/10));
+	buf[4] = get_glyph_ascii('0'+(minutes%10));
+	buf[5] = get_glyph_ascii(':');
+	buf[6] = get_glyph_ascii('0'+(secs/10));
+	buf[7] = get_glyph_ascii('0'+(secs%10));
 
 	clear_buffer();
 
 	int16_t pos = ticks >> 3;
 
-	scroll_text(text, false, pos, render_xy);
-	scroll_text(text, false, pos-7, render_yz);
+	scroll_text(&vars.text, false, pos, render_xy);
+	scroll_text(&vars.text, false, pos-7, render_yz);
 }
