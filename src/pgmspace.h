@@ -33,16 +33,13 @@
    information about type parameter, see avr-libc user manual about
    pgmspace. */
 #define pgm_get(var,type)			\
-	pgm_read_ ## type ## _near(&(var))
-
-#define mb_pgm_get(var,type)			\
-	(is_pgm_ptr(&(var)) ? pgm_get(var,type) : var)
+  pgm_read_ ## type ## _near(&(var))
 
 #define pgm_copy(target,var)			\
 	pgm_aware_copy(&(target),&(var),sizeof(var))
 
-#define mb_pgm_copy(target,var)					\
-	(is_pgm_ptr(&(var)) ? pgm_copy(target,var) : memcpy(&(target),&(var),sizeof(var)))
+#define mb_pgm_copy(target,var,progmem)					\
+	(progmem ? pgm_copy(target,var) : memcpy(&(target),&(var),sizeof(var)))
 	
 #else
 // On other platforms, implement some dummy macros
@@ -51,8 +48,7 @@
 #define PGM_P const char *
 
 #define pgm_get(var,type) var
-#define mb_pgm_get(var,type) var
 #define pgm_copy(target,var) memcpy(&(target),&(var),sizeof(var))
-#define mb_pgm_copy(target,var) pgm_copy(target,var)
+#define mb_pgm_copy(target,var,progmem) pgm_copy(target,var)
 
 #endif

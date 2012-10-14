@@ -17,15 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdbool.h>
-
-/**
- * Determine if the pointer is in PROGMEM or in SRAM. True is returned
- * when the variable is in PROGMEM. This function is tested only on
- * ATmega328p.
- */
-bool is_pgm_ptr(const void *p);
-
 /**
  * Copies stuff from program memory to SRAM. This functions is not
  * intended to be called directly but via pgmspace.h macros.

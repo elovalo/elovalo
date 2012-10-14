@@ -24,12 +24,12 @@ typedef void(*render_t)(uint8_t x, uint8_t y);
 /**
  * Scrolls given text using given callback
  */
-void scroll_text(const struct glyph_buf *text_p, int16_t offset, render_t f);
+void scroll_text(const struct glyph_buf *text_p, bool progmem, int16_t offset, render_t f);
 
 /**
  * Renders character (index from font8x8_basic) using given callback
  */
-void render_character(const struct glyph *glyph_p, int16_t offset, render_t f);
+void render_character(const struct glyph *glyph_p, bool progmem, int16_t offset, render_t f);
 
 /**
  * Render helpers
