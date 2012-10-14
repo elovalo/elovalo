@@ -165,12 +165,13 @@ class SourceFile(object):
         )
 
     def _functions(self, c):
-        return ''.join(line['block'] for line in c
+        return ''.join(block_with_meta(line) for line in c
             if 'function' in line['types'] and len(line['types']) == 1
         )
 
     def _block(self, c, name):
-        return ''.join(line['block'] for line in c if name in line['types'])
+        return ''.join(block_with_meta(line) for line in c
+                if name in line['types'])
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
@@ -192,6 +193,12 @@ class SourceFile(object):
             return a[0]['block']
 
 
+def block_with_meta(line):
+    line_number = line['line_number']
+    return '\n'.join(['#line ' + str(line_number + i) + '\n' + p
+        for i, p in enumerate(line['block'].split('\n')) if p.strip()]) + '\n'
+
+
 def find_globals(content):
     ret = []
 
@@ -210,7 +217,7 @@ def find_globals(content):
 
 
 def analyze(name, content):
-    def analyze_line(i, line):
+    def analyze_line(i, line, line_offset):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
@@ -281,12 +288,16 @@ def analyze(name, content):
 
         ret['block'] = block
 
+        ret['line_number'] = line_offset + i + 1
+
         return ret
 
+    content_len = len(content)
     content = remove_comments(content)
+    line_offset = content_len - len(content)
     content = replace_variables(content, 'vars.', 'vars.' + name + '.')
 
-    return [analyze_line(i, line) for i, line in enumerate(content)]
+    return [analyze_line(i, line, line_offset) for i, line in enumerate(content)]
 
 
 def remove_comments(text):
