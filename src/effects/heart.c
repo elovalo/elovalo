@@ -20,6 +20,7 @@
 #include "common.h"
 
 #pragma MAX_FPS 25
+#pragma FLIP
 
 struct {
 	uint8_t y;
