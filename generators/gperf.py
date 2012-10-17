@@ -26,7 +26,7 @@ def pgm_wrap(var, s):
     uint8_t in that var """
     m = re.search(var + '\[[^\]]', s)
 
-    if m == None:
+    if not m:
         return s
 
     start = m.start()
@@ -78,6 +78,5 @@ def generate(source, target):
     out = re.sub('0B[01]+', replace_binary, out)
 
     # Write to target file
-    f = open(target, 'w')
-    f.write(out)
-    f.close()
+    with open(target, 'w') as f:
+        f.write(out)
