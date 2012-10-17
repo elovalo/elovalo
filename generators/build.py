@@ -18,27 +18,33 @@
 #
 
 import os
-from SCons.Script import Glob,Environment,Import
+from SCons.Script import Glob, Environment
 from SCons.Script.Main import GetOption
 
 Elf = 'firmware.elf'
 
+
 def avr_source_files():
     "Return globbed list of sources. Add new source directories here if needed"
-    return [ Glob('src/*.c'),
+    return [Glob('src/*.c'),
              Glob('src/effects/lib/*.c'),
              Glob('src/avr/*.c')]
 
-def avr_build_env(flags = ''):
+
+def avr_build_env(flags=''):
     """Returns environment suitable for AVR building. Flags should be
     compatible with both linker and compiler"""
+    mmcu = '-mmcu=atmega328p'
+    hz = '-DF_CPU=16000000UL'
+
     env = Environment(ENV=os.environ)
     env['CC'] = 'avr-gcc'
-    env.Append(CCFLAGS = flags)
-    env.Append(LINKFLAGS = flags)
-    env.Append(CCFLAGS = '-mmcu=atmega328p -DF_CPU=16000000UL -Wall -std=gnu99 -fpack-struct -fshort-enums -flto')
-    env.Append(LINKFLAGS = '-mmcu=atmega328p -flto -fwhole-program -flto-partition=none')
+    env.Append(CCFLAGS=flags)
+    env.Append(LINKFLAGS=flags)
+    env.Append(CCFLAGS=mmcu + ' ' + hz + ' -Wall -std=gnu99 -fpack-struct ' +\
+        '-fshort-enums -flto')
+    env.Append(LINKFLAGS=mmcu + ' -flto -fwhole-program -flto-partition=none')
     env.Append(LIBS='m')
     if GetOption('use_asm'):
-        env.Append(CPPDEFINES = 'ASM_ISRS')
+        env.Append(CPPDEFINES='ASM_ISRS')
     return env
