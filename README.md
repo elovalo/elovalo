@@ -6,7 +6,7 @@ You should check out [elovalo.org](http://elovalo.org/) for more casual document
 
 ## Dependencies
 
-You should have at least gcc, avr-gcc, scons and preferably jansson and Blender installed in order to use the simulator.
+You should have at least gcc, avr-gcc, scons, gperf and preferably jansson and Blender installed in order to use the simulator.
 
 ## Building
 
@@ -50,7 +50,9 @@ In order to render with Blender, you'll need to define an alias for. Just having
 
 alias blender="path to blender/blender.app/Contents/MacOS/blender"
 
-### Eclipse
+### Eclipse 
+
+*OUTDATED*
 
 Import project to Eclipse using Projects from Git thingy.
 
