@@ -27,6 +27,7 @@ Elf = 'firmware.elf'
 def source_files():
     "Return globbed list of sources. Add new source directories here if needed"
     return [Glob('src/*.c'),
+        Glob('src/common/*.c'),
         Glob('src/effects/lib/*.c'),
         Glob('src/generated/*.c'),
     ]

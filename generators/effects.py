@@ -31,8 +31,8 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "../pgmspace.h"
-#include "../env.h"
+#include "../common/pgmspace.h"
+#include "../common/env.h"
 #include "effects.h"
 #include "../effects/common.h"
 '''

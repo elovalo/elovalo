@@ -18,7 +18,7 @@
  */
 
 #include "font8x8.h"
-#include "../../pgmspace.h"
+#include "../../common/pgmspace.h"
 #include "font8x8_generated.h"
 
 #define BIT_NOT_SET(x,y) (!((x) & (1 << (y))))

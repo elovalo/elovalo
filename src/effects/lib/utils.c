@@ -21,12 +21,12 @@
  * Led cube effect utilities
  */
 
-#include "../../assert.h"
+#include "../../common/assert.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "../../env.h"
-#include "../../cube.h"
+#include "../../common/env.h"
+#include "../../common/cube.h"
 #include "utils.h"
 
 /* If you are changing LED count make sure you are not using set_led

@@ -105,7 +105,7 @@ def playlist_source(data):
 #include <stdint.h>
 #include <stdlib.h>
 #include "playlists.h"
-#include "../pgmspace.h"
+#include "../common/pgmspace.h"
 #include "../effects/lib/font8x8.h"
 '''
 
