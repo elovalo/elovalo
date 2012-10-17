@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../effects.h"
+#include "../generated/effects.h"
 
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers

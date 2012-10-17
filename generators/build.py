@@ -24,11 +24,26 @@ from SCons.Script.Main import GetOption
 Elf = 'firmware.elf'
 
 
-def avr_source_files():
+def source_files():
     "Return globbed list of sources. Add new source directories here if needed"
     return [Glob('src/*.c'),
-             Glob('src/effects/lib/*.c'),
-             Glob('src/avr/*.c')]
+        Glob('src/effects/lib/*.c'),
+        Glob('src/generated/*.c'),
+    ]
+
+
+def avr_source_files():
+    ret = source_files()
+    ret.append(Glob('src/avr/*.c'))
+
+    return ret
+
+
+def exporter_source_files():
+    ret = source_files()
+    ret.append(Glob('src/exporter/*.c'))
+
+    return ret
 
 
 def avr_build_env(flags=''):

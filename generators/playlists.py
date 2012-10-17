@@ -28,6 +28,11 @@ from glob import glob
 TICK_GRANULARITY = 0.008
 
 def generate(source, target, conf, effects=None):
+    parent_dir = os.path.split(target)[0]
+
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
+
     write(target, playlist_source(attach_ids(get_playlists(
         load(source), load_conf(conf)), get_names(effects))))
 
@@ -98,8 +103,8 @@ def playlist_source(data):
 #include <stdint.h>
 #include <stdlib.h>
 #include "playlists.h"
-#include "pgmspace.h"
-#include "effects/lib/font8x8.h"
+#include "../pgmspace.h"
+#include "../effects/lib/font8x8.h"
 '''
 
     def custom_data(data):
