@@ -64,6 +64,11 @@ def generate(source, target):
     out = out.replace('\nconst struct glyph *','\n#if 0')
     out = out + '\n#endif'
 
+    # Replace binary with hex (GCC 4.3<)
+    def replace_binary(m):
+        return hex(int(m.group(0)[2:], 2))
+    out = re.sub('0B[01]+', replace_binary, out)
+
     # Write to target file
     f = open(target,'w')
     f.write(out)
