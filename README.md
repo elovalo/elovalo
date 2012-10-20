@@ -6,17 +6,24 @@ You should check out [elovalo.org](http://elovalo.org/) for more casual document
 
 ## Dependencies
 
-You should have at least gcc, avr-gcc, scons, gperf and preferably jansson and Blender installed in order to use the simulator.
+You should have at least gcc, avr-gcc, scons, gperf and preferably
+jansson and Blender installed in order to use the simulator. If you
+have Ubuntu 12.04 LTS or 12.10, we have instructions for you.
 
-## Building
+### Ubuntu 12.10
 
-### Ubuntu with SCons
+To build on Ubuntu 12.10, install the following packages:
 
-To build on Ubuntu install the following packages from the Quantal repository:
+    gcc-avr avr-libc gcc scons libjansson-dev gperf avrdude
 
-    avr-gcc gcc scons libjansson4
+If you want to generate animations, install the following packages as well:
 
-In order to install Quantal(12.10) packages you have to enable Quantal repositories:
+    sudo apt-get install blender libav-tools
+
+### Ubuntu 12.04
+
+With Ubuntu 12.04 LTS you need to install some packages from Quantal (12.10)
+repositories. Here's how to do it:
 
 Add the following lines to <tt>/etc/apt/preferences/</tt>
 
@@ -28,31 +35,34 @@ And add the following line to <tt>/etc/apt/sources.list</tt>
 
     deb http://archive.ubuntu.com/ubuntu quantal main restricted universe multiverse
 
-Now you can install packages from the Quantal repository like this:
+Now you can install all the required packages packages:
 
-    sudo apt-get install avr-gcc/quantal avr-libc/quantal
-
-You can compile the program by running
-
-    # scons
+    sudo apt-get install gcc-avr/quantal avr-libc/quantal gcc scons libjansson-dev gperf avrdude
 
 If you want to generate animations, install the following packages as well:
 
-    blender libav-tools
-
-To be able to program the microcontroller, you'll need the programmer hardware and `avrdude` package.
+    sudo apt-get install blender libav-tools
 
 ### OS X with SCons
 
-Make sure you have at least gcc, avr-gcc and scons installed. Preferably you should have jansson and Blender (2.6x) as well if you wish to use the simulator.
+Make sure you have at least gcc, avr-gcc and scons
+installed. Preferably you should have jansson and Blender (2.6x) as
+well if you wish to use the simulator.
 
-In order to render with Blender, you'll need to define an alias for. Just having it in your path isn't quite enough for some reason. Add something like this to your .bashrc or .bash\_profile:
+In order to render with Blender, you'll need to define an alias
+for. Just having it in your path isn't quite enough for some
+reason. Add something like this to your .bashrc or .bash\_profile:
 
-alias blender="path to blender/blender.app/Contents/MacOS/blender"
+    alias blender="path to blender/blender.app/Contents/MacOS/blender"
 
 ### Eclipse 
 
-*OUTDATED*
+**Please note:** Eclipse builds do not support code generation so you
+are totally on your own with Eclipse. You may try consulting
+StackOverflow:
+http://stackoverflow.com/questions/1052759/eclipse-cdt-scons
+
+The old instructinos were:
 
 Import project to Eclipse using Projects from Git thingy.
 
@@ -73,10 +83,10 @@ SCons build file for you. Just run:
 
     scons
 
-Then the AVR output gets into `build_avr` and exporter stuff to
-`build_exporter`. To run the exporter:
+Then the AVR output gets into `build/elo` and `build/zcl` and exporter
+stuff to `build/exporter`. To run the exporter:
 
-    build_exporter/exporter
+    build/exporter/exporter
 
 If you want just to play with effets and you don't have an AVR compiler,
 you may skip AVR build by running:
@@ -92,9 +102,13 @@ root privileges, add the following udev rule to `/etc/udev/rules.d/10-usbasp`:
 
 Then just reboot your computer (or do some udev magic if you are Linux master).
 
-To program, run:
+To program Elocmd variant (the ordinary one), run:
 
-    scons --program
+    scons --program-elo
+	
+To program the variant with Zigbee support, run:
+
+    scons --program-zcl
 
 ## Size Optimization
 
