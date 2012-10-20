@@ -140,6 +140,7 @@ class SourceFiles(object):
 class SourceFile(object):
 
     def __init__(self, path):
+        self.path = ''.join(path.rpartition('src')[1:])
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
@@ -165,12 +166,12 @@ class SourceFile(object):
         )
 
     def _functions(self, c):
-        return ''.join(block_with_meta(line) for line in c
+        return ''.join(block_with_meta(line, self.path) for line in c
             if 'function' in line['types'] and len(line['types']) == 1
         )
 
     def _block(self, c, name):
-        return ''.join(block_with_meta(line) for line in c
+        return ''.join(block_with_meta(line, self.path) for line in c
                 if name in line['types'])
 
     def _flip(self, c):
@@ -193,9 +194,10 @@ class SourceFile(object):
             return a[0]['block']
 
 
-def block_with_meta(line):
+def block_with_meta(line, path):
     line_number = line['line_number']
-    return '\n'.join(['#line ' + str(line_number + i) + '\n' + p
+    return '\n'.join(['#line ' + str(line_number + i) + ' ' +
+        '"' + path + '"' + '\n' + p
         for i, p in enumerate(line['block'].split('\n')) if p.strip()]) + '\n'
 
 
