@@ -72,6 +72,13 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	assert(z < LEDS_Z);
 	assert(i < (1 << GS_DEPTH));
 
+#ifdef MIRROR_X
+	x = 7-x;
+#endif
+#ifdef MIRROR_Y
+	y = 7-y;
+#endif
+
 	/* Cube buffers are bit packed: 2 voxels per 3 bytes when
 	 * GS_DEPTH is 12. This calculates bit position efficiently by
 	 * using bit shifts. With AVR's 8-bit registers this is
