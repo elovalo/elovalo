@@ -1,0 +1,30 @@
+# Playlist for Pöö! demo by Hot Lambda Lovin' in WÄRK:fest 2012
+
+- name: cube
+  length: 2.4
+- name: all_on
+  length: 0.15
+- name: cube
+  length: 1.5
+- name: blinker
+  length: 10
+- name: scroll_text
+  length: 7
+  data: "elovalo.org"
+- name: sine
+  length: 13.5
+- name: scroll_text
+  length: 11
+  data: "λ Hot Lambda Lovin' λ"
+- name: blinker
+  length: 3
+- name: ilkka
+  length: 7
+- name: cube
+  length: 1
+- name: ilkka
+  length: 17
+- name: scroll_text
+  data: "Thanks!"
+  length: 30
+
