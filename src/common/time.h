@@ -22,7 +22,7 @@
  *  64 bit on POSIX platforms but is uint32_t in AVR.
  */
 #ifdef AVR
-#include "avr/clock.h"
+#include "../avr/clock.h"
 #else
 #include <time.h>
 #endif
