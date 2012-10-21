@@ -55,7 +55,7 @@ Make sure you have at least gcc, avr-gcc and scons installed. Preferably you sho
 
 In order to render with Blender, you'll need to define an alias for. Just having it in your path isn't quite enough for some reason. Add something like this to your .bashrc or .bash\_profile:
 
-alias blender="path to blender/blender.app/Contents/MacOS/blender"
+    alias blender="path to blender/blender.app/Contents/MacOS/blender"
 
 ### Eclipse
 
