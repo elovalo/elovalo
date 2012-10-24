@@ -26,5 +26,4 @@
   length: 17
 - name: scroll_text
   data: "Thanks!"
-  length: 30
-
+  length: 10
