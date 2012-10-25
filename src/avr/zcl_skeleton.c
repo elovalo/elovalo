@@ -19,7 +19,9 @@
 
 // Lengths
 #define ZCL_MESSAGE_HEADER_LEN 11
+#define READ_RESP_HEADER_LEN 4
 #define MAC_LEN 8
+#define READ_BUF_LEN 32
 
 // Frame types
 #define ACK 'K' // Successfully received last packet
@@ -71,6 +73,14 @@
 #define TYPE_UTC_TIME 0xe2
 #define TYPE_IEEE_ADDRESS 0xf0
 
+// Data type lengths
+#define TYPELEN_BOOLEAN 1
+#define TYPELEN_UINT8 1
+#define TYPELEN_INT32 4
+#define TYPELEN_ENUM 1
+#define TYPELEN_UTC_TIME 4
+#define TYPELEN_IEEE_ADDRESS 8
+
 // Status IDs
 #define STATUS_SUCCESS 0x00
 #define STATUS_FAILURE 0x01
@@ -85,6 +95,8 @@ uint16_t write_crc = 0xffff;
 uint16_t read_crc = 0xffff;
 
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
+
+uint8_t read_buffer[READ_BUF_LEN];
 
 void process_zcl_frame(void) {
 	read_t read;
@@ -180,9 +192,10 @@ uint8_t process_command_frame(uint16_t cluster, uint16_t length) {
 }
 
 void process_read_cmd(uint16_t cluster, uint16_t len) {
-	uint16_t attr;
+	uint16_t resp_len = read_cmd_length();
 	
-	write_zcl_header(length); //TODO: Multiple attributes, how to write length?
+	uint16_t attr;
+	write_zcl_header(resp_len); //TODO: Multiple attributes, how to write length?
 	write_payload_header(cluster); //TODO: is supporting just clusterid enough
 	write_cmd_header(CMD_READ_RESPONSE); //TODO
 	
@@ -221,7 +234,7 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_ENUM);
+				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
 			case ATTR_PLAYLIST:
@@ -270,6 +283,70 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 	write_crc_out();
 }
 
+void read_cmd_length(uint16_t cluster, uint16_t msg_len) {
+	uint16_t length = 1; // Because payload contains the channel byte
+
+	for (uint16_t i = 0; i < msg_len; i++) {
+		attr = read_hex_crc_16();
+		length += READ_RESP_HEADER_LEN;
+
+		if (cluster == CLUSTERID_BASIC) {
+			switch(attr) {
+			case ATTR_DEVICE_ENABLED:
+				length += TYPELEN_BOOLEAN;
+				break;
+			case ATTR_ALARM_MASK:
+				length += TYPELEN_UINT8;
+				break;
+			case ATTR_IEEE_ADDRESS:
+				length += TYPELEN_IEEE_ADDRESS;
+				break;
+			default:
+				break;
+			}
+		} else if (cluster == CLUSTERID_ELOVALO) {
+			switch(cmd) {
+			case ATTR_OPERATING_MODE:
+				length += TYPELEN_ENUM;
+				break;
+			case ATTR_EFFECT_TEXT:
+				length += //TODO;
+				break;
+			case ATTR_PLAYLIST:
+				length += //TODO;
+				break;
+			case ATTR_TIMEZONE:
+				length += TYPELEN_INT32;
+				break;
+			case ATTR_TIME:
+				length += TYPELEN_UTC_TIME;
+				break;
+			case ATTR_EFFECT_NAMES:
+				length += //TODO;
+				break;
+			case ATTR_PLAYLIST_NAMES:
+				length += //TODO;
+				break;
+			case ATTR_PLAYLIST_EFFECTS:
+				length += //TODO;
+				break;
+			case ATTR_EFFECT:
+				length += TYPELEN_UINT8;
+				break;
+			case ATTR_HW_VERSION:
+				length += //TODO;
+				break;
+			case ATTR_SW_VERSION:
+				length += //TODO;
+				break;
+			default:
+				length += ;
+				break;
+			}
+		}
+	}
+}
+
 static void write_effect_names() {
 	write_hex('[');
 	for (uint8_t i = 0; i < effects_len; i++ ) {
@@ -303,8 +380,8 @@ void process_write_cmd(uint16_t length) {
 				break;
 			case ATTR_IEEE_ADDRESS:
 				if (accept(TYPE_IEEE_ADDRESS)) {
-					for (uint8_t i = 0; i < 6; i++) {
-						MAC[i] = read_hex_crc();
+					for (uint8_t i = 0; i < MAC_LEN; i++) {
+						mac[i] = read_hex_crc();
 					}
 				}
 				break;
