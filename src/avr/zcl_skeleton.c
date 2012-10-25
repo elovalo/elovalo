@@ -17,6 +17,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "serial.h"
+#include "serial_hex.h"
+#include "main.h"
+
 // Lengths
 #define ZCL_MESSAGE_HEADER_LEN 11
 #define READ_RESP_HEADER_LEN 4
@@ -91,19 +95,47 @@
 
 uint8_t error_read = 0;
 
+uint8_t read_buffer[READ_BUF_LEN];
+
 uint16_t write_crc = 0xffff;
 uint16_t read_crc = 0xffff;
 
+// ZCL Header variables
+uint8_t transaction_seq = 0;
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
-uint8_t read_buffer[READ_BUF_LEN];
+typedef struct {
+    unsigned type: 2;
+    unsigned manu_specific: 1;
+    unsigned direction: 1;
+    unsigned disable_def_resp: 1;
+    unsigned reserved: 3;
+} frame_control_t;
+
+static void send_error(void);
+static void send_ok(void);
+static uint8_t read_packet(void);
+static uint8_t process_payload(uint16_t length);
+static uint8_t process_command_frame(uint16_t cluster, uint16_t length);
+static void process_read_cmd(uint16_t cluster, uint16_t length);
+static uint16_t read_cmd_length(void);
+static void write_packet_header(uint16_t length);
+static void write_payload_header(void);
+static void write_zcl_header(uint8_t cmd);
+static void write_effect_names(void);
+static void process_write_cmd(uint8_t cluster, uint16_t length);
+static void write_default_response(uint8_t cmd, uint8_t status);
+static uint8_t read_hex(void);
+static uint16_t read_hex_16(void);
+static uint8_t read_hex_crc(void);
+static uint16_t read_hex_crc_16(void);
+static void reset_read_crc(void);
+static void reset_write_crc(void);
 
 void process_zcl_frame(void) {
-	read_t read;
+	uint8_t frametype = serial_read_blocking();
 
-	read = serial_read_blocking();
-
-	switch (read.byte) {
+	switch (frametype) {
 	case ACK:
 		//TODO: timeout error if not received 1s after sending a message
 		break;
@@ -111,6 +143,7 @@ void process_zcl_frame(void) {
 		//TODO: resend last packet
 		break;
 	case STX:
+	{
 		uint8_t err = read_packet();
 		if (err) {
 			send_error();
@@ -118,23 +151,33 @@ void process_zcl_frame(void) {
 			send_ok();
 		}
 		break;
+	}
 	default:
 		//TODO: handle unknown content
 		break;
 	}
 }
 
-uint8_t read_packet(void) {
+static void send_error(void) {
+	serial_send(NAK);
+}
+
+static void send_ok(void) {
+	serial_send(ACK);
+}
+
+static uint8_t read_packet(void) {
+	//TODO: did packets need CRC checking?
 	error_read = 0;
 	reset_read_crc();
+
+	uint16_t length = read_hex_16();
 
 	uint8_t channel = read_hex_crc_byte();
 	if (channel != ZCL_CHANNEL) {
 		// Do nothing or send error?
 		return 1;
 	}
-
-	uint16_t length = read_hex_crc_16();
 	uint8_t err = process_payload(length);
 	if (err) { return 1; }
 
@@ -146,10 +189,10 @@ uint8_t read_packet(void) {
 	return 0;
 }
 
-uint8_t process_payload(uint16_t length) {
+static uint8_t process_payload(uint16_t length) {
 	// Confirming MAC address
-	for (uint8_t i = 0; i < 6; i++) {
-		if (mac[1] != read_hex_crc();) {
+	for (uint8_t i = 0; i < MAC_LEN; i++) {
+		if (mac[1] != read_hex_crc()) {
 			return 1;
 		}
 	}
@@ -166,8 +209,15 @@ uint8_t process_payload(uint16_t length) {
 	return process_zcl_command_frame(cluster, length);
 }
 
-uint8_t process_command_frame(uint16_t cluster, uint16_t length) {
-	frame_control_t frame_control = (frame_control_t) read_hex_crc();
+static uint8_t process_command_frame(uint16_t cluster, uint16_t length) {
+	frame_control_t frame_control;
+	uint8_t fc_byte = read_hex_crc();
+
+	frame_control.type = (fc_byte >> 6);
+	frame_control.manu_specific = (fc_byte & 0x00100000) >> 5;
+	frame_control.direction = (fc_byte & 0x00010000) >> 4;
+	frame_control.disable_def_resp = (fc_byte & 0x00001000) >> 3;
+	frame_control.reserved = fc_byte;
 
 	if (frame_control.manu_specific) {
 		uint16_t manu_spec = read_hex_crc_16();
@@ -191,13 +241,13 @@ uint8_t process_command_frame(uint16_t cluster, uint16_t length) {
 	return 0;
 }
 
-void process_read_cmd(uint16_t cluster, uint16_t len) {
+static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	uint16_t resp_len = read_cmd_length();
-	
 	uint16_t attr;
-	write_zcl_header(resp_len); //TODO: Multiple attributes, how to write length?
-	write_payload_header(cluster); //TODO: is supporting just clusterid enough
-	write_cmd_header(CMD_READ_RESPONSE); //TODO
+
+	write_packet_header(resp_len);
+	write_payload_header();
+	write_zcl_header(CMDID_READ_RESPONSE);
 	
 	for (uint8_t i = 0; i < len; i++) {
 		attr = read_hex_crc_16();
@@ -205,16 +255,16 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
 				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN); //TODO
-				write_hex(IS_ON);
+				//send_hex_encoded(IS_ON); //TODO
 				break;
 			case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
-				write_hex(ALARM_MASK);
+				//send_hex_encoded(ALARM_MASK); //TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
 				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
 				for (uint8_t i = 0; i < MAC_LEN; i++) {
-					write_hex(mac[i]);
+					send_hex_encoded(mac[i]);
 				}
 				break;
 			default:
@@ -222,24 +272,27 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 				break;
 			}
 		} else if (cluster == CLUSTERID_ELOVALO) {
-			switch(cmd) {
+			switch(attr) {
 			case ATTR_OPERATING_MODE:
+			{
 				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
+				uint8_t mode = main_current_mode();
 				if (mode == MODE_OFF || mode == MODE_IDLE) {
-					write_hex(0);
+					send_hex_encoded(0);
 				} else if (mode == MODE_EFFECT) {
-					write_hex(1);
+					send_hex_encoded(1);
 				} else if (mode == MODE_PLAYLIST) {
-					write_hex(2);
+					send_hex_encoded(2);
 				}
 				break;
-			case ATTR_EFFECT_TEXT:
+			}
+			/*case ATTR_EFFECT_TEXT:
 				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
 			case ATTR_PLAYLIST:
 				write_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				write_hex(current_playlist);
+				send_hex_encoded(current_playlist);
 				break;
 			case ATTR_TIMEZONE:
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
@@ -263,7 +316,7 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 				break;
 			case ATTR_EFFECT:
 				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				write_hex(current_effect);
+				send_hex_encoded(current_effect);
 				break;
 			case ATTR_HW_VERSION:
 				write_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
@@ -275,7 +328,7 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 				break;
 			default:
 				write_attr_resp_fail(); // TODO
-				break;
+				break;*/
 			}
 		}
 	}
@@ -283,10 +336,10 @@ void process_read_cmd(uint16_t cluster, uint16_t len) {
 	write_crc_out();
 }
 
-void read_cmd_length(uint16_t cluster, uint16_t msg_len) {
+static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 	uint16_t length = 1; // Because payload contains the channel byte
 
-	for (uint16_t i = 0; i < msg_len; i++) {
+	for (uint16_t i = 0; i < msg_len; i += 2) {
 		attr = read_hex_crc_16();
 		length += READ_RESP_HEADER_LEN;
 
@@ -309,7 +362,7 @@ void read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 			case ATTR_OPERATING_MODE:
 				length += TYPELEN_ENUM;
 				break;
-			case ATTR_EFFECT_TEXT:
+			/*case ATTR_EFFECT_TEXT:
 				length += //TODO;
 				break;
 			case ATTR_PLAYLIST:
@@ -341,26 +394,56 @@ void read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 				break;
 			default:
 				length += ;
-				break;
+				break;*/
 			}
 		}
 	}
+
+	return length;
 }
 
-static void write_effect_names() {
-	write_hex('[');
+static void write_packet_header(uint16_t length) {
+	//TODO check if crc needed, and the correct order for these
+	reset_write_crc();
+	send_hex_encoded(STX);
+	write_hex_16(length);
+	write_hex_crc(ZCL_CHANNEL);
+}
+
+static void write_payload_header(void) {
+	// write MAC
+	for (uint8_t i = 0; i < MAC_LEN; i++) {
+		write_hex_crc(mac[i]);
+	}
+
+	write_hex_crc(EP_ID);
+	write_hex_crc_16(profile); //TODO: profile?
+	write_hex_crc_16(CLUSTERID_ELOVALO);
+}
+
+static void write_zcl_header(uint8_t cmd){
+	write_hex_crc(frame_control);
+	write_hex_crc(transaction_seq++);
+	if (transaction_seq == 0xff) {
+		transaction_seq = 0;
+	}
+	write_hex_crc(cmd);
+}
+
+static void write_effect_names(void) {
+	send_hex_encoded('[');
 	for (uint8_t i = 0; i < effects_len; i++ ) {
-		write_hex('"');
+		send_hex_encoded('"');
 		send_string_from_pgm(&effects[i].name)
-		write_hex('"');
+		send_hex_encoded('"');
 		if (i < effects_len - 1) {
-			write_hex(',');
+			send_hex_encoded(',');
 		};
 	}
-	write_hex(']');
+	send_hex_encoded(']');
 }
 
-void process_write_cmd(uint16_t length) {
+static void process_write_cmd(uint8_t cluster, uint16_t length) {
 	for (uint8_t i = 0; i < len; i++) {
 		attr = read_hex_crc_16();
 		if (cluster == CLUSTERID_BASIC) {
@@ -428,13 +511,13 @@ void process_write_cmd(uint16_t length) {
 	write_success_write_resp();
 }
 
-void write_default_response(uint8_t cmd, uint8_t status) {
+static void write_default_response(uint8_t cmd, uint8_t status) {
 	write_zcl_header(2);
 	write_hex_crc(cmd);
 	write_hex_crc(status);
 }
 
-uint8_t read_hex(void) {
+static uint8_t read_hex(void) {
 	read_t read = serial_hex_read();
 	if (!read.good) {
 		error_reading |= 1;
@@ -442,7 +525,7 @@ uint8_t read_hex(void) {
 	return read.byte
 }
 
-uint16_t read_hex_16(void) {
+static uint16_t read_hex_16(void) {
 	read16_t read = serial_hex_read_uint16();
 	if (!read.good) {
 		error_reading |= 1;
@@ -450,7 +533,7 @@ uint16_t read_hex_16(void) {
 	return read.val;
 }
 
-uint8_t read_hex_crc(void) {
+static uint8_t read_hex_crc(void) {
 	uint8_t byte = read_hex();
 	read_crc = _crc_ccitt_update(read_crc, byte);
 	if (!read.good) {
@@ -459,7 +542,7 @@ uint8_t read_hex_crc(void) {
 	return read.byte
 }
 
-uint16_t read_hex_crc_16(void) {
+static uint16_t read_hex_crc_16(void) {
 	read16_t read = serial_hex_read_uint16();
 	if (!read.good) {
 		error_reading |= 1;
@@ -467,10 +550,10 @@ uint16_t read_hex_crc_16(void) {
 	return read.val;
 }
 
-void reset_read_crc(void) {
+static void reset_read_crc(void) {
 	read_crc = 0xffff;
 }
 
-void reset_write_crc(void) {
+static void reset_write_crc(void) {
 	write_crc = 0xffff;
 }
