@@ -314,20 +314,11 @@ UsedLibrary="elovalo.lbr"
 UsedLibrary="D:/Downloads/Sega Syntesizer/Eagle_projects/SMD LED Rings/smd_led_ring.lbr"
 
 [Win_1]
-Type="CAM Processor"
-Loc="640 518 1271 960"
-State=0
-Number=3
-File="ledikuutio.brd"
-Job="D:/Program Files/EAGLE-6.1.0/cam/excellon.cam"
-
-[Win_2]
 Type="Control Panel"
-Loc="0 1 685 1006"
+Loc="646 200 1333 769"
 State=2
 Number=0
 
 [Desktop]
 Screen="1920 1080"
 Window="Win_1"
-Window="Win_2"
