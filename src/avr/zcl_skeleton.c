@@ -119,6 +119,11 @@ uint16_t read_crc = 0xffff;
 uint8_t transaction_seq = 0;
 uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
+// ATI
+#define ATI 'A'
+#define ATI_LEN 35
+uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
+
 typedef union frame_control {
 	struct {
 		unsigned type: 2;
@@ -166,7 +171,6 @@ static void write_hex_crc(uint8_t);
 static void write_hex_crc_16(uint16_t);
 static void write_pgm_string_hex_crc(const char * const* pgm_p);
 
-
 static uint8_t accept(uint8_t);
 static uint8_t read_hex_byte(void);
 static uint8_t read_hex_crc_byte(void);
@@ -196,6 +200,17 @@ void process_zcl_frame(uint8_t frametype) {
 			send_ok();
 		}
 		break;
+	}
+	case ATI:
+	{
+		uint8_t b;
+		b = serial_read_blocking();
+		if (b != 'T') { break; }
+		b = serial_read_blocking();
+		if (b != 'I') { break; }
+		for (uint8_t i = 0; i < ATI_LEN; i++) {
+			serial_send(ati_resp[i]);
+		}
 	}
 	default:
 		//TODO: handle unknown content
