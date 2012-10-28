@@ -750,7 +750,7 @@ uint8_t hex_to_num(uint8_t c) {
 
 hex_value_t num_to_hex_chars(uint8_t i) {
 	hex_value_t val;
-	val.one = num_to_hex(i & 0xf0);
+	val.one = num_to_hex((i & 0xf0) >> 4);
 	val.two = num_to_hex(i & 0x0f);
 	return val;
 }
