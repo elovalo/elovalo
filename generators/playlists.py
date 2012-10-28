@@ -64,7 +64,7 @@ def get_playlists(data, conf):
 
         return ret
 
-    print 'Missing playlist conf! Using all playlists instead.'
+    print 'Missing src/playlists.json! Using all playlists instead.'
 
     return data
 
