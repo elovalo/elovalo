@@ -21,14 +21,13 @@
 
 #include "common.h"
 
-PROGMEM static const char default_text[] = "\x05""ERROR";
-
 void effect(void)
 {
-	// TODO: Should be asserted instead of just sending "ERROR"
-	const char *text = custom_data == NULL? default_text: (const char*)custom_data;
-
 	clear_buffer();
+
+	// If no custom data, do nothing
+	if (custom_data == NULL) return;
+	const struct glyph_buf *text = (const struct glyph_buf *)custom_data;
 
 	int16_t pos = ticks >> 3;
 	scroll_text(text, true, pos, render_xy);

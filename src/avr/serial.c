@@ -144,6 +144,6 @@ uint8_t serial_read_blocking(void) {
 
 void serial_send(uint8_t data) {
 	while ((tx_in_i+1 == tx_out_i) ||
-	       (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
+		   (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
 	serial_send_nonblocking(data);
 }

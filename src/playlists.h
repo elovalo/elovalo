@@ -20,7 +20,7 @@
 typedef struct {
 	uint8_t id;
 	uint16_t length;
-	void *data;
+	const void *data;
 } playlistitem_t;
 
 extern const playlistitem_t master_playlist[];

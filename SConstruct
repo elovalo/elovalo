@@ -1,8 +1,12 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
 from glob import glob
+import subprocess
+from generators import effects, playlists, gperf
 
-from generators import effects, playlists
+# Compile preprocessor first
+gperf.generate('src/effects/lib/font8x8.gperf','src/effects/lib/font8x8_generated.h')
+subprocess.check_call(["scons","-s","-f","preprocessor.sconstruct"])
 
 cwd = GetLaunchDir()
 
@@ -24,11 +28,17 @@ AddOption('--no-avr',
           default=True,
           help='Do not build to AVR architecture')
 
-AddOption('--program',
-          dest='program',
+AddOption('--program-zcl',
+          dest='program-zcl',
           action='store_true',
           default=False,
-          help='Program the microcontroller after build')
+          help='Program the ZCL variant to microcontroller after build')
+
+AddOption('--program-elo',
+          dest='program-elo',
+          action='store_true',
+          default=False,
+          help='Program the ELO variant to microcontroller after build')
 
 AddOption('--no-exporter',
           dest='build_exporter',
@@ -42,10 +52,17 @@ AddOption('--no-asm',
           default=True,
           help='Do not use optimized interrupt handlers')
 
+def build_avr(build_type):
+    Export('build_type')
+    SConscript('debug.scons', duplicate=0,
+               variant_dir='build/'+build_type+'/debug')
+    SConscript('release.scons', duplicate=0,
+               variant_dir='build/'+build_type+'/release')
+
 if GetOption('build_avr'):
-    SConscript('debug.scons', variant_dir='build/debug', duplicate=0)
     SConscript('simulation.scons', variant_dir='build/simulation', duplicate=0)
-    SConscript('release.scons', variant_dir='build/release', duplicate=0)
+    build_avr('zcl')
+    build_avr('elo')
 
 if GetOption('build_exporter'):
     SConscript('exporter.scons', variant_dir='build/exporter', duplicate=0)

@@ -1,14 +1,14 @@
 [
     {
         "name": "sine",
-        "length": 500
+        "length": 4
     },
     {
         "name": "wave",
-        "length": 500
+        "length": 4
     },
     {
         "name": "all_on",
-        "length": 500
+        "length": 4
     }
 ]

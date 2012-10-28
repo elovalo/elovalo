@@ -32,3 +32,8 @@
 #define GS_DEPTH 12
 #define BYTES_PER_LAYER 96
 #define SHIFT_REGISTER_BYTES 1
+
+/* To mirror cube coordinates, uncomment the axis. To rotate the cube
+ * for 180 degrees, uncomment the both. */
+//#define MIRROR_X
+//#define MIRROR_Y

@@ -17,26 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "common.h"
+#include <stdint.h>
+#include <avr/pgmspace.h>
+#include "pgm_tricks.h"
 
-#pragma MAX_FPS 25
-#pragma FLIP
-
-struct {
-	uint8_t y;
-} vars;
-
-void init(void)
+void pgm_aware_copy(void *dst, const void *src, const int n)
 {
-	vars.y = 255;
-}
-		
+	const uint8_t *p = (uint8_t*)src;
+	const uint8_t *end = p+n;
+	uint8_t *dst_u8 = (uint8_t*)dst;
 
-void effect(void)
-{
-	clear_buffer();
-	// vars.y rolls over, do not care
-	vars.y -= (160-sensors.distance1+40)/10;
-
-	heart_shape(vars.y);
+	while (p < end) {
+		*dst_u8++ = pgm_read_byte_near(p++);
+	}
 }

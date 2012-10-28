@@ -22,8 +22,8 @@
  *  data.
  */
 // Serial protocol fundamentals
-#define ESCAPE              '~'  // Escape character. Go to command mode
-#define LITERAL_ESCAPE      '\0' // Escape followed by this is literal escape.
+#define ESCAPE			  '~'  // Escape character. Go to command mode
+#define LITERAL_ESCAPE	  '\0' // Escape followed by this is literal escape.
 
 typedef struct {
 	uint8_t good;

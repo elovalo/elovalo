@@ -18,7 +18,7 @@
 #
 
 import os
-from SCons.Script import Glob,Environment
+from SCons.Script import Glob,Environment,Import
 from SCons.Script.Main import GetOption
 
 Elf = 'firmware.elf'

@@ -1,0 +1,7 @@
+#!/bin/bash -eu
+stty -F "$1" 9600 cs8 cstopb -parenb raw -hupcl
+
+sleep $2
+
+echo -ne "~P\0" >"$1"
+dbus-send --print-reply --session --dest=org.mpris.MediaPlayer2.vlc /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous
