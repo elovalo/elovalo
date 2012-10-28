@@ -31,15 +31,20 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "pgmspace.h"
-#include "env.h"
+#include "../common/pgmspace.h"
+#include "../common/env.h"
 #include "effects.h"
-#include "effects/common.h"
+#include "../effects/common.h"
 '''
 
 
 def generate(source, target):
     inp = SourceFiles(glob(source))
+
+    parent_dir = os.path.split(target)[0]
+
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
 
     with open(target, 'w') as t:
         t.write(file_start)

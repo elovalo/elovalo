@@ -34,10 +34,10 @@
 #include "configuration.h"
 #include "powersave.h"
 #include "main.h"
-#include "../pgmspace.h"
-#include "../cube.h"
-#include "../effects.h"
-#include "../playlists.h"
+#include "../common/pgmspace.h"
+#include "../common/cube.h"
+#include "../generated/effects.h"
+#include "../generated/playlists.h"
 #include "sleep.h"
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.

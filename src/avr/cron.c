@@ -23,7 +23,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include "../pgmspace.h"
+#include "../common/pgmspace.h"
 #include "cron.h"
 #include "powersave.h"
 #include "configuration.h"

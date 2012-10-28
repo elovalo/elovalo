@@ -22,12 +22,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "../env.h"
 #include "lib/math.h"
 #include "lib/utils.h"
 #include "lib/shapes.h"
 #include "lib/text.h"
 #include "lib/weber_fechner.h"
-#include "../assert.h"
-#include "../pgmspace.h"
-#include "../time.h"
+#include "../common/env.h"
+#include "../common/assert.h"
+#include "../common/pgmspace.h"
+#include "../common/time.h"

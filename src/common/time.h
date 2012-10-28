@@ -17,7 +17,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "effects/lib/utils.h"
-
-extern const effect_t effects[];
-extern const uint8_t effects_len;
+/*
+ *  POSIX compatible real time functions. Remember that time_t may be
+ *  64 bit on POSIX platforms but is uint32_t in AVR.
+ */
+#ifdef AVR
+#include "../avr/clock.h"
+#else
+#include <time.h>
+#endif

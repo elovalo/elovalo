@@ -19,8 +19,8 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "effects/lib/utils.h"
-#include "effects.h"
+#include "../effects/lib/utils.h"
+#include "../generated/effects.h"
 #include "effect_utils.h"
 
 const effect_t *find_effect(const char *name) {

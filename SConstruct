@@ -12,12 +12,12 @@ cwd = GetLaunchDir()
 
 effects.generate(
     os.path.join(cwd, 'src', 'effects') + '/*.c',
-    os.path.join(cwd, 'src', 'effects.c')
+    os.path.join(cwd, 'src/generated', 'effects.c')
 )
 
 playlists.generate(
     os.path.join(cwd, 'src/playlists/'),
-    os.path.join(cwd, 'src', 'playlists.c'),
+    os.path.join(cwd, 'src/generated', 'playlists.c'),
     os.path.join(cwd, 'src', 'playlists.json'),
     effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
 )

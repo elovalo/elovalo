@@ -9,7 +9,7 @@
 #include "configuration.h"
 #include "serial.h"
 #include "serial_escaped.h"
-#include "../pgmspace.h"
+#include "../common/pgmspace.h"
 #include "serial_elo.h"
 
 // Commands issued by the sender

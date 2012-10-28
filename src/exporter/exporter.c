@@ -31,8 +31,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "../effects/lib/utils.h"
-#include "../effect_utils.h"
-#include "../cube.h"
+#include "../common/effect_utils.h"
+#include "../common/cube.h"
 
 void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data);
 
