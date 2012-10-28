@@ -1,11 +1,12 @@
 <!doctype html>
-<html>
+ <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Elovalo by hacklab-jkl</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="stylesheets/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
@@ -15,70 +16,67 @@
     <link rel="stylesheet" href="stylesheets/ie.css">
     <![endif]-->
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
   </head>
   <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/hacklab-jkl/elovalo">View On GitHub</a></li>
-          <li class="fork"><a style="margin-left:5px;" href="http://www.facebook.com/elovaloledcube">Like on Facebook</a></li>
-	  <li class="downloads"><a href="https://github.com/hacklab-jkl/elovalo/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/hacklab-jkl/elovalo/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
-
-    <div class="wrapper">
-
-      <section>
-        <div id="title">
-          <h1>Elovalo</h1>
-          <p>Outdoor Pedestal with a LED Cube</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/hacklab-jkl">hacklab-jkl</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Elovalo</a>
+          <div>
+            <ul class="nav">
+              <li><a href="https://github.com/hacklab-jkl/elovalo" class="btn-small">View on GitHub</a></li>
+              <li class="divider-vertical"></li>
+              <li><a href="http://www.facebook.com/elovaloledcube" class="btn-small">Like on Facebook</a></li>
+              <li class="divider-vertical"></li>
+            </ul>
+          </div>
         </div>
+      </div>
+    </div>
 
+    <div class="container">
+        <div class="row">
+            <div class="span8">
+<iframe width="725" height="550" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps/ms?ll=60.586967,27.158203&amp;spn=35.109724,107.050781&amp;t=m&amp;z=4&amp;msa=0&amp;msid=207602050808687535008.0004cd21245d589aa2e09&amp;output=embed"></iframe><br /><small>View <a href="https://maps.google.com/maps/ms?ll=60.586967,27.158203&amp;spn=35.109724,107.050781&amp;t=m&amp;z=4&amp;msa=0&amp;msid=207602050808687535008.0004cd21245d589aa2e09&amp;source=embed" style="color:#0000FF;text-align:left">Elovalo</a> in a larger map</small>
+            </div>
+            <div class="span4">
+                <div class="news visible-desktop"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span12">
+                <div class="details">
+                    <div class="buttons">
+                    </div>
+                    <div class="navi"></div>
+                    <div class="slides">
+                        <div title="Introduction">
 <p>Elovalo is a joint project between <a href="http://hacklabjkl.org/">Hacklab JKL</a>, <a href="http://koodilehto.fi/">Koodilehto Co-op</a>, and <a href="http://www.ihmemedia.fi/">IhmeMedia</a>. Financing, aesthetic support and mentoring have been provided by <a href="http://www.liveherring.org/">Live Herring</a>.</p>
 
 <p>The lighting system will be installed in <a href="http://valonkaupunki.jyvaskyla.fi/english">Jyväskylä's central Church Park in Fall 2012</a>. It consists of three lighting pedestals that house a red, green and blue 3D display. These low-resolution light displays play various effects that are influenced by ambient conditions, such as sound, light and proximity. The display's resolution is 512 <a href="http://en.wikipedia.org/wiki/Voxel">voxels</a>.</p>
 
 <p>Elovalo is a custom design. We came up with our own hardware and software. The development kit also includes a <a href="http://www.blender.org/">Blender</a> based simulation tool that may be used to preview effects before actually uploading them on the device.</p>
-
-<h2>Videos</h2>
-
-<iframe width="420" height="315" src="http://www.youtube.com/embed/jz8u--oKBqI" frameborder="0" allowfullscreen></iframe>
-
-<iframe width="560" height="315" src="http://www.youtube.com/embed/DIwVZDG_i2M" frameborder="0" allowfullscreen></iframe>
-
-<iframe width="560" height="315" src="http://www.youtube.com/embed/bl-kvfJxYwM" frameborder="0" allowfullscreen></iframe>
-
-<p>
-<a href="http://www.youtube.com/watch?v=dp5NXC4GN9U">Example of Blender Output</a>
-</p>
-
-<h2>News</h2>
-
-<div id="news"></div>
-
-
-
-<h2>Technical Details</h2>
-
-<h3>Hardware</h3>
-
+                        </div>
+                        <div title="Hardware">
 <ul>
 <li>Processor: ATmega328p 2KiB SRAM 32KiB FLASH @ 16MHz</li>
 <li>Sensors: Proximity, Ambient sound, Ambient Light.</li>
 <li>Media: 8x8x8 voxel 512 LED 3D matrix with 12 bit grayscale.</li>
 <li>Communication: 5V UART bidirectional serial communications protocol for debugging and sending/receiving data to and from the processor.</li>
-</ul><h3>Software</h3>
-
+</ul>
+</div>
+<div title="Software">
 <ul>
 <li>Effects simulator that is implemented with Blender3d, allowing to develop real time effects without the Elovalo hardware. After verifying the effects with the simulator, they can be uploaded to the firmware of the equipment. This helps development by allowing to separate effect and hardware development.</li>
 <li>User interface which provides more user friendly view to the binary protocol used in UART communication.</li>
-</ul><h3>Firmware</h3>
-
+</ul>
+</div>
+<div title="Firmware">
 <ul>
 <li>Fully custom and bottom-up designed firmware that is extremely efficiently optimized to squeeze all the juice out of the 8 bit processor.</li>
 <li>768 byte double buffered display buffer that guarantees a stable and smooth interface for animating without pacing issues.</li>
@@ -86,19 +84,9 @@
 <li>Multitasking with interrupts and hardware peripheral modules.</li>
 <li>SLEEP and HIBERNATE modes with remote starting.</li>
 <li>Real time clock with scheduling (for timed turning on).</li>
-</ul><h3>Features yet to be implemented</h3>
-
-<ul>
-<li>Self test: Simple test protocol for detecting errors with the SPI
-bus, UART, faulty LEDs and other LED driver related problems. Error
-codes are saved on the memory for later debugging.</li>
-<li>Zigbee support</li>
-<li>WLAN/LAN support</li>
-<li>DMX support.</li>
 </ul>
-
-<h2>Credits</h2>
-
+                        </div>
+                        <div title="Team">
 <ul>
 <li>
 <a href="https://github.com/katis">Joni Katajamäki</a> – Embedded programming, hardware design </li>
@@ -116,30 +104,35 @@ embedded programming</li>
 <a href="https://github.com/ile2/">Ilkka Turunen</a> – Management, soldering, pedestal
 tests and aesthetic design</li>
 <li>
-<a href="https://github.com/bebraw/">Juho Vepsäläinen</a> – 3D simulator, effect programming, pedestal
-design</li>
-</ul><h2>License</h2>
-
+<a href="https://github.com/bebraw/">Juho Vepsäläinen</a> – 3D simulator, effect programming, pedestal design</li>
+</ul>
+                        </div>
+                        <div title="License">
 <p>We use <a href="http://www.gnu.org/licenses/quick-guide-gplv3.html" title="A Quick Guide to GPLv3">GPLv3</a> for software and firmware. <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons Attribution-ShareAlike 3.0 Unported">CC BY-SA 3.0</a> is used for hardware and accompanying documentation. See LICENSE files for more details. If you are looking for other licensing options, please contact our <a href="http://www.linkedin.com/in/ilkkaturunen" title="Ilkka Turunen">sales representative</a>.</p>
 
 <p>If you create a derivative, please let us know. It would be interesting to hear what you are doing.</p>
-      </section>
-
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="row">
+            <div class="span3">
+                <a href="http://www.hacklabjkl.org"><img src="images/logos/hacklab.png" alt="Hacklab Jyväskylä"></a>
+            </div>
+            <div class="span3">
+                <a href="http://www.ihmemedia.fi"><img src="images/logos/ihmemedia.png" alt="IhmeMedia"></a>
+            </div>
+            <div class="span3">
+                <a href="http://www.koodilehto.fi"><img src="images/logos/koodilehto.png" alt="Koodilehto"></a>
+            </div>
+            <div class="span3">
+                <a href="http://www.liveherring.org"><img src="images/logos/liveherring.png" alt="Live Herring"></a>
+            </div>
+        </footer>
     </div>
 
-    <footer>
-        <ul>
-            <li><a href="http://www.hacklabjkl.org"><img src="images/logos/hacklab.png" alt="Hacklab Jyväskylä"></a></li>
-            <li><a href="http://www.ihmemedia.fi"><img src="images/logos/ihmemedia.png" alt="IhmeMedia"></a></li>
-            <li><a href="http://www.koodilehto.fi"><img src="images/logos/koodilehto.png" alt="Koodilehto"></a></li>
-            <li><a href="http://www.liveherring.org"><img src="images/logos/liveherring.png" alt="Live Herring"></a></li>
-        </ul>
-    </footer>
-
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-
     <script data-main="/javascripts/index.js" src="/javascripts/require-jquery.js"></script>
-
     <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-34591280-1']);

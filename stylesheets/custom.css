@@ -1,0 +1,33 @@
+body {
+    padding-top: 60px;
+}
+
+.details .navi {
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+.details .navi .button {
+    margin-left: 1em;
+}
+
+.details .navi .selected {
+    font-weight: bold;
+}
+
+footer {
+    background-color: #333;
+}
+
+footer div {
+    box-sizing: border-box;
+    padding: 1em;
+}
+
+.news .news_item {
+    margin-bottom: 1em;
+}
+
+.news .author {
+    margin-left: 1em;
+}

@@ -52,7 +52,7 @@ define(['jquery', 'utils'], function($, utils) {
         $.each(entries, function(i, k) {
             $('<dt>').append('<span class="date">' + utils.ISODateString(k.publishedDate) + '</span>').
                 append('<span class="author">' + k.author + '</span>').appendTo($dl);
-            $('<dd>').attr('title', utils.htmlDecode(k.contentSnippet)).append('<a href="' + k.link + '"><span class="title">' + k.title + '</span></a>').appendTo($dl);
+            $('<dd>', {'class': 'news_item'}).attr('title', utils.htmlDecode(k.contentSnippet)).append('<a href="' + k.link + '"><span class="title">' + k.title + '</span></a>').appendTo($dl);
         });
     }
 
