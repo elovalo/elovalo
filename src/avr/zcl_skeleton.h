@@ -17,4 +17,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-void process_zcl_frame(void);
+void process_zcl_frame(uint8_t frametype);

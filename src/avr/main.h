@@ -32,3 +32,6 @@ void select_playlist_item(uint8_t index);
 void init_current_effect(void);
 uint8_t change_current_effect(uint8_t i);
 uint8_t change_playlist(uint8_t i);
+
+uint8_t get_mode(void);
+void set_mode(uint8_t m);

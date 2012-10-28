@@ -29,7 +29,7 @@
 #include "serial.h"
 #include "serial_escaped.h"
 #include "serial_elo.h"
-#include "serial_zcl.h"
+#include "zcl_skeleton.h"
 #include "clock.h"
 #include "configuration.h"
 #include "powersave.h"
@@ -86,7 +86,7 @@ int main() {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
 #if defined AVR_ZCL
-			serial_zcl_process(cmd);
+			process_zcl_frame(cmd);
 #elif defined AVR_ELO
 			serial_elo_process(cmd);
 #elif defined SIMU
@@ -245,6 +245,13 @@ uint8_t change_playlist(uint8_t i) {
 	return 0;
 }
 
+uint8_t get_mode(void) {
+	return mode;
+}
+
+void set_mode(uint8_t m) {
+	mode = m;
+}
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
 {
