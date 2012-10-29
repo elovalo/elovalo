@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "serial.h"
-#include "../pgmspace.h"
+#include "../common/pgmspace.h"
 #include "main.h"
 
 // Lengths
