@@ -309,6 +309,8 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	uint16_t resp_len = read_cmd_length(cluster, len);
 	uint16_t attr;
 
+	reset_write_crc();
+
 	write_packet_header(resp_len);
 	write_payload_header();
 	write_zcl_header(CMDID_READ_RESPONSE);
@@ -473,14 +475,14 @@ static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 }
 
 static void write_packet_header(uint16_t length) {
-	//TODO check if crc needed, and the correct order for these
 	reset_write_crc();
-	write_hex_crc(STX);
+	serial_send(STX);
+	write_hex_crc(PACKET_BEGIN);
 	write_hex_16(length);
-	write_hex_crc(ZCL_CHANNEL);
 }
 
 static void write_payload_header(void) {
+	write_hex_crc(ZCL_CHANNEL);
 	// write MAC
 	for (uint8_t i = 0; i < MAC_LEN; i++) {
 		write_hex_crc(mac[i]);
@@ -493,11 +495,7 @@ static void write_payload_header(void) {
 
 static void write_zcl_header(uint8_t cmd){
 	frame_control_t fc;
-	fc.type = 0;
-	fc.manu_specific = 0;
-	fc.direction = 0;
-	fc.disable_def_resp = 0;
-	fc.reserved = 0;
+	fc.integer = 0;
 
 	write_hex_crc(fc.integer);
 	write_hex_crc(transaction_seq++);
@@ -511,7 +509,6 @@ static void write_effect_names(void) {
 	write_hex_crc('[');
 	for (uint8_t i = 0; i < effects_len; i++) {
 		write_hex_crc('"');
-		//TODO: hex encode sending
 		write_pgm_string_hex_crc(&effects[i].name);
 		write_hex_crc('"');
 		if (i < effects_len - 1) {
@@ -621,14 +618,14 @@ static void write_hex_crc(uint8_t byte) {
 }
 
 static void write_hex_crc_16(uint16_t data) {
-	write_hex_crc((data & 0xff00) >> 8);
+	write_hex_crc(data >> 8);
 	write_hex_crc(data & 0x00ff);
 }
 
 static void write_hex_16(uint16_t data) {
 	hex_value_t val;
 
-	val = num_to_hex_chars((data & 0xff00) >> 8);
+	val = num_to_hex_chars(data >> 8);
 	serial_send(val.one);
 	serial_send(val.two);
 
@@ -653,9 +650,10 @@ static void write_pgm_string_hex_crc(const char * const* pgm_p) {
 	}
 	
 	// Read byte-by-byte and write, not including NUL byte
+	c = pgm_read_byte_near(p++);
 	while (c != '\0') {
-		c = pgm_read_byte_near(p++);
 		write_hex_crc(c);
+		c = pgm_read_byte_near(p++);
 	}
 }
 
@@ -750,7 +748,7 @@ uint8_t hex_to_num(uint8_t c) {
 
 hex_value_t num_to_hex_chars(uint8_t i) {
 	hex_value_t val;
-	val.one = num_to_hex((i & 0xf0) >> 4);
+	val.one = num_to_hex(i >> 4);
 	val.two = num_to_hex(i & 0x0f);
 	return val;
 }
