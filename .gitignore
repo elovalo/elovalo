@@ -14,7 +14,7 @@
 *.swp
 *.swo
 *~
-config.log
+/config.log
 
 # Python files
 *.pyc

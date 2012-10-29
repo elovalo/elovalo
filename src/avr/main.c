@@ -36,8 +36,8 @@
 #include "main.h"
 #include "../common/pgmspace.h"
 #include "../common/cube.h"
-#include "../generated/effects.h"
-#include "../generated/playlists.h"
+#include "../common/effects.h"
+#include "../common/playlists.h"
 #include "sleep.h"
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.

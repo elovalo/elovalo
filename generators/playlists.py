@@ -104,7 +104,7 @@ def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
 #include <stdlib.h>
-#include "playlists.h"
+#include "../common/playlists.h"
 #include "../common/pgmspace.h"
 #include "../effects/lib/font8x8.h"
 '''
