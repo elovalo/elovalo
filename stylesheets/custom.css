@@ -1,6 +1,11 @@
 body {
     position: relative;
     padding-top: 60px;
+    background-image: url('../images/billie2x.png');
+}
+
+hr {
+    border: 1px solid #bbb;
 }
 
 @media (max-width: 980px) {
@@ -35,9 +40,15 @@ body {
     font-weight: bold;
 }
 
-footer div {
-    box-sizing: border-box;
-    padding: 1em;
+footer ul {
+  list-style-type: none;
+  text-align: center;
+}
+
+footer ul li {
+  display: inline-block;
+  padding: 2em;
+  vertical-align: top;
 }
 
 .news .news_item {
