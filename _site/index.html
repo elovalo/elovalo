@@ -1,0 +1,169 @@
+<!doctype html>
+ <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Elovalo by hacklab-jkl</title>
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="stylesheets/custom.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Elovalo</a>
+          <div>
+            <ul class="nav">
+              <li><a href="https://github.com/hacklab-jkl/elovalo" class="btn-small">View on GitHub</a></li>
+              <li class="divider-vertical"></li>
+              <li><a href="http://www.facebook.com/elovaloledcube" class="btn-small">Like on Facebook</a></li>
+              <li class="divider-vertical"></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="span8">
+                <iframe class="map" height="550" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps/ms?ll=60.586967,27.158203&amp;spn=35.109724,107.050781&amp;t=m&amp;z=4&amp;msa=0&amp;msid=207602050808687535008.0004cd21245d589aa2e09&amp;output=embed"></iframe>
+            </div>
+            <div class="span4">
+                <h2>News</h2>
+                <div class="news"></div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="span12">
+                <div class="details">
+                    <div class="buttons">
+                    </div>
+                    <div class="navi"></div>
+                    <div class="slides">
+                        <div title="Introduction">
+<p>Elovalo is a joint project between <a href="http://hacklabjkl.org/">Hacklab JKL</a>, <a href="http://koodilehto.fi/">Koodilehto Co-op</a>, and <a href="http://www.ihmemedia.fi/">IhmeMedia</a>. Financing, aesthetic support and mentoring have been provided by <a href="http://www.liveherring.org/">Live Herring</a>.</p>
+
+<p>The lighting system was originally installed at <a href="http://valonkaupunki.jyvaskyla.fi/english">Jyväskylä's central Church Park in Fall 2012</a> for a week. It consisted of three lighting pedestals that housed a red, green and blue 3D display. These low-resolution light displays played various effects that were influenced by ambient conditions, such as sound, light and proximity.</p>
+
+<p>Elovalo is a custom design. We came up with our own hardware and software. The development kit also includes a <a href="http://www.blender.org/">Blender</a> based simulation tool that may be used to preview effects before actually uploading them on the device. This is just one of those facets that makes our offering unique compared to others.</p>
+
+                       </div>
+                        <div title="Hardware &amp; Software">
+<h3>Hardware</h3>
+<ul>
+<li>Processor: ATmega328p 2KiB SRAM 32KiB FLASH @ 16MHz</li>
+<li>Sensors: proximity, ambient sound, ambient Light.</li>
+<li>Media: 8x8x8 voxel 512 LED 3D matrix with 12 bit grayscale.</li>
+<li>Communication: 5V UART bidirectional serial communications protocol for debugging and sending/receiving data to and from the processor.</li>
+</ul>
+<h3>Software</h3>
+<ul>
+<li>Effects simulator implemented with Blender3d allows us to develop effects without actual hadware , allowing to develop real time effects without the Elovalo hardware.</li>
+<li>User interface which provides more user friendly view to the binary protocol used in UART communication.</li>
+</ul>
+</div>
+<div title="Firmware">
+<ul>
+<li>Fully custom and bottom-up designed firmware that is extremely efficiently optimized to squeeze all the juice out of the 8 bit processor.</li>
+<li>768 byte double buffered display buffer that guarantees a stable and smooth interface for animating without pacing issues.</li>
+<li>Buffered UART communications.</li>
+<li>Multitasking with interrupts and hardware peripheral modules.</li>
+<li>SLEEP and HIBERNATE modes with remote starting.</li>
+<li>Real time clock with scheduling (for timed turning on).</li>
+</ul>
+                        </div>
+                        <div title="Team">
+
+                            <h3>Core Team</h3>
+
+                            <ul>
+<li>
+<a href="https://github.com/katis">Joni Katajamäki</a> – Embedded programming, hardware design </li>
+<li>
+<a href="https://github.com/resutoor">Jukka Kinnunen</a> – Hardware design and debugging</li>
+<li>
+<a href="https://github.com/Zouppen/">Joel Lehtonen</a> – Embedded programming, effect engine programming</li>
+<li><a href="https://github.com/lassesaari/">Lasse Saari</a> – Management, pedestal fabrication</li>
+<li>
+<a href="https://github.com/marant">Marko Silokunnas</a> – Soldering</li>
+<li>
+<a href="https://github.com/mtaalas/">Mio Taalas</a> – LED driver interface design, PCB design,
+embedded programming</li>
+<li>
+<a href="https://github.com/ile2/">Ilkka Turunen</a> – Management, soldering, pedestal
+tests and aesthetic design</li>
+<li>
+<a href="https://github.com/bebraw/">Juho Vepsäläinen</a> – 3D simulator, effect programming, pedestal design</li>
+</ul>
+
+<h3>Contributors</h3>
+
+</div>
+                        <div title="License">
+<p>We use <a href="http://www.gnu.org/licenses/quick-guide-gplv3.html" title="A Quick Guide to GPLv3">GPLv3</a> for software and firmware. <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons Attribution-ShareAlike 3.0 Unported">CC BY-SA 3.0</a> is used for hardware and accompanying documentation. See LICENSE files for more details. If you are looking for other licensing options, please contact our <a href="http://www.linkedin.com/in/ilkkaturunen" title="Ilkka Turunen">sales representative</a>.</p>
+
+<p>If you create a derivative, please let us know. It would be interesting to hear what you are doing.</p>
+                        </div>
+                    </div>
+                </div>
+
+<hr />
+
+<h3>Interested in Elovalo?</h3>
+
+<p>Currently we are in the process of commercializing Elovalo. We will have a presence at <a href="http://www.interlight.messefrankfurt.ru/?lang=en">Interlight Moscow</a>. We have already presented our product on national level at <a href="http://www.warkfest.org/en/">WÄRK:fest</a> and it received an enthusiastic response.</p>
+
+<p>If you happen to be interested in Elovalo, please contact <a href="mailto:sales@elovalo.org">our sales</a>. We are open to suggestions. The devices are available for rent. We are willing to co-operate in other ways too.</p>
+            </div>
+        </div>
+        <hr />
+        <footer>
+            <ul>
+            <li>
+                <a href="http://www.hacklabjkl.org"><img src="images/logos/hacklab.png" alt="Hacklab Jyväskylä"></a>
+            </li>
+            <li>
+                <a href="http://www.ihmemedia.fi"><img src="images/logos/ihmemedia.png" alt="IhmeMedia"></a>
+            </li>
+            <li>
+                <a href="http://www.koodilehto.fi"><img src="images/logos/koodilehto.png" alt="Koodilehto"></a>
+            </li>
+            <li>
+                <a href="http://www.liveherring.org"><img src="images/logos/liveherring.png" alt="Live Herring"></a>
+            </li>
+        </ul>
+        </footer>
+    </div>
+
+    <script data-main="/javascripts/index.js" src="/javascripts/require-jquery.js"></script>
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-34591280-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+    </script>
+  </body>
+</html>
