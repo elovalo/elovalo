@@ -82,6 +82,8 @@ int main() {
 	// Select correct startup mode
 	pick_startup_mode();
 
+	uint16_t next_draw_at = 0;
+
 	while(1) {
 		if(serial_available()) {
 			uint8_t cmd = serial_read();
@@ -108,16 +110,30 @@ int main() {
 			if (ticks > effect_length) {
 				next_effect();
 				init_current_effect();
+				next_draw_at = 0;
 			}
 
 			// no need to break!
 			// fall to MODE_EFFECT on purpose
 		case MODE_EFFECT:
-			// If a buffer is not yet flipped
-			if (flags.may_flip) break;
+			// If a buffer is not yet flipped, wait interrupts
+			if (flags.may_flip) {
+				if (!serial_available()) sleep_mode();
+				break;
+			}
 
-			// Update clock and sensor values
+			// Update clock
 			ticks = centisecs();
+	
+			/* Go back to serial handler if drawing time
+			 * is reached. By doing this we avoid serial
+			 * port slowdown when FPS is low */
+			if (ticks < next_draw_at ) {
+				if (!serial_available()) sleep_mode();
+				break;
+			}
+
+			// Update sensor values
 			sensors.distance1 = hcsr04_get_distance_in_cm();
 			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
 			sensors.ambient_light = adc_get(0) >> 2;
@@ -130,12 +146,8 @@ int main() {
 				allow_flipping(true);
 			}
 
-			// Slow down drawing if FPS is going to be too high
-			uint16_t target_ticks =
-				ticks + pgm_get(effect->minimum_ticks,byte);
-			while (centisecs() < target_ticks ) {
-				sleep_mode();
-			}
+			// Update time when next drawing is allowed
+			next_draw_at = ticks + pgm_get(effect->minimum_ticks,byte);
 
 			break;
 		}
