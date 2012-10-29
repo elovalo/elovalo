@@ -14,19 +14,6 @@ hr {
     }
 }
 
-@media (min-width: 980px) and (max-width: 1200px) {
-    .news_parent {
-        box-sizing: border-box;
-        padding-left: 100px;
-    }
-}
-
-@media (min-width: 768px) and (max-width: 980px) {
-    .news_parent {
-        width: 100%;
-    }
-}
-
 .details .navi {
     margin-bottom: 1em;
     text-align: center;
@@ -57,6 +44,10 @@ footer ul li {
 
 .news .author {
     display: none;
+}
+
+.map {
+    width: 100%;
 }
 
 /* fonts */
