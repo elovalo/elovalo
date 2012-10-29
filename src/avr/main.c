@@ -86,16 +86,16 @@ int main() {
 
 	while(1) {
 		if(serial_available()) {
+#ifndef SIMU
 			uint8_t cmd = serial_read();
 #if defined AVR_ZCL
 			serial_zcl_process(cmd);
 #elif defined AVR_ELO
 			serial_elo_process(cmd);
-#elif defined SIMU
-			// Do nothing
 #else
 #error Unsupported serial communication type
-#endif
+#endif // AVR*
+#endif // SIMU
 		}
 
 		switch (mode) {
