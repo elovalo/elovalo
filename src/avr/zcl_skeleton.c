@@ -126,7 +126,7 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
 // ATI
 #define ATI 'A'
-#define ATI_LEN 35
+#define ATI_LEN 36
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
 
 typedef union frame_control {
