@@ -108,6 +108,11 @@
 #define NOT_HEX 0xff
 #define NOT_NUM 0x00
 
+// Parser states
+#define PARSER_STATE_DEFAULT 0x00
+#define PARSER_STATE_INCORRECT_MAC 0x01
+
+uint8_t parser_state = PARSER_STATE_DEFAULT;
 uint8_t error_read = 0;
 
 uint8_t read_buffer[READ_BUF_LEN];
@@ -151,6 +156,7 @@ static uint8_t read_packet(void);
 static uint8_t process_payload(uint16_t length);
 static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length);
 static void process_read_cmd(uint16_t cluster, uint16_t length);
+static void read_payload_crc(uint16_t length);
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
 static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len);
 static void write_attr_resp_fail(void);
@@ -184,6 +190,8 @@ static hex_value_t num_to_hex_chars(uint8_t);
 static uint8_t num_to_hex(uint8_t);
 
 void process_zcl_frame(uint8_t frametype) {
+	parser_state = PARSER_STATE_DEFAULT;
+
 	switch (frametype) {
 	case ACK:
 		//TODO: timeout error if not received 1s after sending a message
@@ -258,7 +266,7 @@ static uint8_t process_payload(uint16_t length) {
 	// Confirming MAC address
 	for (uint8_t i = 0; i < MAC_LEN; i++) {
 		if (mac[1] != read_hex_crc()) {
-			return 1;
+			parser_state = PARSER_STATE_INCORRECT_MAC;
 		}
 	}
 
@@ -271,6 +279,12 @@ static uint8_t process_payload(uint16_t length) {
 	uint16_t cluster = read_hex_crc_16();
 
 	length -= ZCL_MESSAGE_HEADER_LEN;
+
+	if (parser_state == PARSER_STATE_INCORRECT_MAC) {
+		read_payload_crc(length);
+		return 0;
+	}
+
 	return process_cmd_frame(cluster, length);
 }
 
@@ -315,7 +329,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	write_payload_header();
 	write_zcl_header(CMDID_READ_RESPONSE);
 	
-	for (uint8_t i = 0; i < len; i++) {
+	for (uint16_t i = 0; i < len; i += 2) {
 		attr = read_hex_crc_16();
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
@@ -400,6 +414,16 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	}
 	
 	write_hex_16(write_crc);
+}
+
+/**
+ * Used when the MAC address is incorrect to make sure that the CRC
+ * check works correctly
+ */
+static void read_payload_crc(uint16_t length) {
+	for (uint16_t i = 0; i < length; i++) {
+		read_hex_crc();
+	}
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
