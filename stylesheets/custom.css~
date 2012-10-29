@@ -4,11 +4,6 @@ body {
     background-image: url('../images/billie2x.png');
 }
 
-body, h1, h2, h3, h4, h5, h6 {
-    font: 14px/1.5 "Quicksand", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: normal;
-}
-
 hr {
     border: 1px solid #bbb;
 }
@@ -17,10 +12,6 @@ hr {
     body {
         padding-top: 0;
     }
-}
-
-h2{
-   font-size: 82px;
 }
 
 .details .navi {
@@ -129,3 +120,38 @@ footer ul li {
   font-style: normal;
   -webkit-font-smoothing: antialiased;
 }
+
+/* @license
+ * MyFonts Webfont Build ID 2400405, 2012-10-29T13:20:08-0400
+ * 
+ * The fonts listed in this notice are subject to the End User License
+ * Agreement(s) entered into by the website owner. All other parties are 
+ * explicitly restricted from using the Licensed Webfonts(s).
+ * 
+ * You may obtain a valid license at the URLs below.
+ * 
+ * Webfont: St Ryde Regular by Stereotypes
+ * URL: http://www.myfonts.com/fonts/stereotypes/st-ryde/regular/
+ * Copyright: Copyright (c) 2010 by Stereotypes.de. All rights reserved.
+ * Licensed pageviews: Unlimited
+ * 
+ * 
+ * License: http://www.myfonts.com/viewlicense?type=web&buildid=2400405
+ * 
+ * © 2012 Bitstream Inc
+*/
+
+
+
+
+  
+@font-face {
+	font-family: 'StRydeRegular';
+	src: url('webfonts/24A095_0_0.eot');
+	src: url('webfonts/24A095_0_0.eot?#iefix') format('embedded-opentype'),url('webfonts/24A095_0_0.woff') format('woff'),url('webfonts/24A095_0_0.ttf') format('truetype');
+}
+
+.brand{
+	font-family: 'StRydeRegular';
+	}
+ 
