@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* The C file for this header is automatically generated and located
+ * at ../generated/playlists.c */
+
 typedef struct {
 	uint8_t id;
 	uint16_t length;

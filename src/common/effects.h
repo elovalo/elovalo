@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* The C file for this header is automatically generated and located
+ * at ../generated/effects.c */
+
 #include "../effects/lib/utils.h"
 
 extern const effect_t effects[];
