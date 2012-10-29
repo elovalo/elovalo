@@ -45,7 +45,7 @@ footer div {
 }
 
 .news .author {
-    margin-left: 1em;
+    display: none;
 }
 
 /* fonts */
