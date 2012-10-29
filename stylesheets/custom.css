@@ -15,10 +15,6 @@ body {
     font-weight: bold;
 }
 
-footer {
-    background-color: #333;
-}
-
 footer div {
     box-sizing: border-box;
     padding: 1em;
