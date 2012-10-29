@@ -17,19 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include <string.h>
-#include "effects/lib/utils.h"
-#include "effects.h"
-#include "effect_utils.h"
+# pragma FLIP
 
-const effect_t *find_effect(const char *name) {
-	for(int i = 0; i < effects_len; i++) {
-		if(strcmp(effects[i].name, name) == 0) {
-			return &effects[i];
-		}
-	}
+#include "common.h"
 
-	// TODO: deal with this situation at top level
-	return &effects[effects_len];
+XYZ(effect)
+{
+	set_led(x, y, z, 0);
 }

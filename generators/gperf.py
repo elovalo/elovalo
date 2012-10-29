@@ -20,20 +20,28 @@
 import re
 import subprocess
 
-def pgm_wrap(var,s):
+
+def pgm_wrap(var, s):
     """Wrap given var access inside pgm_get. Assumes return value of
     uint8_t in that var """
-    m = re.search(var+'\[[^\]]',s)
-    if m == None: return s
+    m = re.search(var + '\[[^\]]', s)
+
+    if not m:
+        return s
+
     start = m.start()
     brackets = 0
-    for i in range(start,s.__len__()):
+    for i in range(start, s.__len__()):
         if s[i] == '[':
             brackets += 1
         if s[i] == ']':
             brackets -= 1
             if brackets == 0:
-                return s[:start]+'pgm_get('+s[start:i+1]+',byte)'+pgm_wrap(var,s[i+1:])
+                return s[:start] + \
+                    'pgm_get(' + s[start:i + 1] + \
+                    ',byte)' + \
+                    pgm_wrap(var, s[i + 1:])
+
 
 def generate(source, target):
     """This function runs gperf and mangles it output so it allows
@@ -42,29 +50,33 @@ def generate(source, target):
     anything."""
 
     # Get gperf output
-    p = subprocess.Popen(["gperf",source],
+    p = subprocess.Popen(["gperf", source],
                          stdout=subprocess.PIPE)
     out, err = p.communicate()
     if not p.returncode == 0:
-        raise Exception('gperf failed with '+str(p.returncode))
-    
+        raise Exception('gperf failed with ' + str(p.returncode))
+
     # Wrap asso_values and wordlist inside pgmspace and tune the
     # visibility of glyphs
-    out = pgm_wrap('asso_values',out)
+    out = pgm_wrap('asso_values', out)
     out = out.replace("static const ",
                       "PROGMEM static const ")
     out = out.replace("static const struct glyph",
                       "const struct glyph")
 
     # Remove strings from wordlist, no need for verification
-    out = re.sub(r'{".*",',r'{',out)
-    out = out.replace('{""}','{}')
+    out = re.sub(r'{".*",', r'{', out)
+    out = out.replace('{""}', '{}')
 
     # Remove in_word_set to keep it compiling. It's not useful for us.
-    out = out.replace('\nconst struct glyph *','\n#if 0')
+    out = out.replace('\nconst struct glyph *', '\n#if 0')
     out = out + '\n#endif'
 
+    # Replace binary with hex (GCC 4.3<)
+    def replace_binary(m):
+        return hex(int(m.group(0)[2:], 2))
+    out = re.sub('0B[01]+', replace_binary, out)
+
     # Write to target file
-    f = open(target,'w')
-    f.write(out)
-    f.close()
+    with open(target, 'w') as f:
+        f.write(out)

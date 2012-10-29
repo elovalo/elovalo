@@ -27,7 +27,7 @@
 // On AVR use the provided library and define some helpers, too.
 
 #include <avr/pgmspace.h>
-#include "avr/pgm_tricks.h"
+#include "../avr/pgm_tricks.h"
 
 /* Usage example: (init_t)pgm_get(effects[3].init,word); For more
    information about type parameter, see avr-libc user manual about

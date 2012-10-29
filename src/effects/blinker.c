@@ -17,7 +17,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "effects/lib/utils.h"
+# pragma FLIP
 
-extern const effect_t effects[];
-extern const uint8_t effects_len;
+#include "common.h"
+
+void effect(void)
+{
+	if ((uint16_t)((float)ticks / 13.392857142857142) % 4) {
+		clear_buffer();
+		cube_shape(0, 0, 0, 7, 7, 7, MAX_INTENSITY);
+	} else {
+		for (uint8_t x=0; x<LEDS_X; x++) {
+			for (uint8_t y=0; y<LEDS_Y; y++) {
+				for (uint8_t z=0; z<LEDS_Z; z++) {
+					set_led(x,y,z,MAX_INTENSITY);
+				}
+			}
+		}
+	}
+}

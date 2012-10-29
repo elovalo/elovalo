@@ -17,21 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../generated/effects.h"
+# pragma FLIP
 
-// Operating modes
-#define MODE_IDLE           0x00 // Do not update display buffers
-#define MODE_EFFECT         0x01 // Draw effect
-#define MODE_PLAYLIST       0x02 // Playlist
-#define MODE_SLEEP          0x03 // Same as idle, but cube must be started first
+#include "common.h"
 
-const effect_t *effect; // Current effect. Note: points to PGM
-extern uint8_t mode; // If you need to change the running effeet
+XY(effect)
+{
+	const float scaler = (float)MAX_2D_PLOT_INTENSITY/2;
+	const float time = (float)ticks/100;
+	const float x_ = x*cos(time)-y*sin(time);
+	const float y_ = x*sin(time)+y*cos(time);
+	uint16_t i = scaler*(1+sin(0.8*(x_+y_+time)));
 
-void select_playlist_item(uint8_t index);
-void init_current_effect(void);
-uint8_t change_current_effect(uint8_t i);
-uint8_t change_playlist(uint8_t i);
-
-uint8_t get_mode(void);
-void set_mode(uint8_t m);
+	set_z(x, y, i);
+}

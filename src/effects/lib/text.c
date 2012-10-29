@@ -28,7 +28,7 @@
 #include "font8x8.h"
 #include "utils.h"
 #include "text.h"
-#include "../../pgmspace.h"
+#include "../../common/pgmspace.h"
 
 #define mb_pgm_get(a,b,progmem) progmem? pgm_get(a,b): a
 

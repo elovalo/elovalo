@@ -25,7 +25,7 @@ If you want to generate animations, install the following packages as well:
 With Ubuntu 12.04 LTS you need to install some packages from Quantal (12.10)
 repositories. Here's how to do it:
 
-Add the following lines to <tt>/etc/apt/preferences/</tt>
+Add the following lines to <tt>/etc/apt/preferences.d/10-quantal</tt>
 
     Package: *
     Pin: release a=quantal
@@ -35,13 +35,24 @@ And add the following line to <tt>/etc/apt/sources.list</tt>
 
     deb http://archive.ubuntu.com/ubuntu quantal main restricted universe multiverse
 
-Now you can install all the required packages packages:
+Now you can install all the required packages:
 
     sudo apt-get install gcc-avr/quantal avr-libc/quantal gcc scons libjansson-dev gperf avrdude
 
 If you want to generate animations, install the following packages as well:
 
     sudo apt-get install blender libav-tools
+
+The alternative to using quantal-pinning is to fetch the packages from
+launchpad. This has only been verified on Kubuntu. You can also skip
+the above steps and download the packages straight from the quantal
+launchpad:
+	
+	https://launchpad.net/ubuntu/quantal/amd64/avr-libc/1:1.8.0-2
+	https://launchpad.net/ubuntu/quantal/amd64/gcc-avr
+
+If you have a 32bit system (tell 2002 we said *hi*), replace the amd64
+from the URL to i386.
 
 ### OS X with SCons
 

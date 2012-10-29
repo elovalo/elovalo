@@ -17,12 +17,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- *  POSIX compatible real time functions. Remember that time_t may be
- *  64 bit on POSIX platforms but is uint32_t in AVR.
- */
-#ifdef AVR
-#include "avr/clock.h"
-#else
-#include <time.h>
-#endif
+#include <stdint.h>
+#include <string.h>
+#include "../effects/lib/utils.h"
+#include "../generated/effects.h"
+#include "effect_utils.h"
+
+const effect_t *find_effect(const char *name) {
+	for(int i = 0; i < effects_len; i++) {
+		if(strcmp(effects[i].name, name) == 0) {
+			return &effects[i];
+		}
+	}
+
+	// TODO: deal with this situation at top level
+	return &effects[effects_len];
+}

@@ -1,5 +1,6 @@
 # -*- mode: python; coding: utf-8 -*-
 import os
+from generators.build import exporter_source_files
 
 env = Environment(ENV=os.environ)
 
@@ -35,4 +36,4 @@ env.ParseConfig('pkg-config --cflags --libs jansson')
 env.Append(LIBS='m')
 
 # Make just common code and exporter source, not the AVR code
-env.Program('exporter', [Glob('src/*.c'), Glob('src/effects/lib/*.c'), Glob('src/exporter/*.c')])
+env.Program('exporter', exporter_source_files())

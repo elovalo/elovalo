@@ -22,25 +22,11 @@
 			io : "RW"
 		},
 		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x0401,
-			name : "deviceaddress",
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x401,
+			name : "ieeaddress",
 			zcltype : ZCLIEEEAddress,
 			io : "RW"
-		},
-		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x01,
-			name : "hwversion",
-			zcltype : ZCLOctetString,
-			io : "R"
-		},
-		{
-			clusterid : CLUSTERID_COMMISSIONING,
-			attributeid : 0x02,
-			name : "swversion",
-			zcltype : ZCLOctectString,
-			io : "R"
 		},
 		{
 			clusterid : CLUSTERID_ELOVALO,
@@ -70,7 +56,7 @@
 			clusterid : CLUSTERID_ELOVALO,
 			attributeid : 0x04,
 			name : "timezone",
-			zcltype : ZCLUint32,
+			zcltype : ZCLint32,
 			io : "RW"
 		},		
 		{
@@ -85,14 +71,46 @@
 			attributeid : 0x06,
 			name : "effectnames",
 			zcltype : ZCLLongOctectString,
-			io : "R"
+			io : "R",
+			 "Kaikkien mahdollisten efektien nimet. Data palautetaan JSON muodossa ["sine","cube","rain"] "
 		},
 		{
 			clusterid : CLUSTERID_ELOVALO,
 			attributeid : 0x07,
 			name : "playlistnames",
 			zcltype : ZCLLongOctectString,
+			io : "R",
+			comment : "Kaikkien mahdollisten soittolistojen nimet. Data palautetaan JSON muodossa ["park","protomo","moskova"] "
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x08,
+			name :"playlisteffects",
+			zcltype : ZCLOctectString,
+			io : "R",
+			comment : "Tämänhetkisen soittolistan efektit voidaan lukea tästä attribuutista. Data palautetaan byte-taulukkona, jossa on peräkkäin efektien indeksit siinä järjestyksessä kun tulevat näkyviin "
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x09,
+			name :"effect",
+			zcltype : ZCLUint8,
+			io : "RW",
+			comment : "Tämänhetkinen efekti"
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x10,
+			name : "hwversion",
+			zcltype : ZCLOctetString,
 			io : "R"
-		}
+		},
+		{
+			clusterid : CLUSTERID_ELOVALO,
+			attributeid : 0x11,
+			name : "swversion",
+			zcltype : ZCLOctectString,
+			io : "R"
+		},		
 	]
 }

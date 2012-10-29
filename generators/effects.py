@@ -31,15 +31,20 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "pgmspace.h"
-#include "env.h"
+#include "../common/pgmspace.h"
+#include "../common/env.h"
 #include "effects.h"
-#include "effects/common.h"
+#include "../effects/common.h"
 '''
 
 
 def generate(source, target):
     inp = SourceFiles(glob(source))
+
+    parent_dir = os.path.split(target)[0]
+
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
 
     with open(target, 'w') as t:
         t.write(file_start)
@@ -140,6 +145,7 @@ class SourceFiles(object):
 class SourceFile(object):
 
     def __init__(self, path):
+        self.path = ''.join(path.rpartition('src')[1:])
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
@@ -165,12 +171,13 @@ class SourceFile(object):
         )
 
     def _functions(self, c):
-        return ''.join(line['block'] for line in c
+        return ''.join(block_with_meta(line, self.path) for line in c
             if 'function' in line['types'] and len(line['types']) == 1
         )
 
     def _block(self, c, name):
-        return ''.join(line['block'] for line in c if name in line['types'])
+        return ''.join(block_with_meta(line, self.path) for line in c
+                if name in line['types'])
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
@@ -192,6 +199,13 @@ class SourceFile(object):
             return a[0]['block']
 
 
+def block_with_meta(line, path):
+    line_number = line['line_number']
+    return '\n'.join(['#line ' + str(line_number + i) + ' ' +
+        '"' + path + '"' + '\n' + p
+        for i, p in enumerate(line['block'].split('\n')) if p.strip()]) + '\n'
+
+
 def find_globals(content):
     ret = []
 
@@ -210,7 +224,7 @@ def find_globals(content):
 
 
 def analyze(name, content):
-    def analyze_line(i, line):
+    def analyze_line(i, line, line_offset):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
@@ -281,12 +295,16 @@ def analyze(name, content):
 
         ret['block'] = block
 
+        ret['line_number'] = line_offset + i + 1
+
         return ret
 
+    content_len = len(content)
     content = remove_comments(content)
+    line_offset = content_len - len(content)
     content = replace_variables(content, 'vars.', 'vars.' + name + '.')
 
-    return [analyze_line(i, line) for i, line in enumerate(content)]
+    return [analyze_line(i, line, line_offset) for i, line in enumerate(content)]
 
 
 def remove_comments(text):
