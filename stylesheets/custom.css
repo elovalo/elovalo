@@ -8,7 +8,13 @@ body, h1, h2, h3, h4, h5, h6 {
     font: 14px/1.5 "Quicksand", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: normal;
 }
+p,a{
+   font-family: "OpenSansRegular", Helvetica, Arial;
+}
 
+.navi a{
+   font-size:24px;
+}
 hr {
     border: 1px solid #bbb;
 }
@@ -59,6 +65,9 @@ footer ul li {
     width: 100%;
 }
 
+.navbar-inner{
+/*	height:75px; */
+}
 /* fonts */
 @font-face {
   font-family: 'OpenSansLight';
