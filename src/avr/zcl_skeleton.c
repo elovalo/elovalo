@@ -275,20 +275,20 @@ static uint8_t read_packet(void) {
 }
 
 static uint8_t process_payload(uint16_t length) {
-	uint8_t channel = read_hex_crc(ser_read);
-	if (channel != ZCL_CHANNEL) {
+	// Confirm message channel
+	if (!accept(ser_read, ZCL_CHANNEL)) {
 		return 1;
 	}
 
 	// Confirming MAC address
 	for (uint8_t i = 0; i < MAC_LEN; i++) {
-		if (mac[1] != read_hex_crc(ser_read)) {
+		if (!accept(ser_read, mac[i])) {
 			parser_state = PARSER_STATE_INCORRECT_MAC;
 		}
 	}
 
-	uint8_t endpoint = read_hex_crc(ser_read);
-	if (endpoint != EP_ID) {
+	// Confirming the end point
+	if (accept(ser_read, EP_ID)) {
 		return 1;
 	}
 
@@ -727,12 +727,16 @@ static uint8_t read_rbuf(void) {
 }
 
 /**
- * Resets the read-commad buffer reading index
+ * Resets the read-command buffer reading index
  */
 static void reset_rbuf_i(void) {
 	rbuf_i = 0;
 }
 
+/**
+ * Reads a single byte, compares it to the given parameter
+ * and returns if it matches.
+ */
 static uint8_t accept(reader_t r, uint8_t val) {
 	uint8_t b = read_hex_crc(r);
 
@@ -742,12 +746,18 @@ static uint8_t accept(reader_t r, uint8_t val) {
 	return 0;
 }
 
+/**
+ * Read a single byte and hex decodes it
+ */
 static uint8_t read_hex_byte(reader_t r) {
 	uint8_t read;
 	read = r();
 	return hex_to_num(read);
 }
 
+/**
+ * Read a single byte and hex decode it while updating the CRC
+ */
 static uint8_t read_hex_crc_byte(reader_t r) {
 	uint8_t read;
 	read = r();
@@ -755,6 +765,9 @@ static uint8_t read_hex_crc_byte(reader_t r) {
 	return hex_to_num(read);
 }
 
+/**
+ * Read two bytes and hex decode them to a single value
+ */
 static uint8_t read_hex(reader_t r) {
 	uint8_t read;
 	uint8_t val;
@@ -768,6 +781,10 @@ static uint8_t read_hex(reader_t r) {
 	return val;
 }
 
+/**
+ * Read two bytes and hex decode them to a single value while
+ * updating the CRC value
+ */
 static uint8_t read_hex_crc(reader_t r) {
 	uint8_t read;
 	uint8_t val;
@@ -783,6 +800,9 @@ static uint8_t read_hex_crc(reader_t r) {
 	return val;
 }
 
+/**
+ * Read four bytes and hex decode them to a single value.
+ */
 static uint16_t read_hex_16(reader_t r) {
 	uint16_t ret;
 	uint8_t val;
@@ -796,6 +816,10 @@ static uint16_t read_hex_16(reader_t r) {
 	return ret;
 }
 
+/**
+ * Read four bytes and hex decode them to a single value
+ * while updating the CRC.
+ */
 static uint16_t read_hex_crc_16(reader_t r) {
 	uint16_t ret;
 	uint8_t val;
@@ -811,6 +835,9 @@ static uint16_t read_hex_crc_16(reader_t r) {
 
 // --------- Hex conversions --------
 
+/**
+ * Convert a hexadecimal character to integer.
+ */
 uint8_t hex_to_num(uint8_t c) {
 	if ('0' <= c && c <= '9') {
 		return c - '0';
@@ -822,6 +849,9 @@ uint8_t hex_to_num(uint8_t c) {
 	return NOT_HEX;
 }
 
+/**
+ * Convert an integer to hex characters.
+ */
 hex_value_t num_to_hex_chars(uint8_t i) {
 	hex_value_t val;
 	val.one = num_to_hex(i >> 4);
@@ -829,6 +859,9 @@ hex_value_t num_to_hex_chars(uint8_t i) {
 	return val;
 }
 
+/**
+ * Convert an integer to a hexadecimal character.
+ */
 uint8_t num_to_hex(uint8_t i) {
 	if (i >= 0 && i <= 9) {
 		return i + '0';
