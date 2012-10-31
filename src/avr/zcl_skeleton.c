@@ -347,7 +347,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	write_payload_header();
 	write_zcl_header(CMDID_READ_RESPONSE);
 	
-	for (uint16_t i = 0; i < len; i += 2) {
+	for (uint16_t i = 0; i < len; i++) {
 		attr = read_hex_crc_16(rbuf_read);
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
@@ -454,7 +454,7 @@ static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 	uint16_t length = 1; // Because payload contains the channel byte
 
 	reset_rbuf_i();
-	for (uint16_t i = 0; i < msg_len; i += 2) {
+	for (uint16_t i = 0; i < msg_len; i++) {
 		uint16_t attr = read_hex_crc_16(ser_to_rbuf_read);
 		length += READ_RESP_HEADER_LEN;
 
