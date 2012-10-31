@@ -29,7 +29,6 @@
 #define ZCL_MESSAGE_HEADER_LEN 11
 #define READ_RESP_HEADER_LEN 4
 #define MAC_LEN 8
-#define READ_BUF_LEN 32
 
 // Frame types
 #define ACK 'K' // Successfully received last packet
@@ -112,22 +111,13 @@
 #define PARSER_STATE_DEFAULT 0x00
 #define PARSER_STATE_INCORRECT_MAC 0x01
 
-uint8_t parser_state = PARSER_STATE_DEFAULT;
-uint8_t error_read = 0;
+// Read buffer defines
+#define READ_BUF_CAPACITY 32
+#define READ_BUF_OK 0x00
+#define READ_BUF_OVERFLOW 0x01
 
-uint8_t read_buffer[READ_BUF_LEN];
-
-uint16_t write_crc = 0xffff;
-uint16_t read_crc = 0xffff;
-
-// ZCL Header variables
-uint8_t transaction_seq = 0;
-uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
-
-// ATI
-#define ATI 'A'
-#define ATI_LEN 36
-uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
+// Data reading functions
+typedef uint8_t (*reader_t)(void);
 
 typedef union frame_control {
 	struct {
@@ -177,17 +167,44 @@ static void write_hex_crc(uint8_t);
 static void write_hex_crc_16(uint16_t);
 static void write_pgm_string_hex_crc(const char * const* pgm_p);
 
-static uint8_t accept(uint8_t);
-static uint8_t read_hex_byte(void);
-static uint8_t read_hex_crc_byte(void);
-static uint8_t read_hex(void);
-static uint8_t read_hex_crc(void);
-static uint16_t read_hex_16(void);
-static uint16_t read_hex_crc_16(void);
+static uint8_t ser_to_rbuf_read(void);
+static uint8_t read_rbuf(void);
+static void reset_rbuf_i(void);
+
+static uint8_t accept(reader_t, uint8_t);
+static uint8_t read_hex_byte(reader_t);
+static uint8_t read_hex_crc_byte(reader_t);
+static uint8_t read_hex(reader_t);
+static uint8_t read_hex_crc(reader_t);
+static uint16_t read_hex_16(reader_t);
+static uint16_t read_hex_crc_16(reader_t);
 
 static uint8_t hex_to_num(uint8_t);
 static hex_value_t num_to_hex_chars(uint8_t);
 static uint8_t num_to_hex(uint8_t);
+
+uint8_t parser_state = PARSER_STATE_DEFAULT;
+uint8_t error_read = 0;
+
+uint8_t rbuf[READ_BUF_CAPACITY];
+uint8_t rbuf_i = 0;
+uint8_t rbuf_state = READ_BUF_OK;
+
+uint16_t write_crc = 0xffff;
+uint16_t read_crc = 0xffff;
+
+// ZCL Header variables
+uint8_t transaction_seq = 0;
+uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
+
+// ATI
+#define ATI 'A'
+#define ATI_LEN 36
+uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
+
+reader_t ser_read = &serial_read_blocking;
+reader_t ser_rbuf_read = &ser_to_rbuf_read;
+reader_t rbuf_read = &read_rbuf;
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
@@ -244,12 +261,12 @@ static uint8_t read_packet(void) {
 		// Do nothing or return error?
 		return 1;
 	}
-	uint16_t length = read_hex_16();
+	uint16_t length = read_hex_16(ser_read);
 	
 	uint8_t err = process_payload(length);
 	if (err) { return 1; }
 
-	uint16_t msg_crc = read_hex_16();
+	uint16_t msg_crc = read_hex_16(ser_read);
 	if (msg_crc != read_crc || error_read) {
 		return 1;
 	}
@@ -258,25 +275,25 @@ static uint8_t read_packet(void) {
 }
 
 static uint8_t process_payload(uint16_t length) {
-	uint8_t channel = read_hex_crc();
+	uint8_t channel = read_hex_crc(ser_read);
 	if (channel != ZCL_CHANNEL) {
 		return 1;
 	}
 
 	// Confirming MAC address
 	for (uint8_t i = 0; i < MAC_LEN; i++) {
-		if (mac[1] != read_hex_crc()) {
+		if (mac[1] != read_hex_crc(ser_read)) {
 			parser_state = PARSER_STATE_INCORRECT_MAC;
 		}
 	}
 
-	uint8_t endpoint = read_hex_crc();
+	uint8_t endpoint = read_hex_crc(ser_read);
 	if (endpoint != EP_ID) {
 		return 1;
 	}
 
-	uint16_t profile = read_hex_crc_16();
-	uint16_t cluster = read_hex_crc_16();
+	uint16_t profile = read_hex_crc_16(ser_read);
+	uint16_t cluster = read_hex_crc_16(ser_read);
 
 	length -= ZCL_MESSAGE_HEADER_LEN;
 
@@ -290,7 +307,7 @@ static uint8_t process_payload(uint16_t length) {
 
 static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
 	frame_control_t frame_control;
-	uint8_t fc_byte = read_hex_crc();
+	uint8_t fc_byte = read_hex_crc(ser_read);
 
 	frame_control.type = (fc_byte >> 6);
 	frame_control.manu_specific = (fc_byte & ( 1 << 5 )) >> 5;
@@ -299,11 +316,11 @@ static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
 	frame_control.reserved = fc_byte & 0x07;
 
 	if (frame_control.manu_specific) {
-		uint16_t manu_spec = read_hex_crc_16();
+		uint16_t manu_spec = read_hex_crc_16(ser_read);
 		length -= 2;
 	}
-	uint8_t trans_seq = read_hex_crc();
-	uint8_t cmd = read_hex_crc();
+	uint8_t trans_seq = read_hex_crc(ser_read);
+	uint8_t cmd = read_hex_crc(ser_read);
 	length -= 3;
 
 	switch (cmd) {
@@ -324,13 +341,14 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	uint16_t attr;
 
 	reset_write_crc();
+	reset_rbuf_i();
 
 	write_packet_header(resp_len);
 	write_payload_header();
 	write_zcl_header(CMDID_READ_RESPONSE);
 	
 	for (uint16_t i = 0; i < len; i += 2) {
-		attr = read_hex_crc_16();
+		attr = read_hex_crc_16(rbuf_read);
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
@@ -422,7 +440,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
  */
 static void read_payload_crc(uint16_t length) {
 	for (uint16_t i = 0; i < length; i++) {
-		read_hex_crc();
+		read_hex_crc(ser_read);
 	}
 }
 
@@ -435,8 +453,9 @@ static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 	uint16_t length = 1; // Because payload contains the channel byte
 
+	reset_rbuf_i();
 	for (uint16_t i = 0; i < msg_len; i += 2) {
-		uint16_t attr = read_hex_crc_16();
+		uint16_t attr = read_hex_crc_16(ser_to_rbuf_read);
 		length += READ_RESP_HEADER_LEN;
 
 		if (cluster == CLUSTERID_BASIC) {
@@ -544,12 +563,12 @@ static void write_effect_names(void) {
 
 static void process_write_cmd(uint8_t cluster, uint16_t length) {
 	for (uint16_t i = 0; i < length; i++) {
-		uint16_t attr = read_hex_crc_16();
+		uint16_t attr = read_hex_crc_16(ser_read);
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				if (accept(TYPE_BOOLEAN)) {
-					uint8_t state = read_hex_crc();
+				if (accept(ser_read, TYPE_BOOLEAN)) {
+					uint8_t state = read_hex_crc(ser_read);
 					if (state == BOOL_TRUE) {
 						set_mode(MODE_PLAYLIST);
 					} else if (state == BOOL_FALSE) {
@@ -561,9 +580,9 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 				//TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
-				if (accept(TYPE_IEEE_ADDRESS)) {
+				if (accept(ser_read, TYPE_IEEE_ADDRESS)) {
 					for (uint8_t i = 0; i < MAC_LEN; i++) {
-						mac[i] = read_hex_crc();
+						mac[i] = read_hex_crc(ser_read);
 					}
 				}
 				break;
@@ -571,13 +590,13 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 		} else if (cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_OPERATING_MODE:
-				if (accept(TYPE_ENUM)) {
-					uint8_t mode = read_hex_crc();
+				if (accept(ser_read, TYPE_ENUM)) {
+					uint8_t mode = read_hex_crc(ser_read);
 					set_mode(mode);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				if (accept(TYPE_OCTET_STRING)) {
+				if (accept(ser_read, TYPE_OCTET_STRING)) {
 					/*uint8_t slen = read_hex_crc();
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
@@ -585,22 +604,22 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 				}
 				break;
 			case ATTR_PLAYLIST:
-				if (accept(TYPE_UINT8)) {
+				if (accept(ser_read, TYPE_UINT8)) {
 					//current_playlist(read_hex_crc());
 				}
 				break;
 			case ATTR_TIMEZONE:
-				if (accept(TYPE_INT32)) {
+				if (accept(ser_read, TYPE_INT32)) {
 					//TODO			}
 				}
 				break;
 			case ATTR_TIME:
-				if (accept(TYPE_UTC_TIME)) {
+				if (accept(ser_read, TYPE_UTC_TIME)) {
 					//TODO
 				}
 				break;
 			case ATTR_EFFECT:
-				if (accept(TYPE_UINT8)) {
+				if (accept(ser_read, TYPE_UINT8)) {
 					//uint8_t current_effect = read_hex_crc(); //TODO
 				}
 				break;
@@ -683,8 +702,39 @@ static void write_pgm_string_hex_crc(const char * const* pgm_p) {
 
 // Reads
 
-static uint8_t accept(uint8_t val) {
-	uint8_t b = read_hex_crc();
+/**
+ * A reader_t reading from serial port to the
+ * read-command buffer. Returns the value read.
+ */
+static uint8_t ser_to_rbuf_read(void) {
+	if (rbuf_i >= READ_BUF_CAPACITY) {
+		rbuf_state = READ_BUF_OVERFLOW;
+		return 0;
+	}
+	rbuf[rbuf_i++] = serial_read_blocking();
+	return rbuf[rbuf_i];
+}
+
+/**
+ * A reader_t reading a byte from the read-command buffer
+ */
+static uint8_t read_rbuf(void) {
+	if (rbuf_i >= READ_BUF_CAPACITY) {
+		rbuf_state = READ_BUF_OVERFLOW;
+		return 0;
+	}
+	return rbuf[rbuf_i++];
+}
+
+/**
+ * Resets the read-commad buffer reading index
+ */
+static void reset_rbuf_i(void) {
+	rbuf_i = 0;
+}
+
+static uint8_t accept(reader_t r, uint8_t val) {
+	uint8_t b = read_hex_crc(r);
 
 	if (b == val) {
 		return 1;
@@ -692,66 +742,68 @@ static uint8_t accept(uint8_t val) {
 	return 0;
 }
 
-static uint8_t read_hex_byte(void) {
+static uint8_t read_hex_byte(reader_t r) {
 	uint8_t read;
-	read = serial_read_blocking();
+	read = r();
 	return hex_to_num(read);
 }
 
-static uint8_t read_hex_crc_byte(void) {
+static uint8_t read_hex_crc_byte(reader_t r) {
 	uint8_t read;
-	read = serial_read_blocking();
+	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
 	return hex_to_num(read);
 }
 
-static uint8_t read_hex(void) {
+static uint8_t read_hex(reader_t r) {
 	uint8_t read;
 	uint8_t val;
 
-	read = serial_read_blocking();
+	read = r();
 	val = (num_to_hex(read) << 4);
 
-	read = serial_read_blocking();
+	read = r();
 	val |= num_to_hex(read);
 
 	return val;
 }
 
-static uint8_t read_hex_crc(void) {
+static uint8_t read_hex_crc(reader_t r) {
 	uint8_t read;
 	uint8_t val;
 
-	read = serial_read_blocking();
+	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
 	val = (num_to_hex(read) << 4);
 
-	read = serial_read_blocking();
+	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
 	val |= num_to_hex(read);
 
 	return val;
 }
 
-static uint16_t read_hex_16(void) {
-	uint8_t val = read_hex();
+static uint16_t read_hex_16(reader_t r) {
 	uint16_t ret;
+	uint8_t val;
+	val = read_hex(r);
 
 	ret = (val << 8);
 
-	val = read_hex();
+	val = read_hex(r);
 	ret |= val;
 
 	return ret;
 }
 
-static uint16_t read_hex_crc_16(void) {
-	uint8_t val = read_hex_crc();
+static uint16_t read_hex_crc_16(reader_t r) {
 	uint16_t ret;
+	uint8_t val;
+	val = read_hex_crc(r);
 
 	ret = (val << 8);
 
-	val = read_hex_crc();
+	val = read_hex_crc(r);
 	ret |= val;
 
 	return ret;
