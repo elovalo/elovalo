@@ -18,28 +18,27 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
     }
 
     function convert(data) {
-        console.log(data);
+        var dates = data.entries.map(function(v) {
+            var date = new Date(v.publishedDate);
+            var d = date.getFullYear() + ',' + (date.getMonth() + 1) + ',' + date.getDate();
 
-        data = {
+            return {
+                startDate: d,
+                endData: d,
+                headline: v.title,
+                text: v.content
+            };
+        });
+
+        return {
             timeline: {
-                headline: 'foobar',
+                //headline: 'Elovalo',
                 type: 'default',
                 startDate: '2012',
-                text: "<p>Intro body text goes here, some HTML is ok</p>p>",
-                date: [
-                    {
-                        startDate: "2012,12,10",
-                        endData: "2012,12,11",
-                        headline: "Headline Goes Here",
-                        text: "<p>Body text goes here, some HTML is OK</p>"
-                    }
-                ]
+                //text: "<p>Intro body text goes here, some HTML is ok</p>p>",
+                date: dates
             }
         };
-
-        console.log(data);
-
-        return data;
     }
 
     function constructTimeline(id, data) {
