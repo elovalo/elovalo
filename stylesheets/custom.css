@@ -8,7 +8,7 @@ body, h1, h2, h3, h4, h5, h6 {
     font: 14px/1.5 "Quicksand", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: normal;
 }
-p,a{
+p,a, li{
    font-family: "OpenSansRegular", Helvetica, Arial;
 }
 
@@ -30,8 +30,10 @@ h2{
 }
 
 .details .navi {
+    margin-top: 2em;
     margin-bottom: 1em;
     text-align: center;
+    
 }
 
 .details .navi .button {
@@ -64,6 +66,10 @@ footer ul li {
 .navbar-inner{
 /*	height:75px; */
 }
+
+.btn-small{
+   margin-top:5px;
+  }
 /* fonts */
 @font-face {
   font-family: 'OpenSansLight';
