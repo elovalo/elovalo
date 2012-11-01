@@ -21,11 +21,11 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
         var dates = data.entries.map(function(v) {
             var date = new Date(v.publishedDate);
             var d = date.getFullYear() + ',' + (date.getMonth() + 1) + ',' + date.getDate();
-
+console.log(v.title);
             return {
                 startDate: d,
                 endData: d,
-                headline: v.title,
+                headline: decode(v.title),
                 text: v.content
             };
         });
@@ -39,6 +39,10 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
                 date: dates
             }
         };
+    }
+
+    function decode(t) {
+        return $('<div/>').html(t).text();
     }
 
     function constructTimeline(id, data) {
