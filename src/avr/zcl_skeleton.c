@@ -184,7 +184,6 @@ static hex_value_t itohval(uint8_t);
 static uint8_t itoh(uint8_t);
 
 uint8_t parser_state = PARSER_STATE_DEFAULT;
-uint8_t error_read = 0;
 
 uint8_t rbuf[READ_BUF_CAPACITY];
 uint8_t rbuf_i = 0;
@@ -245,7 +244,6 @@ void process_zcl_frame(uint8_t frametype) {
 }
 
 static bool read_packet(void) {
-	error_read = 0;
 	reset_read_crc();
 
 	// Read "reserved" byte
@@ -259,7 +257,7 @@ static bool read_packet(void) {
 	if (err) return false;
 
 	uint16_t msg_crc = read_hex_16(ser_read);
-	if (msg_crc != read_crc || error_read) {
+	if (msg_crc != read_crc) {
 		return false;
 	}
 
