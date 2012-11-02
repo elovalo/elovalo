@@ -134,8 +134,8 @@ typedef union frame_control {
 
 typedef union hex_val {
 	struct {
-		unsigned one: 4;
-		unsigned two: 4;
+		unsigned high: 4;
+		unsigned low: 4;
 	};
 
 	uint8_t integer;
