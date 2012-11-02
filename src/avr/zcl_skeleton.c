@@ -186,7 +186,6 @@ static hex_value_t itohval(uint8_t);
 static uint8_t itoh(uint8_t);
 
 uint8_t parser_state = PARSER_STATE_DEFAULT;
-uint8_t error_read = 0;
 
 uint8_t rbuf[READ_BUF_CAPACITY];
 uint8_t rbuf_i = 0;
@@ -255,7 +254,6 @@ static void send_ok(void) {
 }
 
 static uint8_t read_packet(void) {
-	error_read = 0;
 	reset_read_crc();
 
 	uint8_t begin;
@@ -270,7 +268,7 @@ static uint8_t read_packet(void) {
 	if (err) { return 1; }
 
 	uint16_t msg_crc = read_hex_16(ser_read);
-	if (msg_crc != read_crc || error_read) {
+	if (msg_crc != read_crc) {
 		return 1;
 	}
 
