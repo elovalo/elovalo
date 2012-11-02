@@ -141,9 +141,7 @@ typedef union hex_val {
 	uint8_t integer;
 } hex_value_t;
 
-static void send_error(void);
-static void send_ok(void);
-static uint8_t read_packet(void);
+static bool read_packet(void);
 static uint8_t process_payload(uint16_t length);
 static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length);
 static void process_read_cmd(uint16_t cluster, uint16_t length);
@@ -221,11 +219,11 @@ void process_zcl_frame(uint8_t frametype) {
 		break;
 	case STX:
 	{
-		uint8_t err = read_packet();
-		if (err) {
-			send_error();
+		bool ok = read_packet();
+		if (ok) {
+			serial_send(ACK);
 		} else {
-			send_ok();
+			serial_send(NAK);
 		}
 		break;
 	}
@@ -246,35 +244,26 @@ void process_zcl_frame(uint8_t frametype) {
 	}
 }
 
-static void send_error(void) {
-	serial_send(NAK);
-}
-
-static void send_ok(void) {
-	serial_send(ACK);
-}
-
-static uint8_t read_packet(void) {
+static bool read_packet(void) {
 	error_read = 0;
 	reset_read_crc();
 
-	uint8_t begin;
-	begin = serial_read_blocking();
-	if (begin != PACKET_BEGIN) {
+	// Read "reserved" byte
+	if (serial_read_blocking() != PACKET_BEGIN) {
 		// Do nothing or return error?
-		return 1;
+		return false;
 	}
 	uint16_t length = read_hex_16(ser_read);
 	
 	uint8_t err = process_payload(length);
-	if (err) { return 1; }
+	if (err) return false;
 
 	uint16_t msg_crc = read_hex_16(ser_read);
 	if (msg_crc != read_crc || error_read) {
-		return 1;
+		return false;
 	}
 
-	return 0;
+	return true;
 }
 
 static uint8_t process_payload(uint16_t length) {
