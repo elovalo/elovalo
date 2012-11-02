@@ -133,11 +133,11 @@ typedef union frame_control {
 
 typedef union hex_val {
 	struct {
-		unsigned one: 8;
-		unsigned two: 8;
+		unsigned one: 4;
+		unsigned two: 4;
 	};
 
-	uint16_t integer;
+	uint8_t integer;
 } hex_value_t;
 
 static void send_error(void);
@@ -773,10 +773,10 @@ static uint8_t read_hex(reader_t r) {
 	uint8_t val;
 
 	read = r();
-	val = (itoh(read) << 4);
+	val = (htoi(read) << 4);
 
 	read = r();
-	val |= itoh(read);
+	val |= htoi(read);
 
 	return val;
 }
@@ -791,11 +791,11 @@ static uint8_t read_hex_crc(reader_t r) {
 
 	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
-	val = (itoh(read) << 4);
+	val = (htoi(read) << 4);
 
 	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
-	val |= itoh(read);
+	val |= htoi(read);
 
 	return val;
 }
@@ -854,8 +854,7 @@ uint8_t htoi(uint8_t c) {
  */
 hex_value_t itohval(uint8_t i) {
 	hex_value_t val;
-	val.one = itoh(i >> 4);
-	val.two = itoh(i & 0x0f);
+	val.integer = i;
 	return val;
 }
 
