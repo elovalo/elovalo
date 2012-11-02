@@ -134,8 +134,8 @@ typedef union frame_control {
 
 typedef union hex_val {
 	struct {
-		unsigned high: 4;
 		unsigned low: 4;
+		unsigned high: 4;
 	};
 
 	uint8_t integer;
@@ -198,8 +198,8 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
 // ATI
 #define ATI 'A'
-#define ATI_LEN 36
-uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
+#define ATI_LEN 42
+uint8_t ati_resp[] = "C2IS,elovalo,v1.1,01:23:45:67:89:ab:cd:ef\n";
 
 // REFACTORING TODO ser_read and friends to upper-case
 #define ser_read (&serial_read_blocking)
