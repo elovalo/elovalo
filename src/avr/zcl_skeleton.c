@@ -20,6 +20,7 @@
 #include <util/crc16.h>
 #include <avr/pgmspace.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "serial.h"
 #include "../common/pgmspace.h"
@@ -172,7 +173,7 @@ static uint8_t ser_to_rbuf_read(void);
 static uint8_t read_rbuf(void);
 static void reset_rbuf_i(void);
 
-static uint8_t accept(reader_t, uint8_t);
+static bool accept(reader_t, uint8_t);
 static uint8_t read_hex_byte(reader_t);
 static uint8_t read_hex_crc_byte(reader_t);
 static uint8_t read_hex(reader_t);
@@ -737,13 +738,10 @@ static void reset_rbuf_i(void) {
  * Reads a single byte, compares it to the given parameter
  * and returns if it matches.
  */
-static uint8_t accept(reader_t r, uint8_t val) {
+static bool accept(reader_t r, uint8_t val) {
 	uint8_t b = read_hex_crc(r);
 
-	if (b == val) {
-		return 1;
-	}
-	return 0;
+	return b == val;
 }
 
 /**
