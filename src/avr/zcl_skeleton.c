@@ -203,9 +203,10 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 #define ATI_LEN 36
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
 
-reader_t ser_read = &serial_read_blocking;
-reader_t ser_rbuf_read = &ser_to_rbuf_read;
-reader_t rbuf_read = &read_rbuf;
+// REFACTORING TODO ser_read and friends to upper-case
+#define ser_read (&serial_read_blocking)
+#define ser_rbuf_read (&ser_to_rbuf_read)
+#define rbuf_read (&read_rbuf)
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
