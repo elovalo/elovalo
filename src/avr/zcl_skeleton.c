@@ -157,6 +157,7 @@ static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
 static void process_write_cmd(uint8_t cluster, uint16_t length);
 static void write_default_response(uint8_t cmd, uint8_t status);
+static void write_unsupported_read_attribute(uint16_t attr);
 
 static void reset_read_crc(void);
 static void reset_write_crc(void);
@@ -179,9 +180,9 @@ static uint8_t read_hex_crc(reader_t);
 static uint16_t read_hex_16(reader_t);
 static uint16_t read_hex_crc_16(reader_t);
 
-static uint8_t hex_to_num(uint8_t);
-static hex_value_t num_to_hex_chars(uint8_t);
-static uint8_t num_to_hex(uint8_t);
+static uint8_t htoi(uint8_t);
+static hex_value_t itohval(uint8_t);
+static uint8_t itoh(uint8_t);
 
 uint8_t parser_state = PARSER_STATE_DEFAULT;
 uint8_t error_read = 0;
@@ -307,13 +308,7 @@ static uint8_t process_payload(uint16_t length) {
 
 static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
 	frame_control_t frame_control;
-	uint8_t fc_byte = read_hex_crc(ser_read);
-
-	frame_control.type = (fc_byte >> 6);
-	frame_control.manu_specific = (fc_byte & ( 1 << 5 )) >> 5;
-	frame_control.direction = (fc_byte & ( 1 << 4 )) >> 4;
-	frame_control.disable_def_resp = (fc_byte & ( 1 << 3 )) >> 3;
-	frame_control.reserved = fc_byte & 0x07;
+	frame_control.integer = read_hex_crc(ser_read);
 
 	if (frame_control.manu_specific) {
 		uint16_t manu_spec = read_hex_crc_16(ser_read);
@@ -352,8 +347,8 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN); //TODO
-				//write_hex_crc(IS_ON); //TODO
+				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
+				write_hex_crc(get_mode());
 				break;
 			case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
@@ -366,7 +361,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 				}
 				break;
 			default:
-				write_attr_resp_fail(); // TODO
+				write_unsupported_read_attribute(attr);
 				break;
 			}
 		} else if (cluster == CLUSTERID_ELOVALO) {
@@ -423,10 +418,10 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 			case ATTR_SW_VERSION:
 				write_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
 				write_sw_version(); //TODO
-				break;
-			default:
-				write_attr_resp_fail(); // TODO
 				break;*/
+			default:
+				write_unsupported_read_attribute(attr);
+				break;
 			}
 		}
 	}
@@ -448,6 +443,11 @@ static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 	write_hex_crc_16(attr);
 	write_hex_crc(STATUS_SUCCESS);
 	write_hex_crc(type);
+}
+
+static void write_unsupported_read_attribute(uint16_t attr) {
+	write_hex_crc_16(attr);
+	write_hex_crc(STATUS_UNSUPPORTED_ATTRIBUTE);
 }
 
 static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
@@ -654,7 +654,7 @@ static void reset_write_crc(void) {
 static void write_hex_crc(uint8_t byte) {
 	write_crc = _crc_ccitt_update(write_crc, byte);
 	hex_value_t val;
-	val = num_to_hex_chars(byte);
+	val = itohval(byte);
 
 	serial_send(val.one);
 	serial_send(val.two);
@@ -668,17 +668,17 @@ static void write_hex_crc_16(uint16_t data) {
 static void write_hex_16(uint16_t data) {
 	hex_value_t val;
 
-	val = num_to_hex_chars(data >> 8);
+	val = itohval(data >> 8);
 	serial_send(val.one);
 	serial_send(val.two);
 
-	val = num_to_hex_chars(data & 0x00ff);
+	val = itohval(data & 0x00ff);
 	serial_send(val.one);
 	serial_send(val.two);
 }
 
 static void write_hex_byte(uint8_t byte) {
-	uint8_t val = num_to_hex(byte);
+	uint8_t val = itoh(byte);
 	serial_send(val);
 }
 
@@ -752,7 +752,7 @@ static uint8_t accept(reader_t r, uint8_t val) {
 static uint8_t read_hex_byte(reader_t r) {
 	uint8_t read;
 	read = r();
-	return hex_to_num(read);
+	return htoi(read);
 }
 
 /**
@@ -762,7 +762,7 @@ static uint8_t read_hex_crc_byte(reader_t r) {
 	uint8_t read;
 	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
-	return hex_to_num(read);
+	return htoi(read);
 }
 
 /**
@@ -773,10 +773,10 @@ static uint8_t read_hex(reader_t r) {
 	uint8_t val;
 
 	read = r();
-	val = (num_to_hex(read) << 4);
+	val = (itoh(read) << 4);
 
 	read = r();
-	val |= num_to_hex(read);
+	val |= itoh(read);
 
 	return val;
 }
@@ -791,11 +791,11 @@ static uint8_t read_hex_crc(reader_t r) {
 
 	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
-	val = (num_to_hex(read) << 4);
+	val = (itoh(read) << 4);
 
 	read = r();
 	read_crc = _crc_ccitt_update(read_crc, read);
-	val |= num_to_hex(read);
+	val |= itoh(read);
 
 	return val;
 }
@@ -838,7 +838,7 @@ static uint16_t read_hex_crc_16(reader_t r) {
 /**
  * Convert a hexadecimal character to integer.
  */
-uint8_t hex_to_num(uint8_t c) {
+uint8_t htoi(uint8_t c) {
 	if ('0' <= c && c <= '9') {
 		return c - '0';
 	} else if ('a' <= c && c <= 'f') {
@@ -852,17 +852,17 @@ uint8_t hex_to_num(uint8_t c) {
 /**
  * Convert an integer to hex characters.
  */
-hex_value_t num_to_hex_chars(uint8_t i) {
+hex_value_t itohval(uint8_t i) {
 	hex_value_t val;
-	val.one = num_to_hex(i >> 4);
-	val.two = num_to_hex(i & 0x0f);
+	val.one = itoh(i >> 4);
+	val.two = itoh(i & 0x0f);
 	return val;
 }
 
 /**
  * Convert an integer to a hexadecimal character.
  */
-uint8_t num_to_hex(uint8_t i) {
+uint8_t itoh(uint8_t i) {
 	if (i >= 0 && i <= 9) {
 		return i + '0';
 	} else if (i >= 10 && i <= 15) {
