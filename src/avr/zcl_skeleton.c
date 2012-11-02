@@ -198,7 +198,6 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
 // ATI
 #define ATI 'A'
-#define ATI_LEN 36
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
 
 // REFACTORING TODO ser_read and friends to upper-case
@@ -228,12 +227,9 @@ void process_zcl_frame(uint8_t frametype) {
 	}
 	case ATI:
 	{
-		uint8_t b;
-		b = serial_read_blocking();
-		if (b != 'T') { break; }
-		b = serial_read_blocking();
-		if (b != 'I') { break; }
-		for (uint8_t i = 0; i < ATI_LEN; i++) {
+		if (serial_read_blocking() != 'T') break;
+		if (serial_read_blocking() != 'I') break;
+		for (uint8_t i = 0; i < sizeof(ati_resp)-1; i++) {
 			serial_send(ati_resp[i]);
 		}
 	}
