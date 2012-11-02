@@ -134,8 +134,8 @@ typedef union frame_control {
 
 typedef union hex_val {
 	struct {
-		unsigned one: 4;
-		unsigned two: 4;
+		unsigned high: 4;
+		unsigned low: 4;
 	};
 
 	uint8_t integer;
@@ -658,8 +658,8 @@ static void write_hex_crc(uint8_t byte) {
 	hex_value_t val;
 	val = itohval(byte);
 
-	serial_send(val.one);
-	serial_send(val.two);
+	serial_send(val.high);
+	serial_send(val.low);
 }
 
 static void write_hex_crc_16(uint16_t data) {
@@ -671,12 +671,12 @@ static void write_hex_16(uint16_t data) {
 	hex_value_t val;
 
 	val = itohval(data >> 8);
-	serial_send(val.one);
-	serial_send(val.two);
+	serial_send(val.high);
+	serial_send(val.low);
 
 	val = itohval(data & 0x00ff);
-	serial_send(val.one);
-	serial_send(val.two);
+	serial_send(val.high);
+	serial_send(val.low);
 }
 
 static void write_hex_byte(uint8_t byte) {
