@@ -142,8 +142,8 @@ typedef union hex_val {
 } hex_value_t;
 
 static bool read_packet(void);
-static uint8_t process_payload(uint16_t length);
-static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length);
+static bool process_payload(uint16_t length);
+static bool process_cmd_frame(uint16_t cluster, uint16_t length);
 static void process_read_cmd(uint16_t cluster, uint16_t length);
 static void read_payload_crc(uint16_t length);
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
@@ -216,8 +216,7 @@ void process_zcl_frame(uint8_t frametype) {
 		break;
 	case STX:
 	{
-		bool ok = read_packet();
-		if (ok) {
+		if (read_packet()) {
 			serial_send(ACK);
 		} else {
 			serial_send(NAK);
@@ -249,8 +248,7 @@ static bool read_packet(void) {
 	}
 	uint16_t length = read_hex_16(SER_READER);
 	
-	uint8_t err = process_payload(length);
-	if (err) return false;
+	if (!process_payload(length)) return false;
 
 	uint16_t msg_crc = read_hex_16(SER_READER);
 	if (msg_crc != read_crc) {
@@ -260,10 +258,10 @@ static bool read_packet(void) {
 	return true;
 }
 
-static uint8_t process_payload(uint16_t length) {
+static bool process_payload(uint16_t length) {
 	// Confirm message channel
 	if (!accept(SER_READER, ZCL_CHANNEL)) {
-		return 1;
+		return false;
 	}
 
 	// Confirming MAC address
@@ -275,7 +273,7 @@ static uint8_t process_payload(uint16_t length) {
 
 	// Confirming the end point
 	if (accept(SER_READER, EP_ID)) {
-		return 1;
+		return false;
 	}
 
 	uint16_t profile = read_hex_crc_16(SER_READER);
@@ -285,13 +283,13 @@ static uint8_t process_payload(uint16_t length) {
 
 	if (parser_state == PARSER_STATE_INCORRECT_MAC) {
 		read_payload_crc(length);
-		return 0;
+		return true;
 	}
 
 	return process_cmd_frame(cluster, length);
 }
 
-static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
+static bool process_cmd_frame(uint16_t cluster, uint16_t length) {
 	frame_control_t frame_control;
 	frame_control.integer = read_hex_crc(SER_READER);
 
@@ -311,9 +309,9 @@ static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
 			process_write_cmd(cluster, length);
 			break;
 		default:
-			return 1;
+			return false;
 	}
-	return 0;
+	return true;
 }
 
 static void process_read_cmd(uint16_t cluster, uint16_t len) {
