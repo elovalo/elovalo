@@ -207,7 +207,9 @@ uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 #define SER_READER (&serial_read_blocking)
 #define SER_RBUF_READER (&ser_to_rbuf_read)
 #define RBUF_READER (&read_rbuf)
-#define serial_buf (gs_buf_back)
+
+#define SERIAL_BUF_LEN GS_BUF_BYTES
+#define serial_buf gs_buf_back
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
