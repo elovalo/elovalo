@@ -240,6 +240,7 @@ void process_zcl_frame(uint8_t frametype) {
 
 static bool read_packet(void) {
 	reset_read_crc();
+	reset_write_crc();
 
 	// Read "reserved" byte
 	if (serial_read_blocking() != PACKET_BEGIN) {
@@ -319,7 +320,6 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	uint16_t resp_len = read_cmd_length(cluster, len);
 	uint16_t attr;
 
-	reset_write_crc();
 	reset_rbuf_i();
 
 	write_packet_header(resp_len);
@@ -502,7 +502,6 @@ static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 }
 
 static void write_packet_header(uint16_t length) {
-	reset_write_crc();
 	serial_send(STX);
 	write_hex_crc(PACKET_BEGIN);
 	write_hex_16(length);
