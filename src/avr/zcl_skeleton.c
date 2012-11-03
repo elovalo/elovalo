@@ -47,7 +47,7 @@
 
 // Elovalo end point id
 #define PROFILE 1024
-#define EP_ID 70
+#define ENDPOINT 70
 
 // Cluster IDs
 #define CLUSTERID_BASIC 0x00
@@ -124,17 +124,23 @@
 // Data reading functions
 typedef uint8_t (*reader_t)(void);
 
-typedef union frame_control {
-	struct {
-		unsigned type: 2;
-		unsigned manu_specific: 1;
-		unsigned direction: 1;
-		unsigned disable_def_resp: 1;
-		unsigned reserved: 3;
-	};
-
-	uint8_t integer;
-} frame_control_t;
+struct packet_s {
+	uint16_t length;
+	uint8_t channel;
+	uint64_t mac;
+	uint8_t endpoint;
+	uint16_t profile;
+	uint16_t cluster;
+	unsigned type: 2;
+	unsigned mfr_specific: 1;
+	unsigned direction: 1;
+	unsigned disable_def_resp: 1;
+	unsigned reserved: 3;
+	// Manufacturer code is never used, skipping
+	uint8_t transaction_id;
+	uint8_t cmd_type;
+	uint8_t msg[];
+};
 
 typedef union hex_val {
 	struct {
@@ -145,10 +151,17 @@ typedef union hex_val {
 	uint8_t integer;
 } hex_value_t;
 
+enum zcl_status {
+	ZCL_SUCCESS,
+	ZCL_BAD_PROFILE,
+	ZCL_BAD_ENDPOINT,
+	ZCL_BAD_COMMAND
+};
+
 static bool read_packet(void);
-static bool process_payload(uint16_t length);
-static bool process_cmd_frame(uint16_t cluster, uint16_t length);
-static void process_read_cmd(uint16_t cluster, uint16_t length);
+static void process_payload();
+static enum zcl_status process_cmd_frame();
+static enum zcl_status process_read_cmd();
 static void read_payload_crc(uint16_t length);
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
 static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len);
@@ -158,7 +171,7 @@ static void write_packet_header(uint16_t length);
 static void write_payload_header(void);
 static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
-static void process_write_cmd(uint8_t cluster, uint16_t length);
+static enum zcl_status process_write_cmd();
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_unsupported_read_attribute(uint16_t attr);
 
@@ -198,7 +211,7 @@ uint16_t read_crc = 0xffff;
 
 // ZCL Header variables
 uint8_t transaction_seq = 0;
-uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
+uint64_t mac = 0xefcdab8967452301;
 
 // ATI
 #define ATI 'A'
@@ -210,6 +223,7 @@ uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 
 #define SERIAL_BUF_LEN GS_BUF_BYTES
 #define serial_buf gs_buf_back
+#define packet ((struct packet_s *)(gs_buf_back))
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
@@ -225,12 +239,17 @@ void process_zcl_frame(uint8_t frametype) {
 	{
 		// Wait for flip to be sure back buffer stays intact
 		while (flags.may_flip);
-		
-		if (read_packet()) {
-			serial_send(ACK);
-		} else {
+
+		// Reading and verifying serial buffer contents
+		if (!read_packet()) {
 			serial_send(NAK);
+			break;
 		}
+
+		// Message was transmitted correctly
+		serial_send(ACK);
+		process_payload();
+
 		break;
 	}
 	case ATI:
@@ -256,75 +275,56 @@ static bool read_packet(void) {
 		// Do nothing or return error?
 		return false;
 	}
-	uint16_t length = read_hex_16(SER_READER);
-	
-	if (!process_payload(length)) return false;
 
+	packet->length = read_hex_16(SER_READER);
+
+	// FIXME check if packet length is not longer than SERIAL_BUF_LEN
+
+	for (uint16_t i = 0; i < packet->length; i++) {
+		serial_buf[i+2] = read_hex_crc(SER_READER);
+	}
 	uint16_t msg_crc = read_hex_16(SER_READER);
-	if (msg_crc != read_crc) {
-		return false;
-	}
 
-	return true;
+	return msg_crc == read_crc;
 }
 
-static bool process_payload(uint16_t length) {
-	// Confirm message channel
-	if (!accept(SER_READER, ZCL_CHANNEL)) {
-		return false;
+static void process_payload(void) {
+	// Only ZCL messages are supported.
+	if (packet->channel != ZCL_CHANNEL) return;
+
+	// Filter out messages that do not belong to me
+	if (packet->mac != mac) return;
+
+	/* If using manufacturer specific extensions, do not
+	 * touch. The payload is distorted anyway */
+	if (packet->mfr_specific) return;
+
+	/* Filter out profiles and endpoints that are not supported on
+	 * this device. FIXME: Generate error responses for these. */
+	enum zcl_status status;
+	if (packet->endpoint != ENDPOINT) {
+		status = ZCL_BAD_ENDPOINT;
+	} else if (packet->profile != PROFILE) {
+		status = ZCL_BAD_PROFILE;
+	} else {
+		status = process_cmd_frame();
 	}
 
-	// Confirming MAC address
-	for (uint8_t i = 0; i < MAC_LEN; i++) {
-		if (!accept(SER_READER, mac[i])) {
-			parser_state = PARSER_STATE_INCORRECT_MAC;
-		}
-	}
-
-	// Confirming the end point
-	if (accept(SER_READER, EP_ID)) {
-		return false;
-	}
-
-	uint16_t profile = read_hex_crc_16(SER_READER);
-	uint16_t cluster = read_hex_crc_16(SER_READER);
-
-	length -= ZCL_MESSAGE_HEADER_LEN;
-
-	if (parser_state == PARSER_STATE_INCORRECT_MAC) {
-		read_payload_crc(length);
-		return true;
-	}
-
-	return process_cmd_frame(cluster, length);
+	// FIXME error handling
 }
 
-static bool process_cmd_frame(uint16_t cluster, uint16_t length) {
-	frame_control_t frame_control;
-	frame_control.integer = read_hex_crc(SER_READER);
-
-	if (frame_control.manu_specific) {
-		uint16_t manu_spec = read_hex_crc_16(SER_READER);
-		length -= 2;
+static enum zcl_status process_cmd_frame(void) {
+	switch (packet->cmd_type) {
+	case CMDID_READ:
+		return process_read_cmd();
+	case CMDID_WRITE:
+		return process_write_cmd();
+	default:
+		return ZCL_BAD_COMMAND;
 	}
-	uint8_t trans_seq = read_hex_crc(SER_READER);
-	uint8_t cmd = read_hex_crc(SER_READER);
-	length -= 3;
-
-	switch (cmd) {
-		case CMDID_READ:
-			process_read_cmd(cluster, length);
-			break;
-		case CMDID_WRITE:
-			process_write_cmd(cluster, length);
-			break;
-		default:
-			return false;
-	}
-	return true;
 }
 
-static void process_read_cmd(uint16_t cluster, uint16_t len) {
+static enum zcl_status process_read_cmd() {
 	uint16_t resp_len = read_cmd_length(cluster, len);
 	uint16_t attr;
 
@@ -419,16 +419,6 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	}
 	
 	write_hex_16(write_crc);
-}
-
-/**
- * Used when the MAC address is incorrect to make sure that the CRC
- * check works correctly
- */
-static void read_payload_crc(uint16_t length) {
-	for (uint16_t i = 0; i < length; i++) {
-		read_hex_crc(SER_READER);
-	}
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
@@ -552,7 +542,7 @@ static void write_effect_names(void) {
 	write_hex_crc(']');
 }
 
-static void process_write_cmd(uint8_t cluster, uint16_t length) {
+static enum zcl_status process_write_cmd() {
 	for (uint16_t i = 0; i < length; i++) {
 		uint16_t attr = read_hex_crc_16(SER_READER);
 		if (cluster == CLUSTERID_BASIC) {
