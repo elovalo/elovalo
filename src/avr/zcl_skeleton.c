@@ -26,6 +26,10 @@
 #include "../common/pgmspace.h"
 #include "main.h"
 
+// Sharing tlc5940 gs_buf_back to conserve memory
+#include "../common/cube.h" 
+#include "tlc5940.h"
+
 // Lengths
 #define ZCL_MESSAGE_HEADER_LEN 11
 #define READ_RESP_HEADER_LEN 4
@@ -203,6 +207,7 @@ uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 #define SER_READER (&serial_read_blocking)
 #define SER_RBUF_READER (&ser_to_rbuf_read)
 #define RBUF_READER (&read_rbuf)
+#define serial_buf (gs_buf_back)
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
@@ -216,6 +221,9 @@ void process_zcl_frame(uint8_t frametype) {
 		break;
 	case STX:
 	{
+		// Wait for flip to be sure back buffer stays intact
+		while (flags.may_flip);
+		
 		if (read_packet()) {
 			serial_send(ACK);
 		} else {
