@@ -198,12 +198,11 @@ uint8_t mac[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef};
 
 // ATI
 #define ATI 'A'
-uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB\n";
+uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 
-// REFACTORING TODO ser_read and friends to upper-case
-#define ser_read (&serial_read_blocking)
-#define ser_rbuf_read (&ser_to_rbuf_read)
-#define rbuf_read (&read_rbuf)
+#define SER_READER (&serial_read_blocking)
+#define SER_RBUF_READER (&ser_to_rbuf_read)
+#define RBUF_READER (&read_rbuf)
 
 void process_zcl_frame(uint8_t frametype) {
 	parser_state = PARSER_STATE_DEFAULT;
@@ -247,12 +246,12 @@ static bool read_packet(void) {
 		// Do nothing or return error?
 		return false;
 	}
-	uint16_t length = read_hex_16(ser_read);
+	uint16_t length = read_hex_16(SER_READER);
 	
 	uint8_t err = process_payload(length);
 	if (err) return false;
 
-	uint16_t msg_crc = read_hex_16(ser_read);
+	uint16_t msg_crc = read_hex_16(SER_READER);
 	if (msg_crc != read_crc) {
 		return false;
 	}
@@ -262,24 +261,24 @@ static bool read_packet(void) {
 
 static uint8_t process_payload(uint16_t length) {
 	// Confirm message channel
-	if (!accept(ser_read, ZCL_CHANNEL)) {
+	if (!accept(SER_READER, ZCL_CHANNEL)) {
 		return 1;
 	}
 
 	// Confirming MAC address
 	for (uint8_t i = 0; i < MAC_LEN; i++) {
-		if (!accept(ser_read, mac[i])) {
+		if (!accept(SER_READER, mac[i])) {
 			parser_state = PARSER_STATE_INCORRECT_MAC;
 		}
 	}
 
 	// Confirming the end point
-	if (accept(ser_read, EP_ID)) {
+	if (accept(SER_READER, EP_ID)) {
 		return 1;
 	}
 
-	uint16_t profile = read_hex_crc_16(ser_read);
-	uint16_t cluster = read_hex_crc_16(ser_read);
+	uint16_t profile = read_hex_crc_16(SER_READER);
+	uint16_t cluster = read_hex_crc_16(SER_READER);
 
 	length -= ZCL_MESSAGE_HEADER_LEN;
 
@@ -293,14 +292,14 @@ static uint8_t process_payload(uint16_t length) {
 
 static uint8_t process_cmd_frame(uint16_t cluster, uint16_t length) {
 	frame_control_t frame_control;
-	frame_control.integer = read_hex_crc(ser_read);
+	frame_control.integer = read_hex_crc(SER_READER);
 
 	if (frame_control.manu_specific) {
-		uint16_t manu_spec = read_hex_crc_16(ser_read);
+		uint16_t manu_spec = read_hex_crc_16(SER_READER);
 		length -= 2;
 	}
-	uint8_t trans_seq = read_hex_crc(ser_read);
-	uint8_t cmd = read_hex_crc(ser_read);
+	uint8_t trans_seq = read_hex_crc(SER_READER);
+	uint8_t cmd = read_hex_crc(SER_READER);
 	length -= 3;
 
 	switch (cmd) {
@@ -328,7 +327,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
 	write_zcl_header(CMDID_READ_RESPONSE);
 	
 	for (uint16_t i = 0; i < len; i += 2) {
-		attr = read_hex_crc_16(rbuf_read);
+		attr = read_hex_crc_16(RBUF_READER);
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
@@ -420,7 +419,7 @@ static void process_read_cmd(uint16_t cluster, uint16_t len) {
  */
 static void read_payload_crc(uint16_t length) {
 	for (uint16_t i = 0; i < length; i++) {
-		read_hex_crc(ser_read);
+		read_hex_crc(SER_READER);
 	}
 }
 
@@ -440,7 +439,7 @@ static uint16_t read_cmd_length(uint16_t cluster, uint16_t msg_len) {
 
 	reset_rbuf_i();
 	for (uint16_t i = 0; i < msg_len; i += 2) {
-		uint16_t attr = read_hex_crc_16(ser_to_rbuf_read);
+		uint16_t attr = read_hex_crc_16(SER_RBUF_READER);
 		length += READ_RESP_HEADER_LEN;
 
 		if (cluster == CLUSTERID_BASIC) {
@@ -548,12 +547,12 @@ static void write_effect_names(void) {
 
 static void process_write_cmd(uint8_t cluster, uint16_t length) {
 	for (uint16_t i = 0; i < length; i++) {
-		uint16_t attr = read_hex_crc_16(ser_read);
+		uint16_t attr = read_hex_crc_16(SER_READER);
 		if (cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				if (accept(ser_read, TYPE_BOOLEAN)) {
-					uint8_t state = read_hex_crc(ser_read);
+				if (accept(SER_READER, TYPE_BOOLEAN)) {
+					uint8_t state = read_hex_crc(SER_READER);
 					if (state == BOOL_TRUE) {
 						set_mode(MODE_PLAYLIST);
 					} else if (state == BOOL_FALSE) {
@@ -565,9 +564,9 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 				//TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
-				if (accept(ser_read, TYPE_IEEE_ADDRESS)) {
+				if (accept(SER_READER, TYPE_IEEE_ADDRESS)) {
 					for (uint8_t i = 0; i < MAC_LEN; i++) {
-						mac[i] = read_hex_crc(ser_read);
+						mac[i] = read_hex_crc(SER_READER);
 					}
 				}
 				break;
@@ -575,13 +574,13 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 		} else if (cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_OPERATING_MODE:
-				if (accept(ser_read, TYPE_ENUM)) {
-					uint8_t mode = read_hex_crc(ser_read);
+				if (accept(SER_READER, TYPE_ENUM)) {
+					uint8_t mode = read_hex_crc(SER_READER);
 					set_mode(mode);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				if (accept(ser_read, TYPE_OCTET_STRING)) {
+				if (accept(SER_READER, TYPE_OCTET_STRING)) {
 					/*uint8_t slen = read_hex_crc();
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
@@ -589,22 +588,22 @@ static void process_write_cmd(uint8_t cluster, uint16_t length) {
 				}
 				break;
 			case ATTR_PLAYLIST:
-				if (accept(ser_read, TYPE_UINT8)) {
+				if (accept(SER_READER, TYPE_UINT8)) {
 					//current_playlist(read_hex_crc());
 				}
 				break;
 			case ATTR_TIMEZONE:
-				if (accept(ser_read, TYPE_INT32)) {
+				if (accept(SER_READER, TYPE_INT32)) {
 					//TODO			}
 				}
 				break;
 			case ATTR_TIME:
-				if (accept(ser_read, TYPE_UTC_TIME)) {
+				if (accept(SER_READER, TYPE_UTC_TIME)) {
 					//TODO
 				}
 				break;
 			case ATTR_EFFECT:
-				if (accept(ser_read, TYPE_UINT8)) {
+				if (accept(SER_READER, TYPE_UINT8)) {
 					//uint8_t current_effect = read_hex_crc(); //TODO
 				}
 				break;
