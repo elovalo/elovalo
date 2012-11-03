@@ -21,20 +21,22 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
         var dates = data.entries.map(function(v) {
             var date = new Date(v.publishedDate);
             var d = date.getFullYear() + ',' + (date.getMonth() + 1) + ',' + date.getDate();
-console.log(v.title);
+
+            // TODO: if has a youtube link, move as asset
+
             return {
                 startDate: d,
                 endData: d,
-                headline: decode(v.title),
+                headline: decode(v.title) || 'No Title',
                 text: v.content
             };
         });
 
         return {
             timeline: {
-                //headline: 'Elovalo',
+                headline: 'Elovalo News',
                 type: 'default',
-                startDate: '2012',
+                startDate: dates[dates.length - 1].startDate,
                 //text: "<p>Intro body text goes here, some HTML is ok</p>p>",
                 date: dates
             }
