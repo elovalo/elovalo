@@ -21,14 +21,30 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
         var dates = data.entries.map(function(v) {
             var date = new Date(v.publishedDate);
             var d = date.getFullYear() + ',' + (date.getMonth() + 1) + ',' + date.getDate();
+            var media = '';
+            var content = v.content;
 
-            // TODO: if has a youtube link, move as asset
+            var $content = $('<div/>').html(content);
+            $('a[href*="youtube"]', $content).replaceWith(function(i, v) {
+                var parts = v.split('youtube.com/watch?');
+
+                if(parts.length > 1) {
+                    parts = parts[parts.length - 1].split('=');
+                    media = 'http://youtu.be/' + parts[parts.length - 1];
+                }
+            });
+            content = $content.html().replace('<br>www.youtube.com<br>', '', 'g');
 
             return {
                 startDate: d,
                 endData: d,
                 headline: decode(v.title) || 'No Title',
-                text: v.content
+                text: content,
+                asset: {
+                    media: media,
+                    credit: '',
+                    caption: ''
+                }
             };
         });
 
