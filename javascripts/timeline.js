@@ -71,7 +71,7 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
             source: data,
             embed_id: id,
             start_at_end: true,
-            debug: true
+            debug: false
         });
     }
 
