@@ -123,6 +123,7 @@
 
 // Data reading functions
 typedef uint8_t (*reader_t)(void);
+typedef void (*writer_t)(uint8_t);
 
 struct packet_s {
 	uint16_t length;
@@ -169,22 +170,23 @@ static void write_attr_resp_fail(void);
 
 static void write_packet_header(uint16_t length);
 static void write_payload_header(void);
-static void write_mac(void);
 static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
 static enum zcl_status process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_unsupported_read_attribute(uint16_t attr);
 
-static void reset_write_crc(void);
-
-static void write_hex_16(uint16_t);
-static void write_hex_crc(uint8_t);
-static void write_hex_crc_16(uint16_t);
-static void write_pgm_string_hex_crc(const char * const* pgm_p);
-
 static uint8_t msg_next(void);
 static bool msg_available(void);
+
+static inline void write(writer_t, uint8_t);
+static void write_16(writer_t, uint16_t);
+static void write_64(writer_t, uint64_t);
+static void write_pgm_string(writer_t w, const char * const* pgm_p);
+
+static void serial_send_hex_crc(uint8_t);
+static void reset_write_crc(void);
+static inline void serial_send_hex(uint8_t);
 
 static bool accept(reader_t, uint8_t);
 static uint8_t read(reader_t);
@@ -204,8 +206,10 @@ uint64_t mac = 0xefcdab8967452301;
 #define ATI 'A'
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 
-#define MSG_READER (&msg_next)
-#define SER_READER (&serial_read_blocking)
+// reader_t and writer_t functions
+#define MSG_R (&msg_next)
+#define HEX_CRC_W (&serial_send_hex_crc)
+#define HEX_W (&serial_send_hex)
 
 #define SERIAL_BUF_LEN GS_BUF_BYTES
 #define serial_buf gs_buf_back
@@ -322,22 +326,22 @@ static enum zcl_status process_read_cmd() {
 
 	while(msg_available()) {
 		uint16_t attr;
-		attr = read_16(MSG_READER);
+		attr = read_16(MSG_R);
 		
 		if (packet->cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
 				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
-				write_hex_crc(get_mode());
+				write(HEX_CRC_W, get_mode());
 				break;
 			case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
-				//write_hex_crc(ALARM_MASK); //TODO
+				//write(HEX_CRC_W, ALARM_MASK); //TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
 			{
 				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
-				write_mac();
+				write_64(HEX_CRC_W, mac);
 				break;
 			}
 			default:
@@ -351,11 +355,11 @@ static enum zcl_status process_read_cmd() {
 				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
 				uint8_t mode = get_mode();
 				if (mode == MODE_SLEEP || mode == MODE_IDLE) {
-					write_hex_crc(0);
+					write(HEX_CRC_W, 0);
 				} else if (mode == MODE_EFFECT) {
-					write_hex_crc(1);
+					write(HEX_CRC_W, 1);
 				} else if (mode == MODE_PLAYLIST) {
-					write_hex_crc(2);
+					write(HEX_CRC_W, 2);
 				}
 				break;
 			}
@@ -365,7 +369,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			case ATTR_PLAYLIST:
 				write_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				write_hex_crc(current_playlist);
+				write(HEX_CRC_W, current_playlist);
 				break;
 			case ATTR_TIMEZONE:
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
@@ -389,7 +393,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			case ATTR_EFFECT:
 				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				write_hex_crc(current_effect);
+				write(HEX_CRC_W, current_effect);
 				break;
 			case ATTR_HW_VERSION:
 				write_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
@@ -407,20 +411,20 @@ static enum zcl_status process_read_cmd() {
 
 	}
 
-	write_hex_16(write_crc);
+	write_16(HEX_W, write_crc);
 
 	return ZCL_SUCCESS;
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
-	write_hex_crc_16(attr);
-	write_hex_crc(STATUS_SUCCESS);
-	write_hex_crc(type);
+	write_16(HEX_CRC_W, attr);
+	write(HEX_CRC_W, STATUS_SUCCESS);
+	write(HEX_CRC_W, type);
 }
 
 static void write_unsupported_read_attribute(uint16_t attr) {
-	write_hex_crc_16(attr);
-	write_hex_crc(STATUS_UNSUPPORTED_ATTRIBUTE);
+	write_16(HEX_CRC_W, attr);
+	write(HEX_CRC_W, STATUS_UNSUPPORTED_ATTRIBUTE);
 }
 
 static uint16_t resp_read_len(void) {
@@ -428,7 +432,7 @@ static uint16_t resp_read_len(void) {
 	uint16_t attr;
 
 	while(msg_available()) {
-		attr = read_16(MSG_READER);
+		attr = read_16(MSG_R);
 		length += READ_RESP_HEADER_LEN;
 
 		if (packet->cluster == CLUSTERID_BASIC) {
@@ -492,59 +496,53 @@ static uint16_t resp_read_len(void) {
 
 static void write_packet_header(uint16_t length) {
 	serial_send(STX);
-	write_hex_crc(PACKET_BEGIN);
-	write_hex_16(length);
+	write(HEX_CRC_W, PACKET_BEGIN);
+	write_16(HEX_W, length);
 }
 
 static void write_payload_header(void) {
-	write_hex_crc(ZCL_CHANNEL);
-	write_mac();
+	write(HEX_CRC_W, ZCL_CHANNEL);
+	write_64(HEX_CRC_W, mac);
 
-	write_hex_crc(ENDPOINT);
-	write_hex_crc_16(PROFILE);
-	write_hex_crc_16(CLUSTERID_ELOVALO);
-}
-
-static void write_mac(void) {
-	for (uint8_t i = 0; i < sizeof(mac); i++) {
-		write_hex_crc(mac >> (8 * i));
-	}
+	write(HEX_CRC_W, ENDPOINT);
+	write_16(HEX_CRC_W, PROFILE);
+	write_16(HEX_CRC_W, CLUSTERID_ELOVALO);
 }
 
 static void write_zcl_header(uint8_t cmd){
 	// Send out the frame control byte
 	//FIXME: see if needs to be non-zero
-	write_hex_crc(0);
+	write(HEX_CRC_W, 0);
 
-	write_hex_crc(transaction_seq++);
+	write(HEX_CRC_W, transaction_seq++);
 	if (transaction_seq == 0xff) {
 		transaction_seq = 0;
 	}
-	write_hex_crc(cmd);
+	write(HEX_CRC_W, cmd);
 }
 
 static void write_effect_names(void) {
-	write_hex_crc('[');
+	write(HEX_CRC_W, '[');
 	for (uint8_t i = 0; i < effects_len; i++) {
-		write_hex_crc('"');
-		write_pgm_string_hex_crc(&effects[i].name);
-		write_hex_crc('"');
+		write(HEX_CRC_W, '"');
+		write_pgm_string(HEX_CRC_W, &effects[i].name);
+		write(HEX_CRC_W, '"');
 		if (i < effects_len - 1) {
-			write_hex_crc(',');
+			write(HEX_CRC_W, ',');
 		};
 	}
-	write_hex_crc(']');
+	write(HEX_CRC_W, ']');
 }
 
 static enum zcl_status process_write_cmd(void) {
 	while(msg_available()) {
-		uint16_t attr = read_16(MSG_READER);
+		uint16_t attr = read_16(MSG_R);
 
 		if (packet->cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				if (accept(MSG_READER, TYPE_BOOLEAN)) {
-					uint8_t state = read(MSG_READER);
+				if (accept(MSG_R, TYPE_BOOLEAN)) {
+					uint8_t state = read(MSG_R);
 					if (state == BOOL_TRUE) {
 						set_mode(MODE_PLAYLIST);
 					} else if (state == BOOL_FALSE) {
@@ -556,21 +554,21 @@ static enum zcl_status process_write_cmd(void) {
 				//TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
-				if (accept(MSG_READER, TYPE_IEEE_ADDRESS)) {
-					mac = read_64(MSG_READER);
+				if (accept(MSG_R, TYPE_IEEE_ADDRESS)) {
+					mac = read_64(MSG_R);
 				}
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_OPERATING_MODE:
-				if (accept(MSG_READER, TYPE_ENUM)) {
-					uint8_t mode = read(MSG_READER);
+				if (accept(MSG_R, TYPE_ENUM)) {
+					uint8_t mode = read(MSG_R);
 					set_mode(mode);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				if (accept(MSG_READER, TYPE_OCTET_STRING)) {
+				if (accept(MSG_R, TYPE_OCTET_STRING)) {
 					/*uint8_t slen = read_hex_crc();
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
@@ -578,22 +576,22 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_PLAYLIST:
-				if (accept(MSG_READER, TYPE_UINT8)) {
+				if (accept(MSG_R, TYPE_UINT8)) {
 					//current_playlist(read_hex_crc());
 				}
 				break;
 			case ATTR_TIMEZONE:
-				if (accept(MSG_READER, TYPE_INT32)) {
+				if (accept(MSG_R, TYPE_INT32)) {
 					//TODO			}
 				}
 				break;
 			case ATTR_TIME:
-				if (accept(MSG_READER, TYPE_UTC_TIME)) {
+				if (accept(MSG_R, TYPE_UTC_TIME)) {
 					//TODO
 				}
 				break;
 			case ATTR_EFFECT:
-				if (accept(MSG_READER, TYPE_UINT8)) {
+				if (accept(MSG_R, TYPE_UINT8)) {
 					//uint8_t current_effect = read_hex_crc(); //TODO
 				}
 				break;
@@ -606,64 +604,14 @@ static enum zcl_status process_write_cmd(void) {
 
 static void write_default_response(uint8_t cmd, uint8_t status) {
 	write_zcl_header(2);
-	write_hex_crc(cmd);
-	write_hex_crc(status);
+	write(HEX_CRC_W, cmd);
+	write(HEX_CRC_W, status);
 }
 
 static void write_attr_resp_fail(void) {
 }
 
 //------ Serial port functions ---------
-
-static void reset_write_crc(void) {
-	write_crc = 0xffff;
-}
-
-// Writes
-
-static void write_hex_crc(uint8_t byte) {
-	write_crc = _crc_ccitt_update(write_crc, byte);
-	hex_value_t val;
-	val = itohval(byte);
-
-	serial_send(val.high);
-	serial_send(val.low);
-}
-
-static void write_hex_crc_16(uint16_t data) {
-	write_hex_crc(data >> 8);
-	write_hex_crc(data & 0x00ff);
-}
-
-static void write_hex_16(uint16_t data) {
-	hex_value_t val;
-
-	val = itohval(data >> 8);
-	serial_send(val.high);
-	serial_send(val.low);
-
-	val = itohval(data & 0x00ff);
-	serial_send(val.high);
-	serial_send(val.low);
-}
-
-static void write_pgm_string_hex_crc(const char * const* pgm_p) {
-	char *p = (char*)pgm_read_word_near(pgm_p);
-	char c;
-
-	// If is NULL, print is as zero-length string
-	if ( p == NULL) {
-		write_hex_crc(' ');
-		return;
-	}
-	
-	// Read byte-by-byte and write, not including NUL byte
-	c = pgm_read_byte_near(p++);
-	while (c != '\0') {
-		write_hex_crc(c);
-		c = pgm_read_byte_near(p++);
-	}
-}
 
 /**
  * Returns the next packet message byte.
@@ -683,6 +631,69 @@ static bool msg_available(void) {
 	}
 	return true;
 }
+
+// Writes
+
+static inline void write(writer_t w, uint8_t data) {
+	w(data);
+}
+
+static void write_16(writer_t w, uint16_t data) {
+	w(data >> 8);
+	w(data & 0x00ff);
+}
+
+static void write_64(writer_t w, uint64_t data) {
+	for (uint8_t i = 0; i < sizeof(data); i++) {
+		w(data >> (8 * i));
+	}	
+}
+
+static void write_pgm_string(writer_t w, const char * const* pgm_p) {
+	char *p = (char*)pgm_read_word_near(pgm_p);
+	char c;
+
+	// If is NULL, print is as zero-length string
+	if ( p == NULL) {
+		w(' ');
+		return;
+	}
+	
+	// Read byte-by-byte and write, not including NUL byte
+	c = pgm_read_byte_near(p++);
+	while (c != '\0') {
+		w(c);
+		c = pgm_read_byte_near(p++);
+	}
+}
+
+
+/**
+ * Sends data to the serial port and updates the write CRC value
+ */
+static void serial_send_hex_crc(uint8_t data) {
+	write_crc = _crc_ccitt_update(write_crc, data);
+	serial_send_hex(data);
+}
+
+/**
+ * Resets the internally used write CRC value
+ */
+static void reset_write_crc(void) {
+	write_crc = 0xffff;
+}
+
+/**
+ * Hex encodes data and sends it to the serial port
+ */
+static inline void serial_send_hex(uint8_t data) {
+	hex_value_t val;
+	val = itohval(data);
+
+	serial_send(val.high);
+	serial_send(val.low);
+}
+
 
 // Reads
 
