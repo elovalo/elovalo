@@ -26,10 +26,7 @@
 #include "tlc5940.h"
 #include "hcsr04.h"
 #include "adc.h"
-#include "serial.h"
-#include "serial_escaped.h"
-#include "serial_elo.h"
-#include "zcl_skeleton.h"
+#include "serial_target.h"
 #include "clock.h"
 #include "configuration.h"
 #include "powersave.h"
@@ -38,7 +35,6 @@
 #include "../common/cube.h"
 #include "../common/effects.h"
 #include "../common/playlists.h"
-#include "sleep.h"
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 //const effect_t *effect; // Current effect. Note: points to PGM
@@ -77,7 +73,7 @@ int main() {
 	hcsr04_start_continuous_meas();
 	adc_start();
 
-	serial_elo_init();
+	serial_boot_report();
 	
 	// Select correct startup mode
 	pick_startup_mode();
@@ -85,25 +81,16 @@ int main() {
 	uint16_t next_draw_at = 0;
 
 	while(1) {
-		if(serial_available()) {
-#ifndef SIMU
-			uint8_t cmd = serial_read();
-#if defined AVR_ZCL
-			process_zcl_frame(cmd);
-#elif defined AVR_ELO
-			serial_elo_process(cmd);
-#else
-#error Unsupported serial communication type
-#endif // AVR*
-#endif // SIMU
-		}
+		/* Serial processing is implementation specific and defined in
+		 * serial_common.c */
+		process_serial();
 
 		switch (mode) {
 		case MODE_SLEEP:
 			// Fall through to MODE_IDLE
 		case MODE_IDLE:
 			// No operation
-			sleep_mode();
+			sleep_if_no_traffic();
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
@@ -118,7 +105,7 @@ int main() {
 		case MODE_EFFECT:
 			// If a buffer is not yet flipped, wait interrupts
 			if (flags.may_flip) {
-				if (!serial_available()) sleep_mode();
+				sleep_if_no_traffic();
 				break;
 			}
 
@@ -129,7 +116,7 @@ int main() {
 			 * is reached. By doing this we avoid serial
 			 * port slowdown when FPS is low */
 			if (ticks < next_draw_at ) {
-				if (!serial_available()) sleep_mode();
+				sleep_if_no_traffic();
 				break;
 			}
 
