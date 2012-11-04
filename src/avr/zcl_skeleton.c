@@ -176,7 +176,6 @@ static enum zcl_status process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_unsupported_read_attribute(uint16_t attr);
 
-static void reset_read_crc(void);
 static void reset_write_crc(void);
 
 static void write_hex_16(uint16_t);
@@ -195,7 +194,6 @@ static uint64_t read_64(reader_t);
 static hex_value_t itohval(uint8_t);
 
 uint16_t write_crc = 0xffff;
-uint16_t read_crc = 0xffff;
 uint16_t msg_i = 0; // Packet message read index
 
 // ZCL Header variables
@@ -253,7 +251,6 @@ void process_zcl_frame(uint8_t frametype) {
 }
 
 static bool read_packet(void) {
-	reset_read_crc();
 	reset_write_crc();
 
 	// Read "reserved" byte
@@ -617,11 +614,6 @@ static void write_attr_resp_fail(void) {
 }
 
 //------ Serial port functions ---------
-
-// CRC
-static void reset_read_crc(void) {
-	read_crc = 0xffff;
-}
 
 static void reset_write_crc(void) {
 	write_crc = 0xffff;
