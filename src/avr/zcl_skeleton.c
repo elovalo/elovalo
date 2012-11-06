@@ -111,7 +111,7 @@
 #define BOOL_FALSE 0x00
 
 // Serial port
-#define NOT_HEX 0xff
+#define NOT_HEX 'G'
 #define NOT_NUM 0x00
 
 // Parser states
@@ -147,11 +147,9 @@ struct packet_s {
 
 typedef union hex_val {
 	struct {
-		unsigned low: 4;
-		unsigned high: 4;
+		unsigned low: 8;
+		unsigned high: 8;
 	};
-
-	uint8_t integer;
 } hex_value_t;
 
 enum zcl_status {
@@ -196,6 +194,7 @@ static uint16_t read_16(reader_t);
 static uint64_t read_64(reader_t);
 
 static hex_value_t itohval(uint8_t);
+static uint8_t itoh(uint8_t i);
 
 uint16_t write_crc = 0xffff;
 uint16_t msg_i = 0; // Packet message read index
@@ -619,6 +618,7 @@ static enum zcl_status process_write_cmd(void) {
 }
 
 static void write_default_response(uint8_t cmd, uint8_t status) {
+	//write_packet_header();
 	write_zcl_header(2); //FIXME: wtf?
 	write(HEX_CRC_W, cmd);
 	write(HEX_CRC_W, status);
@@ -748,10 +748,25 @@ static uint64_t read_64(reader_t r) {
 /**
  * Convert an integer to hex characters.
  */
-hex_value_t itohval(uint8_t i) {
+static hex_value_t itohval(uint8_t i) {
 	hex_value_t val;
-	val.integer = i;
+	val.high = itoh(i >> 4);
+	val.low = itoh(i & 0x0f);
 	return val;
+}
+
+/**
+ * Convert an integer to a single hex character
+ */
+static uint8_t itoh(uint8_t i) {
+	if (i >= 0 && i <= 9) {
+		return i;
+	}
+	if (i >= 10 && i <= 16) {
+		return 'A' + (i - 10);
+	}
+
+	return NOT_HEX;
 }
 
 #endif //AVR_ZCL
