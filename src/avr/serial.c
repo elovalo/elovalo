@@ -86,6 +86,11 @@ void serial_send(uint8_t data) {
 	serial_send_nonblocking(data);
 }
 
+/* Receiver functions. Conditionally compiled only for elocmd
+ * target. ZCL versions are in serial_zcl.c */
+//TODO serial_zcl.c
+#ifdef AVR // AVR_ELO
+
 // RX ring buffer
 uint8_t rx_buf[RX_BUF_SIZE];
 volatile uint8_t rx_in_i = 0; // Set by USART_RX_vect
@@ -149,3 +154,5 @@ uint8_t serial_read_blocking(void) {
 	}
 	return serial_read();
 }
+
+#endif // AVR_ELO
