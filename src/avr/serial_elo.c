@@ -2,6 +2,9 @@
  * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
  * the values in serial_escaped.h .
  */
+
+#ifdef AVR_ELO
+
 #include <avr/io.h>
 #include <stdlib.h>
 
@@ -227,3 +230,5 @@ static uint8_t answering(void) {
 	report(REPORT_ANSWERING);
 	return 1;
 }
+
+#endif // AVR_ELO

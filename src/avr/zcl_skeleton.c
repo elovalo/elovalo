@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef AVR_ZCL
+
 #include <util/crc16.h>
 #include <avr/pgmspace.h>
 #include <stdlib.h>
@@ -751,3 +753,5 @@ hex_value_t itohval(uint8_t i) {
 	val.integer = i;
 	return val;
 }
+
+#endif //AVR_ZCL
