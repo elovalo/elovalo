@@ -54,4 +54,32 @@ union zcl_u {
 
 extern union zcl_u zcl;
 
+/**
+ * Returns true if ZCL packet is received and zcl global variable is
+ * considered stable to use. This function does not validate CRC, you
+ * are responsible to do that.
+ */
+bool zcl_packet_available(void);
+
+/**
+ * Reset receiver state. After reset it starts receiving packet again.
+ */
+void zcl_receiver_reset(void);
+
+/**
+ * Waits ACK or NAK from serial line and returns true if ACK is
+ * received. Timeout is not implemented but when it shall be, false is
+ * returned if timeout occurs. This doesn't wait for receipt if one is
+ * already received, so it's safe to do anything between sending the
+ * message and calling this function. This function automatically
+ * resets its internal receipt status flag.
+ */
+bool wait_receipt(void);
+
+/**
+ * Returns true if ATI has been received. This command resets ATI
+ * atomically back to false.
+ */
+bool zcl_ati(void);
+
 #endif /* SERIAL_ZCL_H_ */

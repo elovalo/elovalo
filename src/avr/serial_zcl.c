@@ -127,15 +127,22 @@ bool zcl_packet_available(void)
 void zcl_receiver_reset(void)
 {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		state.ati = false;
+		// Receipt and ATI are not related to packet receiver
 		state.high_nibble = false;
 		state.packet_ready = false;
 		state.wait_zero = false;
 		state.hex_decoding = false;
-		state.receipt = false;
-		// ack may be left as such
-		state.i = 0;
+		// state.i is reset by 'S' case
 	}
+}
+
+bool zcl_ati(void)
+{
+	if (!state.ati) return false;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		state.ati = false;
+	}
+	return true;
 }
 
 bool wait_receipt(void)
@@ -143,6 +150,9 @@ bool wait_receipt(void)
 	// FIXME implement timeout
 	while (!state.receipt) {
 		sleep_mode();
+	}
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		state.receipt = false;
 	}
 	return state.ack;
 }
