@@ -143,7 +143,6 @@ enum zcl_status {
 	ZCL_IMPOSSIBLE
 };
 
-static bool read_packet(void);
 static void process_payload();
 static enum zcl_status process_cmd_frame();
 static enum zcl_status process_read_cmd();
@@ -195,72 +194,43 @@ uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 #define HEX_CRC_W (&serial_send_hex_crc)
 #define HEX_W (&serial_send_hex)
 
-#define SERIAL_BUF_LEN GS_BUF_BYTES
-#define serial_buf gs_buf_back
-#define packet ((struct packet_s *)(gs_buf_back))
-
-void process_zcl_frame(uint8_t frametype) {
-	switch (frametype) {
-	case ACK:
-		//TODO: timeout error if not received 1s after sending a message
-		break;
-	case NAK:
-		//TODO: resend last packet
-		break;
-	case STX:
-	{
-		// Wait for flip to be sure back buffer stays intact
-		while (flags.may_flip);
-
-		// Reading and verifying serial buffer contents
-		if (!read_packet()) {
-			serial_send(NAK);
-			break;
-		}
-
-		// Message was transmitted correctly
-		serial_send(ACK);
-		process_payload();
-
-		break;
-	}
-	case ATI:
-	{
-		if (serial_read_blocking() != 'T') break;
-		if (serial_read_blocking() != 'I') break;
+void process_serial(void)
+{
+	// ATI command response
+	if (zcl_ati()) {
 		for (uint8_t i = 0; i < sizeof(ati_resp)-1; i++) {
 			serial_send(ati_resp[i]);
 		}
 	}
-	default:
-		//TODO: handle unknown content
-		break;
-	}
-}
 
-static bool read_packet(void) {
-	reset_write_crc();
+	if (!zcl_packet_available()) return;
 
-	// Read "reserved" byte
-	if (serial_read_blocking() != PACKET_BEGIN) {
-		// Do nothing or return error?
-		return false;
-	}
-
-	// FIXME check if packet length is not longer than SERIAL_BUF_LEN
-
+	// We have a packet. Checking CRC.
+	uint16_t *msg_crc = (uint16_t *)(zcl.raw + zcl.packet.length + 2);
 	uint16_t crc = 0xffff;
-
-	for (uint16_t i = 0; i < packet->length; i++) {
-		crc = _crc_ccitt_update(crc, serial_buf[i+2]);
+	for (uint16_t i = 0; i < zcl.packet.length; i++) {
+		crc = _crc_ccitt_update(crc, zcl.raw[i+2]);
 	}
-	uint16_t msg_crc;
-	msg_crc = serial_buf[packet->length + 2] << 8;
-	msg_crc |= serial_buf[packet->length + 3];
 
-
-	return msg_crc == crc;
+	/* Answering ACK and processing the answer if it was
+	 * correct. Otherwise just send NAK and let the sender to
+	 * resend it later */
+	if (*msg_crc == crc) {
+		serial_send(ACK);
+		// Reset checksum before generating an answer
+		reset_write_crc();
+		process_payload();
+	} else {
+		serial_send(NAK);
+	}
+	
+	// Re-enable the receiver
+	zcl_receiver_reset();
 }
+
+// Temporary serial buf tricks to make the rest of file to compile. TODO remove
+#define serial_buf (&(zcl.raw))
+#define packet (&(zcl.packet))
 
 static void process_payload(void) {
 

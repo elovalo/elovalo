@@ -31,16 +31,12 @@ void serial_boot_report(void) {}
 #include "serial.h"
 #include "zcl_skeleton.h"
 
-void process_serial(void)
-{
-	if (!serial_available()) return;
-	uint8_t cmd = serial_read();
-	process_zcl_frame(cmd);
-}
+/* process_serial() is implemented in zcl_skeleton to keep the serial
+   mess out of here */
 
 void sleep_if_no_traffic(void)
 {
-	if (serial_available()) return;
+	if (zcl_receiver_has_data()) return;
 	sleep_mode();
 }
 
