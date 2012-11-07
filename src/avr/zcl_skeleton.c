@@ -25,6 +25,7 @@
 #include <stdbool.h>
 
 #include "serial.h"
+#include "clock.h"
 #include "../common/pgmspace.h"
 #include "main.h"
 #include "serial_zcl.h"
@@ -105,6 +106,7 @@
 #define STATUS_UNSUP_CLUSTER_COMMAND 0x80
 #define STATUS_UNSUPPORTED_ATTRIBUTE 0x86
 #define STATUS_INVALID_VALUE 0x87
+#define STATUS_INVALID_DATA_TYPE 0x8d
 #define STATUS_READ_ONLY 0x88
 
 // Values
@@ -113,7 +115,6 @@
 
 // Serial port
 #define NOT_HEX 'G'
-#define NOT_NUM 0x00
 
 // Parser states
 #define PARSER_STATE_DEFAULT 0x00
@@ -128,11 +129,9 @@
 typedef uint8_t (*reader_t)(void);
 typedef void (*writer_t)(uint8_t);
 
-typedef union hex_val {
-	struct {
-		unsigned low: 8;
-		unsigned high: 8;
-	};
+typedef struct {
+	uint8_t low;
+	uint8_t high;
 } hex_value_t;
 
 enum zcl_status {
@@ -148,7 +147,6 @@ static enum zcl_status process_cmd_frame();
 static enum zcl_status process_read_cmd();
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
 static uint16_t resp_read_len(void);
-static void write_attr_resp_fail(void);
 
 static void write_packet_header(uint16_t length);
 static void write_payload_header(void);
@@ -156,13 +154,14 @@ static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
 static enum zcl_status process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
-static void write_unsupported_attribute(uint16_t attr);
+static void write_cmd_status(uint16_t attr, uint8_t status);
 
 static uint8_t msg_next(void);
 static bool msg_available(void);
 
 static inline void write(writer_t, uint8_t);
 static void write_16(writer_t, uint16_t);
+static void write_32(writer_t, uint32_t);
 static void write_64(writer_t, uint64_t);
 static void write_pgm_string(writer_t w, const char * const* pgm_p);
 
@@ -173,6 +172,7 @@ static inline void serial_send_hex(uint8_t);
 static bool accept(reader_t, uint8_t);
 static uint8_t read(reader_t);
 static uint16_t read_16(reader_t);
+static uint32_t read_32(reader_t);
 static uint64_t read_64(reader_t);
 
 static hex_value_t itohval(uint8_t);
@@ -299,7 +299,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			}
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
@@ -317,7 +317,8 @@ static enum zcl_status process_read_cmd() {
 				}
 				break;
 			}
-			/*case ATTR_EFFECT_TEXT:
+			/*
+			case ATTR_EFFECT_TEXT:
 				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
@@ -329,10 +330,12 @@ static enum zcl_status process_read_cmd() {
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
 				write_timezone(); //TODO
 				break;
-			case ATTR_TIMEZONE:
+			*/
+			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_time(); //TODO
+				write_32(HEX_CRC_W, time(NULL));
 				break;
+			/*
 			case ATTR_EFFECT_NAMES:
 				write_attr_resp_header(ATTR_EFFECT_NAMES, TYPE_LONG_OCTET_STRING);
 				write_effect_names();
@@ -356,9 +359,10 @@ static enum zcl_status process_read_cmd() {
 			case ATTR_SW_VERSION:
 				write_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
 				write_sw_version(); //TODO
-				break;*/
+				break;
+			*/
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		}
@@ -376,9 +380,9 @@ static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 	write(HEX_CRC_W, type);
 }
 
-static void write_unsupported_attribute(uint16_t attr) {
+static void write_cmd_status(uint16_t attr, uint8_t status) {
 	write_16(HEX_CRC_W, attr);
-	write(HEX_CRC_W, STATUS_UNSUPPORTED_ATTRIBUTE);
+	write(HEX_CRC_W, status);
 }
 
 static uint16_t resp_read_len(void) {
@@ -505,6 +509,9 @@ static enum zcl_status process_write_cmd(void) {
 					} else if (state == BOOL_FALSE) {
 						set_mode(MODE_IDLE);
 					}
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_ALARM_MASK:
@@ -513,10 +520,13 @@ static enum zcl_status process_write_cmd(void) {
 			case ATTR_IEEE_ADDRESS:
 				if (accept(MSG_R, TYPE_IEEE_ADDRESS)) {
 					mac = read_64(MSG_R);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
@@ -526,6 +536,9 @@ static enum zcl_status process_write_cmd(void) {
 				if (accept(MSG_R, TYPE_ENUM)) {
 					uint8_t mode = read(MSG_R);
 					set_mode(mode);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
@@ -534,30 +547,49 @@ static enum zcl_status process_write_cmd(void) {
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
 					}*/
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_PLAYLIST:
 				if (accept(MSG_R, TYPE_UINT8)) {
-					//current_playlist(read_hex_crc());
+					change_playlist(read(MSG_R));
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_TIMEZONE:
+			{
 				if (accept(MSG_R, TYPE_INT32)) {
-					//TODO			}
+					//TODO
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
+			}
 			case ATTR_TIME:
 				if (accept(MSG_R, TYPE_UTC_TIME)) {
-					//TODO
+					time_t t;
+					t = (time_t) read_32(MSG_R);
+					stime(&t);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT:
 				if (accept(MSG_R, TYPE_UINT8)) {
-					//uint8_t current_effect = read_hex_crc(); //TODO
+					change_current_effect(read(MSG_R));
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
@@ -575,9 +607,6 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
 	write_zcl_header(2); //FIXME: wtf?
 	write(HEX_CRC_W, cmd);
 	write(HEX_CRC_W, status);
-}
-
-static void write_attr_resp_fail(void) {
 }
 
 //------ Serial port functions ---------
@@ -612,8 +641,14 @@ static void write_16(writer_t w, uint16_t data) {
 	w(data & 0x00ff);
 }
 
+static void write_32(writer_t w, uint32_t data) {
+	for (uint8_t i = 3; i >= 0; i--) {
+		w(data >> (8 * i));
+	}
+}
+
 static void write_64(writer_t w, uint64_t data) {
-	for (uint8_t i = 0; i < sizeof(data); i++) {
+	for (uint8_t i = 7; i >= 0; i--) {
 		w(data >> (8 * i));
 	}
 }
@@ -690,9 +725,17 @@ static uint16_t read_16(reader_t r) {
 	return val;
 }
 
+static uint32_t read_32(reader_t r) {
+	uint32_t val;
+	for (uint8_t i = 3; i >= 0; i--) {
+		val |= (r() << (i * 8));
+	}
+	return val;
+}
+
 static uint64_t read_64(reader_t r) {
-	uint64_t val = 0x0000000000000000;
-	for (uint8_t i = 0; i < 8; i++) {
+	uint64_t val;
+	for (uint8_t i = 7; i >= 0; i--) {
 		val |= (r() << (i * 8));
 	}
 	return val;
