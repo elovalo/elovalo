@@ -75,9 +75,11 @@ ISR(USART_RX_vect)
 		if (!state.packet_ready) {
 			// If 'S' comes inside message, reset i to beginning
 			state.i = 0; 
+			state.high_nibble = false;
 			state.wait_zero = true;
 			state.hex_decoding = true;
 		}
+		return;
 	}
 
 	// Do not mess the receive buffer if receiver is off or no 'S' received
@@ -95,23 +97,23 @@ ISR(USART_RX_vect)
 		return;
 	}
 
-	// Put the nibble to array
 	state.high_nibble = !state.high_nibble;
+	// If it is high nibble, put it to buffer but do not advance counter
 	if (state.high_nibble) {
-		zcl.raw[state.i] |= hex;
-		state.i++; // Whole byte ready
-	} else {
 		zcl.raw[state.i] = hex << 4;
 		return;
 	}
 
-	/* A whole byte is received and everything done. Now checking
-	 * if we are running out of buffer or receiving has
-	 * completed. NB! Length and CRC consume equal amount of
-	 * bytes, so reading is stopped after packet length matches
-	 * index to read CRC as well. */
+	// Whole byte ready. Writing last nibble.
+	zcl.raw[state.i] |= hex;
+	state.i++;
+
+	/* Checking if we are running out of buffer or receiving has
+	 * completed. NB! We are reading 4 bytes more than length
+	 * because length and CRC are bot 16-bit values and not
+	 * included in the length. */
 	if (state.i == ZCL_RX_BUF_SIZE ||
-	    (state.i >= 2 && zcl.packet.length == state.i))
+	    (state.i >= 2 && zcl.packet.length + 4 == state.i))
 	{
 		// Stop receiver
 		state.packet_ready = true;
