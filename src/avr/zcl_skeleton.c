@@ -146,11 +146,9 @@ struct packet_s {
 	uint8_t msg[];
 };
 
-typedef union hex_val {
-	struct {
-		unsigned low: 8;
-		unsigned high: 8;
-	};
+typedef struct {
+	uint8_t low;
+	uint8_t high;
 } hex_value_t;
 
 enum zcl_status {
