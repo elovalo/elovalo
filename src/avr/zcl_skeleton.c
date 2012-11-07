@@ -27,6 +27,7 @@
 #include "serial.h"
 #include "../common/pgmspace.h"
 #include "main.h"
+#include "serial_zcl.h"
 
 // Sharing tlc5940 gs_buf_back to conserve memory
 #include "../common/cube.h" 
@@ -127,28 +128,10 @@
 typedef uint8_t (*reader_t)(void);
 typedef void (*writer_t)(uint8_t);
 
-struct packet_s {
-	uint16_t length;
-	uint8_t channel;
-	uint64_t mac;
-	uint8_t endpoint;
-	uint16_t profile;
-	uint16_t cluster;
-	unsigned type: 2;
-	unsigned mfr_specific: 1;
-	unsigned direction: 1;
-	unsigned disable_def_resp: 1;
-	unsigned reserved: 3;
-	// Manufacturer code is never used, skipping
-	uint8_t transaction_id;
-	uint8_t cmd_type;
-	uint8_t msg[];
-};
-
 typedef union hex_val {
 	struct {
-		unsigned low: 4;
-		unsigned high: 4;
+	        uint8_t low: 4;
+		uint8_t high: 4;
 	};
 
 	uint8_t integer;
