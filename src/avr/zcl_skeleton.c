@@ -105,6 +105,7 @@
 #define STATUS_UNSUP_CLUSTER_COMMAND 0x80
 #define STATUS_UNSUPPORTED_ATTRIBUTE 0x86
 #define STATUS_INVALID_VALUE 0x87
+#define STATUS_INVALID_DATA_TYPE 0x8d
 #define STATUS_READ_ONLY 0x88
 
 // Values
@@ -175,7 +176,7 @@ static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
 static enum zcl_status process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
-static void write_unsupported_attribute(uint16_t attr);
+static void write_cmd_status(uint16_t attr, uint8_t status);
 
 static uint8_t msg_next(void);
 static bool msg_available(void);
@@ -349,7 +350,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			}
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
@@ -412,7 +413,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			*/
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		}
@@ -430,9 +431,9 @@ static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 	write(HEX_CRC_W, type);
 }
 
-static void write_unsupported_attribute(uint16_t attr) {
+static void write_cmd_status(uint16_t attr, uint8_t status) {
 	write_16(HEX_CRC_W, attr);
-	write(HEX_CRC_W, STATUS_UNSUPPORTED_ATTRIBUTE);
+	write(HEX_CRC_W, status);
 }
 
 static uint16_t resp_read_len(void) {
@@ -559,6 +560,9 @@ static enum zcl_status process_write_cmd(void) {
 					} else if (state == BOOL_FALSE) {
 						set_mode(MODE_IDLE);
 					}
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_ALARM_MASK:
@@ -567,10 +571,13 @@ static enum zcl_status process_write_cmd(void) {
 			case ATTR_IEEE_ADDRESS:
 				if (accept(MSG_R, TYPE_IEEE_ADDRESS)) {
 					mac = read_64(MSG_R);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
@@ -580,6 +587,9 @@ static enum zcl_status process_write_cmd(void) {
 				if (accept(MSG_R, TYPE_ENUM)) {
 					uint8_t mode = read(MSG_R);
 					set_mode(mode);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
@@ -588,17 +598,26 @@ static enum zcl_status process_write_cmd(void) {
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
 					}*/
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_PLAYLIST:
 				if (accept(MSG_R, TYPE_UINT8)) {
 					change_playlist(read(MSG_R));
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_TIMEZONE:
 			{
 				if (accept(MSG_R, TYPE_INT32)) {
 					//TODO
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			}
@@ -607,15 +626,21 @@ static enum zcl_status process_write_cmd(void) {
 					time_t t;
 					t = (time_t) read_32(MSG_R);
 					stime(&t);
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT:
 				if (accept(MSG_R, TYPE_UINT8)) {
 					change_current_effect(read(MSG_R));
+				} else {
+					success = false;
+					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_unsupported_attribute(attr);
+				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
