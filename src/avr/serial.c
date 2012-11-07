@@ -29,7 +29,7 @@ static uint8_t tx_in_i = 0;
 volatile static uint8_t tx_out_i = 0; // Set by USART_TX_vect
 
 // Transmitter state
-volatile static uint8_t tx_state = TXRX_OK;
+volatile uint8_t tx_state = TXRX_OK;
 
 /**
  * Called when USART has finished transmit.
