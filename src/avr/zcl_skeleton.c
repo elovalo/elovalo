@@ -181,6 +181,7 @@ static bool msg_available(void);
 
 static inline void write(writer_t, uint8_t);
 static void write_16(writer_t, uint16_t);
+static void write_32(writer_t, uint32_t);
 static void write_64(writer_t, uint64_t);
 static void write_pgm_string(writer_t w, const char * const* pgm_p);
 
@@ -191,6 +192,7 @@ static inline void serial_send_hex(uint8_t);
 static bool accept(reader_t, uint8_t);
 static uint8_t read(reader_t);
 static uint16_t read_16(reader_t);
+static uint32_t read_32(reader_t);
 static uint64_t read_64(reader_t);
 
 static hex_value_t itohval(uint8_t);
@@ -659,8 +661,14 @@ static void write_16(writer_t w, uint16_t data) {
 	w(data & 0x00ff);
 }
 
+static void write_32(writer_t w, uint32_t data) {
+	for (uint8_t i = 3; i >= 0; i--) {
+		w(data >> (8 * i));
+	}
+}
+
 static void write_64(writer_t w, uint64_t data) {
-	for (uint8_t i = 0; i < sizeof(data); i++) {
+	for (uint8_t i = 7; i >= 0; i--) {
 		w(data >> (8 * i));
 	}
 }
@@ -737,9 +745,17 @@ static uint16_t read_16(reader_t r) {
 	return val;
 }
 
+static uint32_t read_32(reader_t r) {
+	uint32_t val;
+	for (uint8_t i = 3; i >= 0; i--) {
+		val |= (r() << (i * 8));
+	}
+	return val;
+}
+
 static uint64_t read_64(reader_t r) {
-	uint64_t val = 0x0000000000000000;
-	for (uint8_t i = 0; i < 8; i++) {
+	uint64_t val;
+	for (uint8_t i = 7; i >= 0; i--) {
 		val |= (r() << (i * 8));
 	}
 	return val;
