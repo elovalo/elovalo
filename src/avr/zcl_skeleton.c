@@ -25,6 +25,7 @@
 #include <stdbool.h>
 
 #include "serial.h"
+#include "clock.h"
 #include "../common/pgmspace.h"
 #include "main.h"
 
@@ -366,7 +367,8 @@ static enum zcl_status process_read_cmd() {
 				}
 				break;
 			}
-			/*case ATTR_EFFECT_TEXT:
+			/*
+			case ATTR_EFFECT_TEXT:
 				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
@@ -378,10 +380,12 @@ static enum zcl_status process_read_cmd() {
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
 				write_timezone(); //TODO
 				break;
-			case ATTR_TIMEZONE:
+			*/
+			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_time(); //TODO
+				write_32(HEX_CRC_W, time(NULL));
 				break;
+			/*
 			case ATTR_EFFECT_NAMES:
 				write_attr_resp_header(ATTR_EFFECT_NAMES, TYPE_LONG_OCTET_STRING);
 				write_effect_names();
@@ -405,7 +409,8 @@ static enum zcl_status process_read_cmd() {
 			case ATTR_SW_VERSION:
 				write_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
 				write_sw_version(); //TODO
-				break;*/
+				break;
+			*/
 			default:
 				write_unsupported_attribute(attr);
 				break;
@@ -587,22 +592,26 @@ static enum zcl_status process_write_cmd(void) {
 				break;
 			case ATTR_PLAYLIST:
 				if (accept(MSG_R, TYPE_UINT8)) {
-					//current_playlist(read_hex_crc());
+					change_playlist(read(MSG_R));
 				}
 				break;
 			case ATTR_TIMEZONE:
+			{
 				if (accept(MSG_R, TYPE_INT32)) {
-					//TODO			}
+					//TODO
 				}
 				break;
+			}
 			case ATTR_TIME:
 				if (accept(MSG_R, TYPE_UTC_TIME)) {
-					//TODO
+					time_t t;
+					t = (time_t) read_32(MSG_R);
+					stime(&t);
 				}
 				break;
 			case ATTR_EFFECT:
 				if (accept(MSG_R, TYPE_UINT8)) {
-					//uint8_t current_effect = read_hex_crc(); //TODO
+					change_current_effect(read(MSG_R));
 				}
 				break;
 			default:
