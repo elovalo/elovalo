@@ -24,12 +24,12 @@
 #include "serial.h"
 
 // TX ring buffer
-uint8_t tx_buf[TX_BUF_SIZE];
-uint8_t tx_in_i = 0;
-volatile uint8_t tx_out_i = 0; // Set by USART_TX_vect
+static uint8_t tx_buf[TX_BUF_SIZE];
+static uint8_t tx_in_i = 0;
+volatile static uint8_t tx_out_i = 0; // Set by USART_TX_vect
 
 // Transmitter state
-volatile uint8_t tx_state = TXRX_OK;
+volatile static uint8_t tx_state = TXRX_OK;
 
 /**
  * Called when USART has finished transmit.
@@ -88,8 +88,7 @@ void serial_send(uint8_t data) {
 
 /* Receiver functions. Conditionally compiled only for elocmd
  * target. ZCL versions are in serial_zcl.c */
-//TODO serial_zcl.c
-#ifdef AVR // AVR_ELO
+#ifdef AVR_ELO
 
 // RX ring buffer
 uint8_t rx_buf[RX_BUF_SIZE];
