@@ -112,7 +112,7 @@
 #define BOOL_FALSE 0x00
 
 // Serial port
-#define NOT_HEX 0xff
+#define NOT_HEX 'G'
 #define NOT_NUM 0x00
 
 // Parser states
@@ -130,11 +130,9 @@ typedef void (*writer_t)(uint8_t);
 
 typedef union hex_val {
 	struct {
-	        uint8_t low: 4;
-		uint8_t high: 4;
+		unsigned low: 8;
+		unsigned high: 8;
 	};
-
-	uint8_t integer;
 } hex_value_t;
 
 enum zcl_status {
@@ -159,7 +157,7 @@ static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
 static enum zcl_status process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
-static void write_unsupported_read_attribute(uint16_t attr);
+static void write_unsupported_attribute(uint16_t attr);
 
 static uint8_t msg_next(void);
 static bool msg_available(void);
@@ -179,6 +177,7 @@ static uint16_t read_16(reader_t);
 static uint64_t read_64(reader_t);
 
 static hex_value_t itohval(uint8_t);
+static uint8_t itoh(uint8_t i);
 
 uint16_t write_crc = 0xffff;
 uint16_t msg_i = 0; // Packet message read index
@@ -330,7 +329,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			}
 			default:
-				write_unsupported_read_attribute(attr);
+				write_unsupported_attribute(attr);
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
@@ -389,7 +388,7 @@ static enum zcl_status process_read_cmd() {
 				write_sw_version(); //TODO
 				break;*/
 			default:
-				write_unsupported_read_attribute(attr);
+				write_unsupported_attribute(attr);
 				break;
 			}
 		}
@@ -407,7 +406,7 @@ static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 	write(HEX_CRC_W, type);
 }
 
-static void write_unsupported_read_attribute(uint16_t attr) {
+static void write_unsupported_attribute(uint16_t attr) {
 	write_16(HEX_CRC_W, attr);
 	write(HEX_CRC_W, STATUS_UNSUPPORTED_ATTRIBUTE);
 }
@@ -520,6 +519,9 @@ static void write_effect_names(void) {
 }
 
 static enum zcl_status process_write_cmd(void) {
+	bool success = true;
+	write_zcl_header(CMDID_WRITE_RESPONSE);
+
 	while(msg_available()) {
 		uint16_t attr = read_16(MSG_R);
 
@@ -542,6 +544,10 @@ static enum zcl_status process_write_cmd(void) {
 				if (accept(MSG_R, TYPE_IEEE_ADDRESS)) {
 					mac = read_64(MSG_R);
 				}
+				break;
+			default:
+				write_unsupported_attribute(attr);
+				success = false;
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
@@ -580,15 +586,23 @@ static enum zcl_status process_write_cmd(void) {
 					//uint8_t current_effect = read_hex_crc(); //TODO
 				}
 				break;
+			default:
+				write_unsupported_attribute(attr);
+				success = false;
+				break;
 			}
 		}
 	}
-	//write_success_write_resp();
+
+	if (success) {
+		write(HEX_CRC_W, STATUS_SUCCESS);
+	}
 	return ZCL_SUCCESS;
 }
 
 static void write_default_response(uint8_t cmd, uint8_t status) {
-	write_zcl_header(2);
+	//write_packet_header();
+	write_zcl_header(2); //FIXME: wtf?
 	write(HEX_CRC_W, cmd);
 	write(HEX_CRC_W, status);
 }
@@ -631,7 +645,7 @@ static void write_16(writer_t w, uint16_t data) {
 static void write_64(writer_t w, uint64_t data) {
 	for (uint8_t i = 0; i < sizeof(data); i++) {
 		w(data >> (8 * i));
-	}	
+	}
 }
 
 static void write_pgm_string(writer_t w, const char * const* pgm_p) {
@@ -679,7 +693,6 @@ static inline void serial_send_hex(uint8_t data) {
 	serial_send(val.low);
 }
 
-
 // Reads
 
 /**
@@ -718,10 +731,25 @@ static uint64_t read_64(reader_t r) {
 /**
  * Convert an integer to hex characters.
  */
-hex_value_t itohval(uint8_t i) {
+static hex_value_t itohval(uint8_t i) {
 	hex_value_t val;
-	val.integer = i;
+	val.high = itoh(i >> 4);
+	val.low = itoh(i & 0x0f);
 	return val;
+}
+
+/**
+ * Convert an integer to a single hex character
+ */
+static uint8_t itoh(uint8_t i) {
+	if (i >= 0 && i <= 9) {
+		return i;
+	}
+	if (i >= 10 && i <= 16) {
+		return 'A' + (i - 10);
+	}
+
+	return NOT_HEX;
 }
 
 #endif //AVR_ZCL
