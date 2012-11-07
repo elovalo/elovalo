@@ -24,27 +24,24 @@
 
 #include <stdint.h>
 #include <avr/interrupt.h>
-#include "serial.h"
-#include "sleep.h"
+#include <avr/sleep.h>
+#include <util/atomic.h>
+#include "serial_zcl.h"
 
 // RX packet buffer
 union zcl_u zcl;
 
-enum receipt {
-	NOTHING,
-	ACK,
-	NAK
-};
-
 // Internal state
 volatile static struct {
-	bool ati:1;              // If ATI is received
-	bool high_nibble:1;      // If last nibble was "high" nibble
-	bool packet_ready:1      // Packet is received (CRC not checked)
-	bool wait_zero:1;        // Expect the next byte to be zero
-	enum receipt_e receipt:2 // If ACK or NAK is received
-	uint8_t i;        // Byte position in receive buffer
-} state = {false,false,false,false,NOTHING,0};
+	bool ati:1;               // If ATI is received
+	bool high_nibble:1;       // If last nibble was "high" nibble
+	bool packet_ready:1;      // Packet is received (CRC not checked)
+	bool wait_zero:1;         // Expect the next byte to be zero
+	bool hex_decoding:1;      // Hex decoder enabled
+	bool receipt:1;           // Has received a receipt
+	bool ack:1;               // ACK if true, else NAK
+	uint8_t i;                // Byte position in receive buffer
+} state = {false,false,false,false,false,false,false,0};
 
 /**
  * Called when a byte is received from USART.
@@ -67,10 +64,12 @@ ISR(USART_RX_vect)
 		state.ati = true;
 		return;
 	case 'N':
-		state.receipt = NAK;
+		state.receipt = true;
+		state.ack = false;
 		return;
 	case 'K':
-		state.receipt = ACK;
+		state.receipt = true;
+		state.ack = true;
 		return;
 	case 'S':
 		if (!state.packet_ready) {
@@ -87,9 +86,9 @@ ISR(USART_RX_vect)
 	uint8_t hex;
 	if (x >= '0' && x <= '9') {
 		hex = x-'0';
-	} elseif (x >= 'A' && x <= 'F') {
+	} else if (x >= 'A' && x <= 'F') {
 		hex = x-'A'+10;
-	} elseif (x >= 'a' && x <= 'f') {
+	} else if (x >= 'a' && x <= 'f') {
 		hex = x-'a'+10;
 	} else {
 		// Invalid character, ignoring
@@ -99,10 +98,10 @@ ISR(USART_RX_vect)
 	// Put the nibble to array
 	state.high_nibble = !state.high_nibble;
 	if (state.high_nibble) {
-		buf.raw[rx.i] |= hex;
+		zcl.raw[state.i] |= hex;
 		state.i++; // Whole byte ready
 	} else {
-		buf.raw[rx.i] = hex << 4;
+		zcl.raw[state.i] = hex << 4;
 		return;
 	}
 
@@ -112,7 +111,7 @@ ISR(USART_RX_vect)
 	 * bytes, so reading is stopped after packet length matches
 	 * index to read CRC as well. */
 	if (state.i == ZCL_RX_BUF_SIZE ||
-	    (state.i >= 2 && buf.packet.length == state.i))
+	    (state.i >= 2 && zcl.packet.length == state.i))
 	{
 		// Stop receiver
 		state.packet_ready = true;
@@ -127,13 +126,25 @@ bool zcl_packet_available(void)
 
 void zcl_receiver_reset(void)
 {
-	// FIXME ATOMIC_FORCEON
-	state = {false,false,false,false,NOTHING,0};
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		state.ati = false;
+		state.high_nibble = false;
+		state.packet_ready = false;
+		state.wait_zero = false;
+		state.hex_decoding = false;
+		state.receipt = false;
+		// ack may be left as such
+		state.i = 0;
+	}
 }
 
-enum receipt wait_receipt(void)
+bool wait_receipt(void)
 {
-	return NOTHING; // TODO
+	// FIXME implement timeout
+	while (!state.receipt) {
+		sleep_mode();
+	}
+	return state.ack;
 }
 
 #endif // AVR_ZCL

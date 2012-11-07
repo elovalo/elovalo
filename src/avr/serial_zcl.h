@@ -1,11 +1,7 @@
-/* c-basic-offset: 8; tab-width: 8; indent-tabs-mode: nil
- * vi: set shiftwidth=8 tabstop=8 expandtab:
- * :indentSize=8:tabSize=8:noTabs=true:
- */
-/*
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
  *  Copyright 2012 Elovalo project group 
- *  
- *  This file is part of Elovalo.
  *  
  *  Elovalo is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +22,9 @@
 #ifndef SERIAL_ZCL_H_
 #define SERIAL_ZCL_H_
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define ZCL_RX_BUF_SIZE 128
 #define TXRX_OK 0
 #define TXRX_OVERFLOW 1
@@ -37,11 +36,11 @@ struct packet_s {
 	uint8_t endpoint;
 	uint16_t profile;
 	uint16_t cluster;
-	unsigned type: 2;
-	unsigned mfr_specific: 1;
-	unsigned direction: 1;
-	unsigned disable_def_resp: 1;
-	unsigned reserved: 3;
+	uint8_t type: 2;
+	bool mfr_specific: 1;
+	bool direction: 1;
+	bool disable_def_resp: 1;
+	uint8_t reserved: 3;
 	// Manufacturer code is never used, skipping
 	uint8_t transaction_id;
 	uint8_t cmd_type;
