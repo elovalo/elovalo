@@ -58,9 +58,9 @@ ISR(USART_RX_vect)
 	}
 
 	switch (x) {
-	case '\r':
-	case '\n':
-		// A hack: Just listening to carriage return after ATI
+	case 'i':
+	case 'I':
+		// A hack: Just listening 'I' letter of ATI to keep it simple
 		state.ati = true;
 		return;
 	case 'N':
