@@ -209,7 +209,7 @@ void process_serial(void)
 	uint16_t *msg_crc = (uint16_t *)(zcl.raw + zcl.packet.length + 2);
 	uint16_t crc = 0xffff;
 	for (uint16_t i = 0; i < zcl.packet.length; i++) {
-		crc = _crc_ccitt_update(crc, zcl.raw[i+2]);
+		crc = _crc_xmodem_update(crc, zcl.raw[i+2]);
 	}
 
 	/* Answering ACK and processing the answer if it was
