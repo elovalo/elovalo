@@ -77,9 +77,22 @@ void zcl_receiver_reset(void);
 bool wait_receipt(void);
 
 /**
+ * Cleans receipt flag. May be used to reset status before sending a
+ * message to make sure we receive recipt related to correct
+ * packet. wait_receipt() also cleans the flag.
+ */
+void reset_receipt(void);
+
+/**
  * Returns true if ATI has been received. This command resets ATI
  * atomically back to false.
  */
 bool zcl_ati(void);
+
+/**
+ * Returns true if ATI, ZCL packet, ACK or NAK is received. This is
+ * not affected by garbage data beign transmitted.
+ */
+bool zcl_receiver_has_data(void);
 
 #endif /* SERIAL_ZCL_H_ */

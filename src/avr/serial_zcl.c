@@ -151,10 +151,19 @@ bool wait_receipt(void)
 	while (!state.receipt) {
 		sleep_mode();
 	}
+	reset_receipt();
+	return state.ack;
+}
+
+void reset_receipt(void) {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 		state.receipt = false;
 	}
-	return state.ack;
+}
+
+bool zcl_receiver_has_data(void)
+{
+	return state.ati || state.packet_ready || state.receipt;
 }
 
 #endif // AVR_ZCL
