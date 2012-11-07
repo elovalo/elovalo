@@ -114,7 +114,6 @@
 
 // Serial port
 #define NOT_HEX 'G'
-#define NOT_NUM 0x00
 
 // Parser states
 #define PARSER_STATE_DEFAULT 0x00
@@ -168,7 +167,6 @@ static enum zcl_status process_cmd_frame();
 static enum zcl_status process_read_cmd();
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
 static uint16_t resp_read_len(void);
-static void write_attr_resp_fail(void);
 
 static void write_packet_header(uint16_t length);
 static void write_payload_header(void);
@@ -658,9 +656,6 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
 	write_zcl_header(2); //FIXME: wtf?
 	write(HEX_CRC_W, cmd);
 	write(HEX_CRC_W, status);
-}
-
-static void write_attr_resp_fail(void) {
 }
 
 //------ Serial port functions ---------
