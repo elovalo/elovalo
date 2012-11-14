@@ -592,8 +592,7 @@ static enum zcl_status process_write_cmd(void) {
 			}
 			case ATTR_TIME:
 				if (accept(TYPE_UTC_TIME)) {
-					time_t t;
-					t = (time_t) read_32();
+					time_t t = read_32()+ZIGBEE_TIME_OFFSET;
 					stime(&t);
 				} else {
 					success = false;
