@@ -656,8 +656,8 @@ static inline void write(writer_t w, uint8_t data) {
 }
 
 static void write_16(writer_t w, uint16_t data) {
-	w(data >> 8);
 	w(data & 0x00ff);
+	w(data >> 8);
 }
 
 static void write_32(writer_t w, uint32_t data) {
@@ -695,7 +695,7 @@ static void write_pgm_string(writer_t w, const char * const* pgm_p) {
  * Sends data to the serial port and updates the write CRC value
  */
 static void serial_send_hex_crc(uint8_t data) {
-	write_crc = _crc_ccitt_update(write_crc, data);
+	write_crc = _crc_xmodem_update(write_crc, data);
 	serial_send_hex(data);
 }
 
@@ -739,21 +739,22 @@ static uint8_t read(reader_t r) {
  */
 static uint16_t read_16(reader_t r) {
 	uint16_t val;
-	val = (r() << 8);
-	val |= r();
+	val = r();
+	val |= (r() << 8);
 	return val;
 }
 
 static uint32_t read_32(reader_t r) {
-	uint32_t val;
+	uint32_t val = 0;
 	for (uint8_t i = 0; i < 4; i++) {
 		val |= (r() << (i * 8));
 	}
 	return val;
 }
 
+// FIXME byte ordering is broken (MAC address requires special handling anyway)
 static uint64_t read_64(reader_t r) {
-	uint64_t val;
+	uint64_t val = 0;
 	for (uint8_t i = 8; i != 0; i++) {
 		val |= (r() << ((i - 1) * 8));
 	}
