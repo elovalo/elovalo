@@ -7,8 +7,9 @@ valid CRC and should return ACK (`K`). To test NAK handling, just
 mutilate message bodies.
 
 In the following messages the MAC address (unless stated otherwise) is
-`EFCDAB8967452301` in *XML* format and `0123456789ABCDEF` in
-*little-endian* format. Little-endian format is used on wire, too.
+`EFCDAB8967452301`. It is sent in big endian format (the same ordering
+used in *XML* format). Little-endian format is used on other parts of
+message.
 
 Valid message to an invalid MAC address:
 
