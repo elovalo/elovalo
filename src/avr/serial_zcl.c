@@ -32,7 +32,7 @@
 union zcl_u zcl;
 
 // Internal state
-volatile static struct {
+static struct {
 	bool ati:1;               // If ATI is received
 	bool high_nibble:1;       // If last nibble was "high" nibble
 	bool packet_ready:1;      // Packet is received (CRC not checked)
@@ -40,8 +40,9 @@ volatile static struct {
 	bool hex_decoding:1;      // Hex decoder enabled
 	bool receipt:1;           // Has received a receipt
 	bool ack:1;               // ACK if true, else NAK
+	bool own_fault:1;         // Buffer overrun occured
 	uint8_t i;                // Byte position in receive buffer
-} state = {false,false,false,false,false,false,false,0};
+} state = {false,false,false,false,false,false,false,false,0};
 
 /**
  * Called when a byte is received from USART.
@@ -78,6 +79,7 @@ ISR(USART_RX_vect)
 			state.high_nibble = false;
 			state.wait_zero = true;
 			state.hex_decoding = true;
+			state.own_fault = false;
 		}
 		return;
 	}
@@ -112,9 +114,14 @@ ISR(USART_RX_vect)
 	 * completed. NB! We are reading 4 bytes more than length
 	 * because length and CRC are bot 16-bit values and not
 	 * included in the length. */
-	if (state.i == ZCL_RX_BUF_SIZE ||
-	    (state.i >= 2 && zcl.packet.length + 4 == state.i))
-	{
+	if (state.i == ZCL_RX_BUF_SIZE) {
+		// Too long message
+		state.own_fault = true;
+
+		// Stop receiver
+		state.packet_ready = true;
+		state.hex_decoding = false;
+	} else if (state.i >= 2 && zcl.packet.length + 4 == state.i) {
 		// Stop receiver
 		state.packet_ready = true;
 		state.hex_decoding = false;
@@ -126,6 +133,11 @@ bool zcl_packet_available(void)
 	return state.packet_ready;
 }
 
+bool zcl_own_fault(void)
+{
+	return state.own_fault;
+}
+
 void zcl_receiver_reset(void)
 {
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -134,6 +146,7 @@ void zcl_receiver_reset(void)
 		state.packet_ready = false;
 		state.wait_zero = false;
 		state.hex_decoding = false;
+		state.own_fault = false;
 		// state.i is reset by 'S' case
 	}
 }
@@ -165,7 +178,8 @@ void reset_receipt(void) {
 
 bool zcl_receiver_has_data(void)
 {
-	return state.ati || state.packet_ready || state.receipt;
+	return state.ati || state.packet_ready || state.receipt
+		|| state.own_fault;
 }
 
 #endif // AVR_ZCL

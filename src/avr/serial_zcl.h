@@ -62,6 +62,12 @@ extern union zcl_u zcl;
 bool zcl_packet_available(void);
 
 /**
+ * Returns true if ZCL packet is received but has too long
+ * payload. This is an internal error and must be handled separately.
+ */
+bool zcl_own_fault(void);
+
+/**
  * Reset receiver state. After reset it starts receiving packet again.
  */
 void zcl_receiver_reset(void);

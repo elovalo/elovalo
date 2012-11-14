@@ -196,12 +196,23 @@ uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 
 void process_serial(void)
 {
-	// ATI command response
 	if (zcl_ati()) {
+		// ATI command response
 		for (uint8_t i = 0; i < sizeof(ati_resp)-1; i++) {
 			serial_send(ati_resp[i]);
 		}
+		// May continue to packet processing
 	}
+
+	if (zcl_own_fault()) {
+		/* If buffer overflow or other internal error
+		 * happened, there is not much to do. TODO Maybe there
+		 * should be some internal flag? Or proper ZigBee
+		 * error? */
+		serial_send(ACK);
+		zcl_receiver_reset();
+		return;
+	}	
 
 	if (!zcl_packet_available()) return;
 
