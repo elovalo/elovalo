@@ -28,7 +28,7 @@ void serial_boot_report(void) {}
 #elif defined AVR_ZCL
 
 #include <avr/sleep.h>
-#include "serial.h"
+#include "serial_zcl.h"
 #include "zcl_skeleton.h"
 
 /* process_serial() is implemented in zcl_skeleton to keep the serial

@@ -96,8 +96,8 @@ void reset_receipt(void);
 bool zcl_ati(void);
 
 /**
- * Returns true if ATI, ZCL packet, ACK or NAK is received. This is
- * not affected by garbage data beign transmitted.
+ * Returns true if ATI, ZCL packet, ACK or NAK, or buffer overrun is
+ * received. This is not affected by garbage data being transmitted.
  */
 bool zcl_receiver_has_data(void);
 
