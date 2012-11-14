@@ -183,7 +183,8 @@ uint16_t msg_i = 0; // Packet message read index
 
 // ZCL Header variables
 uint8_t transaction_seq = 0;
-uint64_t mac = 0xefcdab8967452301;
+//uint64_t mac = 0xefcdab8967452301;
+uint64_t mac = 0x0123456789abcdef;
 
 // ATI
 #define ATI 'A'
@@ -238,7 +239,9 @@ static void process_payload(void) {
 	if (packet->channel != ZCL_CHANNEL) return;
 
 	// Filter out messages that do not belong to me
-	if (packet->mac != mac) return;
+	if (packet->mac != mac) {
+		return;
+	}
 
 	/* If using manufacturer specific extensions, do not
 	 * touch. The payload is distorted anyway */
@@ -418,12 +421,14 @@ static uint16_t resp_read_len(void) {
 			case ATTR_PLAYLIST:
 				length += //TODO;
 				break;
+			*/
 			case ATTR_TIMEZONE:
 				length += TYPELEN_INT32;
 				break;
 			case ATTR_TIME:
 				length += TYPELEN_UTC_TIME;
 				break;
+			/*
 			case ATTR_EFFECT_NAMES:
 				length += //TODO;
 				break;
@@ -433,9 +438,11 @@ static uint16_t resp_read_len(void) {
 			case ATTR_PLAYLIST_EFFECTS:
 				length += //TODO;
 				break;
+			*/
 			case ATTR_EFFECT:
 				length += TYPELEN_UINT8;
 				break;
+			/*
 			case ATTR_HW_VERSION:
 				length += //TODO;
 				break;
@@ -454,7 +461,7 @@ static uint16_t resp_read_len(void) {
 
 static void write_packet_header(uint16_t length) {
 	serial_send(STX);
-	write(HEX_CRC_W, PACKET_BEGIN);
+	serial_send(PACKET_BEGIN);
 	write_16(HEX_W, length);
 }
 
@@ -623,11 +630,12 @@ static uint8_t msg_next(void) {
  * Resets msg_next():s read counter when reaches the end of message.
  */
 static bool msg_available(void) {
-	if ((packet->length - PACKET_HEADER_LEN) >= msg_i) {
+	if (msg_i < (packet->length - PACKET_HEADER_LEN)) {
+		return true;
+	} else {
 		msg_i = 0;
 		return false;
 	}
-	return true;
 }
 
 // Writes
@@ -642,13 +650,13 @@ static void write_16(writer_t w, uint16_t data) {
 }
 
 static void write_32(writer_t w, uint32_t data) {
-	for (uint8_t i = 3; i >= 0; i--) {
+	for (uint8_t i = 0; i < 4; i++) {
 		w(data >> (8 * i));
 	}
 }
 
 static void write_64(writer_t w, uint64_t data) {
-	for (uint8_t i = 7; i >= 0; i--) {
+	for (uint8_t i = 0; i < 8; i++) {
 		w(data >> (8 * i));
 	}
 }
@@ -727,7 +735,7 @@ static uint16_t read_16(reader_t r) {
 
 static uint32_t read_32(reader_t r) {
 	uint32_t val;
-	for (uint8_t i = 3; i >= 0; i--) {
+	for (uint8_t i = 0; i < 4; i++) {
 		val |= (r() << (i * 8));
 	}
 	return val;
@@ -735,8 +743,8 @@ static uint32_t read_32(reader_t r) {
 
 static uint64_t read_64(reader_t r) {
 	uint64_t val;
-	for (uint8_t i = 7; i >= 0; i--) {
-		val |= (r() << (i * 8));
+	for (uint8_t i = 8; i != 0; i++) {
+		val |= (r() << ((i - 1) * 8));
 	}
 	return val;
 }
@@ -756,7 +764,7 @@ static hex_value_t itohval(uint8_t i) {
  */
 static uint8_t itoh(uint8_t i) {
 	if (i >= 0 && i <= 9) {
-		return i;
+		return i + '0';
 	}
 	if (i >= 10 && i <= 16) {
 		return 'A' + (i - 10);
