@@ -635,7 +635,8 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
  */
 static bool msg_available(void)
 {
-	return msg_i < zcl.packet.msg + zcl.packet.length - PACKET_HEADER_LEN;
+	void *end = zcl.packet.msg + zcl.packet.length - PACKET_HEADER_LEN;
+	return msg_i < end;
 }
 
 // Writes
