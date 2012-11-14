@@ -125,6 +125,9 @@
 #define READ_BUF_OK 0x00
 #define READ_BUF_OVERFLOW 0x01
 
+// ZigBee time starts at Sat Jan 01 00:00:00 UTC 2000
+#define ZIGBEE_TIME_OFFSET 946684800
+
 // Data reading functions
 typedef uint8_t (*reader_t)(void);
 typedef void (*writer_t)(uint8_t);
@@ -347,7 +350,7 @@ static enum zcl_status process_read_cmd() {
 			*/
 			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_32(HEX_CRC_W, time(NULL)); //Zigbee offset 2000, not 1970
+				write_32(HEX_CRC_W, time(NULL)-ZIGBEE_TIME_OFFSET);
 				break;
 			/*
 			case ATTR_EFFECT_NAMES:
