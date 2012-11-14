@@ -302,22 +302,22 @@ static enum zcl_status process_read_cmd() {
 				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
 				write(HEX_CRC_W, get_mode());
 				break;
-			case ATTR_ALARM_MASK:
+			/*case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
 				//write(HEX_CRC_W, ALARM_MASK); //TODO
-				break;
-			case ATTR_IEEE_ADDRESS:
-			{
-				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
-				write_64(HEX_CRC_W, mac);
-				break;
-			}
+				break;*/
 			default:
 				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
+			case ATTR_IEEE_ADDRESS:
+			{
+				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
+				write_64(HEX_CRC_W, mac);
+				break;
+			}
 			case ATTR_OPERATING_MODE:
 			{
 				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
@@ -347,7 +347,7 @@ static enum zcl_status process_read_cmd() {
 			*/
 			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_32(HEX_CRC_W, time(NULL));
+				write_32(HEX_CRC_W, time(NULL)); //Zigbee offset 2000, not 1970
 				break;
 			/*
 			case ATTR_EFFECT_NAMES:
@@ -412,17 +412,17 @@ static uint16_t resp_read_len(void) {
 			case ATTR_DEVICE_ENABLED:
 				length += TYPELEN_BOOLEAN;
 				break;
-			case ATTR_ALARM_MASK:
+			/*case ATTR_ALARM_MASK:
 				length += TYPELEN_UINT8;
-				break;
-			case ATTR_IEEE_ADDRESS:
-				length += TYPELEN_IEEE_ADDRESS;
-				break;
+				break;*/
 			default:
 				break;
 			}
 		} else if (packet->cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
+			case ATTR_IEEE_ADDRESS:
+				length += TYPELEN_IEEE_ADDRESS;
+				break;
 			case ATTR_OPERATING_MODE:
 				length += TYPELEN_ENUM;
 				break;
