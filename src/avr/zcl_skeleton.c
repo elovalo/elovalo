@@ -142,16 +142,14 @@ enum zcl_status {
 };
 
 static void process_payload();
-static enum zcl_status process_cmd_frame();
-static enum zcl_status process_read_cmd();
+static bool process_cmd_frame();
+static bool process_read_cmd();
 static void write_attr_resp_header(uint16_t attr, uint8_t type);
-static uint16_t resp_read_len(void);
 
 static void write_packet_header(uint16_t length);
-static void write_payload_header(void);
 static void write_zcl_header(uint8_t cmd);
 static void write_effect_names(void);
-static enum zcl_status process_write_cmd(void);
+static bool process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_cmd_status(uint16_t attr, uint8_t status);
 
@@ -175,6 +173,9 @@ static uint64_t msg_get_64(void);
 static uint8_t itoh(uint8_t i);
 
 static void reset_msg_ptr(void);
+
+static bool dry_run;
+static uint16_t response_length;
 
 uint16_t write_crc = 0xffff;
 void *msg_i; // Packet message read index
@@ -221,8 +222,6 @@ void process_serial(void)
 	 * resend it later */
 	if (*msg_crc == crc) {
 		serial_send(ACK);
-		// Reset checksum before generating an answer
-		reset_write_crc();
 		process_payload();
 	} else {
 		serial_send(NAK);
@@ -246,43 +245,57 @@ static void process_payload(void) {
 	 * touch. The payload is distorted anyway */
 	if (zcl.packet.mfr_specific) return;
 
-	/* Filter out profiles and endpoints that are not supported on
-	 * this device. FIXME: Generate error responses for these. */
-	enum zcl_status status;
-	if (zcl.packet.endpoint != ENDPOINT) {
-		status = ZCL_BAD_ENDPOINT;
-	} else if (zcl.packet.profile != PROFILE) {
-		status = ZCL_BAD_PROFILE;
-	} else {
-		status = process_cmd_frame();
-	}
+	/* Determining message length */
+	dry_run = true;
+	response_length = 0;
+	bool has_response = process_cmd_frame();
+	if (!has_response) return; // Just say ACK
 
-	// FIXME error handling
+	/* Sending actual response */
+	dry_run = false;
+	write_packet_header(response_length);
+	reset_write_crc();
+	process_cmd_frame();
+	write_16_without_crc(write_crc);
 }
 
-static enum zcl_status process_cmd_frame(void) {
+/**
+ * Processes command frame. If no response should be generated,
+ * returns false. This function is ran twice. First for length
+ * calculation and the second run runs the "real" action.
+ */
+static bool process_cmd_frame(void) {
+	/* Start message reading from the beginning */
+	reset_msg_ptr();
+
+	/* Filter out profiles and endpoints that are not supported on
+	 * this device. FIXME: Generate error responses for these. */
+	if (zcl.packet.endpoint != ENDPOINT) {
+		// TODO generate error msg
+		return false;
+	}
+	if (zcl.packet.profile != PROFILE) {
+		// TODO generate error msg
+		return false;
+	}
 	switch (zcl.packet.cmd_type) {
 	case CMDID_READ:
 		return process_read_cmd();
 	case CMDID_WRITE:
-		return process_write_cmd();
+		process_write_cmd();
+		return true;
 	case CMDID_DEFAULT_RESPONSE:
-		return ZCL_SUCCESS;
+		return false;
 	default:
-		return ZCL_BAD_COMMAND;
+		// Unknown command
+		// TODO generate error msg
+		return false;
 	}
-
-	return ZCL_IMPOSSIBLE;
 }
 
-static enum zcl_status process_read_cmd() {
-	uint16_t resp_len = resp_read_len();
-
-	write_packet_header(resp_len);
-	write_payload_header();
+static bool process_read_cmd() {
 	write_zcl_header(CMDID_READ_RESPONSE);
 
-	reset_msg_ptr();
 	while(msg_available()) {
 		uint16_t attr;
 		attr = msg_get_16();
@@ -370,13 +383,12 @@ static enum zcl_status process_read_cmd() {
 				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
+		} else {
+			// TODO generate correct answer 
+			return false;
 		}
-
 	}
-
-	write_16_without_crc(write_crc);
-
-	return ZCL_SUCCESS;
+	return true;
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
@@ -390,94 +402,20 @@ static void write_cmd_status(uint16_t attr, uint8_t status) {
 	serial_send_hex_crc(status);
 }
 
-static uint16_t resp_read_len(void) {
-	uint16_t length = 1; // Because payload contains the channel byte
-	uint16_t attr;
-
-	reset_msg_ptr();
-	while(msg_available()) {
-		attr = msg_get_16();
-		length += READ_RESP_HEADER_LEN;
-
-		if (zcl.packet.cluster == CLUSTERID_BASIC) {
-			switch(attr) {
-			case ATTR_DEVICE_ENABLED:
-				length += TYPELEN_BOOLEAN;
-				break;
-			/*case ATTR_ALARM_MASK:
-				length += TYPELEN_UINT8;
-				break;*/
-			default:
-				break;
-			}
-		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
-			switch(attr) {
-			case ATTR_IEEE_ADDRESS:
-				length += TYPELEN_IEEE_ADDRESS;
-				break;
-			case ATTR_OPERATING_MODE:
-				length += TYPELEN_ENUM;
-				break;
-			/*case ATTR_EFFECT_TEXT:
-				length += //TODO;
-				break;
-			case ATTR_PLAYLIST:
-				length += //TODO;
-				break;
-			*/
-			case ATTR_TIMEZONE:
-				length += TYPELEN_INT32;
-				break;
-			case ATTR_TIME:
-				length += TYPELEN_UTC_TIME;
-				break;
-			/*
-			case ATTR_EFFECT_NAMES:
-				length += //TODO;
-				break;
-			case ATTR_PLAYLIST_NAMES:
-				length += //TODO;
-				break;
-			case ATTR_PLAYLIST_EFFECTS:
-				length += //TODO;
-				break;
-			*/
-			case ATTR_EFFECT:
-				length += TYPELEN_UINT8;
-				break;
-			/*
-			case ATTR_HW_VERSION:
-				length += //TODO;
-				break;
-			case ATTR_SW_VERSION:
-				length += //TODO;
-				break;
-			default:
-				length += ;
-				break;*/
-			}
-		}
-	}
-
-	return length;
-}
-
 static void write_packet_header(uint16_t length) {
 	serial_send(STX);
 	serial_send(PACKET_BEGIN);
 	write_16_without_crc(length);
 }
 
-static void write_payload_header(void) {
+static void write_zcl_header(uint8_t cmd) {
 	serial_send_hex_crc(ZCL_CHANNEL);
 	write_64(mac);
 
-	serial_send_hex_crc(ENDPOINT);
-	write_16(PROFILE);
-	write_16(CLUSTERID_ELOVALO);
-}
+	serial_send_hex_crc(zcl.packet.endpoint);
+	write_16(zcl.packet.profile);
+	write_16(zcl.packet.cluster);
 
-static void write_zcl_header(uint8_t cmd){
 	// Send out the frame control byte
 	//FIXME: see if needs to be non-zero
 	serial_send_hex_crc(0);
@@ -499,11 +437,10 @@ static void write_effect_names(void) {
 	serial_send_hex_crc(']');
 }
 
-static enum zcl_status process_write_cmd(void) {
+static bool process_write_cmd(void) {
 	bool success = true;
 	write_zcl_header(CMDID_WRITE_RESPONSE);
 
-	reset_msg_ptr();
 	while(msg_available()) {
 		uint16_t attr = msg_get_16();
 
@@ -600,13 +537,17 @@ static enum zcl_status process_write_cmd(void) {
 				success = false;
 				break;
 			}
+		} else {
+			// TODO proper answer to invalid cluster
+			return false;
 		}
 	}
 
+	// If no error reports has been written
 	if (success) {
 		serial_send_hex_crc(STATUS_SUCCESS);
 	}
-	return ZCL_SUCCESS;
+	return true;
 }
 
 static void write_default_response(uint8_t cmd, uint8_t status) {
@@ -675,8 +616,12 @@ static void write_pgm_string(const char * const* pgm_p) {
  * Sends data to the serial port and updates the write CRC value
  */
 static void serial_send_hex_crc(uint8_t data) {
-	write_crc = _crc_xmodem_update(write_crc, data);
-	serial_send_hex(data);
+	if (dry_run) {
+		response_length++;
+	} else {
+		write_crc = _crc_xmodem_update(write_crc, data);
+		serial_send_hex(data);
+	}
 }
 
 /**
