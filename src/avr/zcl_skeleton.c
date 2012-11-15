@@ -161,17 +161,16 @@ static void write_cmd_status(uint16_t attr, uint8_t status);
 
 static bool msg_available(void);
 
-static inline void write(writer_t, uint8_t);
-static void write_16(writer_t, uint16_t);
-static void write_32(writer_t, uint32_t);
-static void write_64(writer_t, uint64_t);
-static void write_pgm_string(writer_t w, const char * const* pgm_p);
+static void write_16(uint16_t);
+static void write_16_without_crc(uint16_t);
+static void write_32(uint32_t);
+static void write_64(uint64_t);
+static void write_pgm_string(const char * const* pgm_p);
 
 static void serial_send_hex_crc(uint8_t);
 static void reset_write_crc(void);
 static inline void serial_send_hex(uint8_t);
 
-static bool accept(uint8_t);
 static uint8_t read(void);
 static uint16_t read_16(void);
 static uint32_t read_32(void);
@@ -193,10 +192,6 @@ uint64_t mac = 0x0123456789abcdef;
 // ATI
 #define ATI 'A'
 uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
-
-// reader_t and writer_t functions
-#define HEX_CRC_W (&serial_send_hex_crc)
-#define HEX_W (&serial_send_hex)
 
 void process_serial(void)
 {
@@ -300,11 +295,11 @@ static enum zcl_status process_read_cmd() {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
 				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
-				write(HEX_CRC_W, get_mode());
+				serial_send_hex_crc(get_mode());
 				break;
 			/*case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
-				//write(HEX_CRC_W, ALARM_MASK); //TODO
+				//serial_send_hex_crc(ALARM_MASK); //TODO
 				break;*/
 			default:
 				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
@@ -315,7 +310,7 @@ static enum zcl_status process_read_cmd() {
 			case ATTR_IEEE_ADDRESS:
 			{
 				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
-				write_64(HEX_CRC_W, mac);
+				write_64(mac);
 				break;
 			}
 			case ATTR_OPERATING_MODE:
@@ -323,11 +318,11 @@ static enum zcl_status process_read_cmd() {
 				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
 				uint8_t mode = get_mode();
 				if (mode == MODE_SLEEP || mode == MODE_IDLE) {
-					write(HEX_CRC_W, 0);
+					serial_send_hex_crc(0);
 				} else if (mode == MODE_EFFECT) {
-					write(HEX_CRC_W, 1);
+					serial_send_hex_crc(1);
 				} else if (mode == MODE_PLAYLIST) {
-					write(HEX_CRC_W, 2);
+					serial_send_hex_crc(2);
 				}
 				break;
 			}
@@ -338,7 +333,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			case ATTR_PLAYLIST:
 				write_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				write(HEX_CRC_W, current_playlist);
+				serial_send_hex_crc(current_playlist);
 				break;
 			case ATTR_TIMEZONE:
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
@@ -347,7 +342,7 @@ static enum zcl_status process_read_cmd() {
 			*/
 			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_32(HEX_CRC_W, time(NULL)-ZIGBEE_TIME_OFFSET);
+				write_32(time(NULL)-ZIGBEE_TIME_OFFSET);
 				break;
 			/*
 			case ATTR_EFFECT_NAMES:
@@ -364,7 +359,7 @@ static enum zcl_status process_read_cmd() {
 				break;
 			case ATTR_EFFECT:
 				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				write(HEX_CRC_W, current_effect);
+				serial_send_hex_crc(current_effect);
 				break;
 			case ATTR_HW_VERSION:
 				write_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
@@ -383,20 +378,20 @@ static enum zcl_status process_read_cmd() {
 
 	}
 
-	write_16(HEX_W, write_crc);
+	write_16_without_crc(write_crc);
 
 	return ZCL_SUCCESS;
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
-	write_16(HEX_CRC_W, attr);
-	write(HEX_CRC_W, STATUS_SUCCESS);
-	write(HEX_CRC_W, type);
+	write_16(attr);
+	serial_send_hex_crc(STATUS_SUCCESS);
+	serial_send_hex_crc(type);
 }
 
 static void write_cmd_status(uint16_t attr, uint8_t status) {
-	write_16(HEX_CRC_W, attr);
-	write(HEX_CRC_W, status);
+	write_16(attr);
+	serial_send_hex_crc(status);
 }
 
 static uint16_t resp_read_len(void) {
@@ -474,41 +469,41 @@ static uint16_t resp_read_len(void) {
 static void write_packet_header(uint16_t length) {
 	serial_send(STX);
 	serial_send(PACKET_BEGIN);
-	write_16(HEX_W, length);
+	write_16_without_crc(length);
 }
 
 static void write_payload_header(void) {
-	write(HEX_CRC_W, ZCL_CHANNEL);
-	write_64(HEX_CRC_W, mac);
+	serial_send_hex_crc(ZCL_CHANNEL);
+	write_64(mac);
 
-	write(HEX_CRC_W, ENDPOINT);
-	write_16(HEX_CRC_W, PROFILE);
-	write_16(HEX_CRC_W, CLUSTERID_ELOVALO);
+	serial_send_hex_crc(ENDPOINT);
+	write_16(PROFILE);
+	write_16(CLUSTERID_ELOVALO);
 }
 
 static void write_zcl_header(uint8_t cmd){
 	// Send out the frame control byte
 	//FIXME: see if needs to be non-zero
-	write(HEX_CRC_W, 0);
+	serial_send_hex_crc(0);
 
-	write(HEX_CRC_W, transaction_seq++);
+	serial_send_hex_crc(transaction_seq++);
 	if (transaction_seq == 0xff) {
 		transaction_seq = 0;
 	}
-	write(HEX_CRC_W, cmd);
+	serial_send_hex_crc(cmd);
 }
 
 static void write_effect_names(void) {
-	write(HEX_CRC_W, '[');
+	serial_send_hex_crc('[');
 	for (uint8_t i = 0; i < effects_len; i++) {
-		write(HEX_CRC_W, '"');
-		write_pgm_string(HEX_CRC_W, &effects[i].name);
-		write(HEX_CRC_W, '"');
+		serial_send_hex_crc('"');
+		write_pgm_string(&effects[i].name);
+		serial_send_hex_crc('"');
 		if (i < effects_len - 1) {
-			write(HEX_CRC_W, ',');
+			serial_send_hex_crc(',');
 		};
 	}
-	write(HEX_CRC_W, ']');
+	serial_send_hex_crc(']');
 }
 
 static enum zcl_status process_write_cmd(void) {
@@ -522,7 +517,7 @@ static enum zcl_status process_write_cmd(void) {
 		if (zcl.packet.cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				if (accept(TYPE_BOOLEAN)) {
+				if (read() == TYPE_BOOLEAN) {
 					uint8_t state = read();
 					if (state == BOOL_TRUE) {
 						set_mode(MODE_PLAYLIST);
@@ -538,7 +533,7 @@ static enum zcl_status process_write_cmd(void) {
 				//TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
-				if (accept(TYPE_IEEE_ADDRESS)) {
+				if (read() == TYPE_IEEE_ADDRESS) {
 					mac = read_64();
 				} else {
 					success = false;
@@ -553,7 +548,7 @@ static enum zcl_status process_write_cmd(void) {
 		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_OPERATING_MODE:
-				if (accept(TYPE_ENUM)) {
+				if (read() == TYPE_ENUM) {
 					uint8_t mode = read();
 					set_mode(mode);
 				} else {
@@ -562,7 +557,7 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				if (accept(TYPE_OCTET_STRING)) {
+				if (read() == TYPE_OCTET_STRING) {
 					/*uint8_t slen = read_hex_crc();
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
@@ -573,7 +568,7 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_PLAYLIST:
-				if (accept(TYPE_UINT8)) {
+				if (read() == TYPE_UINT8) {
 					change_playlist(read());
 				} else {
 					success = false;
@@ -582,7 +577,7 @@ static enum zcl_status process_write_cmd(void) {
 				break;
 			case ATTR_TIMEZONE:
 			{
-				if (accept(TYPE_INT32)) {
+				if (read() == TYPE_INT32) {
 					//TODO
 				} else {
 					success = false;
@@ -591,7 +586,7 @@ static enum zcl_status process_write_cmd(void) {
 				break;
 			}
 			case ATTR_TIME:
-				if (accept(TYPE_UTC_TIME)) {
+				if (read() == TYPE_UTC_TIME) {
 					time_t t = read_32()+ZIGBEE_TIME_OFFSET;
 					stime(&t);
 				} else {
@@ -600,7 +595,7 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_EFFECT:
-				if (accept(TYPE_UINT8)) {
+				if (read() == TYPE_UINT8) {
 					change_current_effect(read());
 				} else {
 					success = false;
@@ -616,7 +611,7 @@ static enum zcl_status process_write_cmd(void) {
 	}
 
 	if (success) {
-		write(HEX_CRC_W, STATUS_SUCCESS);
+		serial_send_hex_crc(STATUS_SUCCESS);
 	}
 	return ZCL_SUCCESS;
 }
@@ -624,8 +619,8 @@ static enum zcl_status process_write_cmd(void) {
 static void write_default_response(uint8_t cmd, uint8_t status) {
 	//write_packet_header();
 	write_zcl_header(2); //FIXME: wtf?
-	write(HEX_CRC_W, cmd);
-	write(HEX_CRC_W, status);
+	serial_send_hex_crc(cmd);
+	serial_send_hex_crc(status);
 }
 
 //------ Serial port functions ---------
@@ -639,43 +634,45 @@ static bool msg_available(void)
 	return msg_i < end;
 }
 
-// Writes
-
-static inline void write(writer_t w, uint8_t data) {
-	w(data);
+// Write functions write hex encoded data to the serial port and update
+// the internal CRC value
+static void write_16(uint16_t data) {
+	serial_send_hex_crc(data & 0x00ff);
+	serial_send_hex_crc(data >> 8);
 }
 
-static void write_16(writer_t w, uint16_t data) {
-	w(data & 0x00ff);
-	w(data >> 8);
+// Same as write_16 but does not update the CRC
+static void write_16_without_crc(uint16_t data) {
+	serial_send_hex(data & 0x00ff);
+	serial_send_hex(data >> 8);
 }
 
-static void write_32(writer_t w, uint32_t data) {
+static void write_32(uint32_t data) {
 	for (uint8_t i = 0; i < 4; i++) {
-		w(data >> (8 * i));
+		serial_send_hex_crc(data >> (8 * i));
 	}
 }
 
-static void write_64(writer_t w, uint64_t data) {
+static void write_64(uint64_t data) {
 	for (uint8_t i = 0; i < 8; i++) {
-		w(data >> (8 * i));
+		serial_send_hex_crc(data >> (8 * i));
 	}
 }
 
-static void write_pgm_string(writer_t w, const char * const* pgm_p) {
+static void write_pgm_string(const char * const* pgm_p) {
 	char *p = (char*)pgm_read_word_near(pgm_p);
 	char c;
 
 	// If is NULL, print is as zero-length string
 	if ( p == NULL) {
-		w(' ');
+		serial_send_hex_crc(' ');
 		return;
 	}
 	
 	// Read byte-by-byte and write, not including NUL byte
 	c = pgm_read_byte_near(p++);
 	while (c != '\0') {
-		w(c);
+		serial_send_hex_crc(c);
 		c = pgm_read_byte_near(p++);
 	}
 }
@@ -708,14 +705,6 @@ static inline void serial_send_hex(uint8_t data) {
 }
 
 // Reads
-
-/**
- * Reads a single byte, compares it to the given parameter
- * and returns if it matches.
- */
-static bool accept(uint8_t val) {
-	return read() == val;
-}
 
 /**
  * Reads and returns single byte from message buffer
