@@ -191,14 +191,15 @@ uint64_t mac = 0x0123456789abcdef;
 
 // ATI
 #define ATI 'A'
-uint8_t ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
+PROGMEM const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 
 void process_serial(void)
 {
 	if (zcl_ati()) {
 		// ATI command response
 		for (uint8_t i = 0; i < sizeof(ati_resp)-1; i++) {
-			serial_send(ati_resp[i]);
+			char c = pgm_get(ati_resp[i],byte);
+			serial_send(c);
 		}
 		// May continue to packet processing
 	}
