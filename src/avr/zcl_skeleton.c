@@ -178,8 +178,6 @@ static void reset_msg_ptr(void);
 uint16_t write_crc = 0xffff;
 void *msg_i; // Packet message read index
 
-// ZCL Header variables
-uint8_t transaction_seq = 0;
 //uint64_t mac = 0xefcdab8967452301;
 uint64_t mac = 0x0123456789abcdef;
 
@@ -480,10 +478,7 @@ static void write_zcl_header(uint8_t cmd){
 	//FIXME: see if needs to be non-zero
 	serial_send_hex_crc(0);
 
-	serial_send_hex_crc(transaction_seq++);
-	if (transaction_seq == 0xff) {
-		transaction_seq = 0;
-	}
+	serial_send_hex_crc(zcl.packet.transaction_id);
 	serial_send_hex_crc(cmd);
 }
 
