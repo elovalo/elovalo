@@ -62,6 +62,7 @@
 #define CMDID_READ_RESPONSE 0x01
 #define CMDID_WRITE 0x02
 #define CMDID_WRITE_RESPONSE 0x04
+#define CMDID_DEFAULT_RESPONSE 0x0b
 
 // Attributes
 // Basic cluster
@@ -264,6 +265,8 @@ static enum zcl_status process_cmd_frame(void) {
 		return process_read_cmd();
 	case CMDID_WRITE:
 		return process_write_cmd();
+	case CMDID_DEFAULT_RESPONSE:
+		return ZCL_SUCCESS;
 	default:
 		return ZCL_BAD_COMMAND;
 	}
