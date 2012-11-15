@@ -132,11 +132,6 @@
 typedef uint8_t (*reader_t)(void);
 typedef void (*writer_t)(uint8_t);
 
-typedef struct {
-	uint8_t low;
-	uint8_t high;
-} hex_value_t;
-
 enum zcl_status {
 	ZCL_SUCCESS,
 	ZCL_BAD_PROFILE,
@@ -176,7 +171,6 @@ static uint16_t read_16(void);
 static uint32_t read_32(void);
 static uint64_t read_64(void);
 
-static hex_value_t itohval(uint8_t);
 static uint8_t itoh(uint8_t i);
 
 static void reset_msg_ptr(void);
@@ -697,11 +691,8 @@ static void reset_write_crc(void) {
  * Hex encodes data and sends it to the serial port
  */
 static inline void serial_send_hex(uint8_t data) {
-	hex_value_t val;
-	val = itohval(data);
-
-	serial_send(val.high);
-	serial_send(val.low);
+	serial_send(itoh(data >> 4));
+	serial_send(itoh(data & 0x0f));
 }
 
 // Reads
@@ -731,16 +722,6 @@ static uint64_t read_64(void) {
 	uint64_t p = *(uint64_t *)msg_i;
 	msg_i += sizeof(uint64_t);
 	return p;
-}
-
-/**
- * Convert an integer to hex characters.
- */
-static hex_value_t itohval(uint8_t i) {
-	hex_value_t val;
-	val.high = itoh(i >> 4);
-	val.low = itoh(i & 0x0f);
-	return val;
 }
 
 /**
