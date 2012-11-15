@@ -62,6 +62,7 @@
 #define CMDID_READ_RESPONSE 0x01
 #define CMDID_WRITE 0x02
 #define CMDID_WRITE_RESPONSE 0x04
+#define CMDID_DEFAULT_RESPONSE 0x0b
 
 // Attributes
 // Basic cluster
@@ -132,11 +133,6 @@
 typedef uint8_t (*reader_t)(void);
 typedef void (*writer_t)(uint8_t);
 
-typedef struct {
-	uint8_t low;
-	uint8_t high;
-} hex_value_t;
-
 enum zcl_status {
 	ZCL_SUCCESS,
 	ZCL_BAD_PROFILE,
@@ -171,12 +167,11 @@ static void serial_send_hex_crc(uint8_t);
 static void reset_write_crc(void);
 static inline void serial_send_hex(uint8_t);
 
-static uint8_t read(void);
-static uint16_t read_16(void);
-static uint32_t read_32(void);
-static uint64_t read_64(void);
+static uint8_t msg_get(void);
+static uint16_t msg_get_16(void);
+static uint32_t msg_get_32(void);
+static uint64_t msg_get_64(void);
 
-static hex_value_t itohval(uint8_t);
 static uint8_t itoh(uint8_t i);
 
 static void reset_msg_ptr(void);
@@ -184,8 +179,6 @@ static void reset_msg_ptr(void);
 uint16_t write_crc = 0xffff;
 void *msg_i; // Packet message read index
 
-// ZCL Header variables
-uint8_t transaction_seq = 0;
 //uint64_t mac = 0xefcdab8967452301;
 uint64_t mac = 0x0123456789abcdef;
 
@@ -273,6 +266,8 @@ static enum zcl_status process_cmd_frame(void) {
 		return process_read_cmd();
 	case CMDID_WRITE:
 		return process_write_cmd();
+	case CMDID_DEFAULT_RESPONSE:
+		return ZCL_SUCCESS;
 	default:
 		return ZCL_BAD_COMMAND;
 	}
@@ -290,7 +285,7 @@ static enum zcl_status process_read_cmd() {
 	reset_msg_ptr();
 	while(msg_available()) {
 		uint16_t attr;
-		attr = read_16();
+		attr = msg_get_16();
 		
 		if (zcl.packet.cluster == CLUSTERID_BASIC) {
 			switch(attr) {
@@ -401,7 +396,7 @@ static uint16_t resp_read_len(void) {
 
 	reset_msg_ptr();
 	while(msg_available()) {
-		attr = read_16();
+		attr = msg_get_16();
 		length += READ_RESP_HEADER_LEN;
 
 		if (zcl.packet.cluster == CLUSTERID_BASIC) {
@@ -487,10 +482,7 @@ static void write_zcl_header(uint8_t cmd){
 	//FIXME: see if needs to be non-zero
 	serial_send_hex_crc(0);
 
-	serial_send_hex_crc(transaction_seq++);
-	if (transaction_seq == 0xff) {
-		transaction_seq = 0;
-	}
+	serial_send_hex_crc(zcl.packet.transaction_id);
 	serial_send_hex_crc(cmd);
 }
 
@@ -513,13 +505,13 @@ static enum zcl_status process_write_cmd(void) {
 
 	reset_msg_ptr();
 	while(msg_available()) {
-		uint16_t attr = read_16();
+		uint16_t attr = msg_get_16();
 
 		if (zcl.packet.cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				if (read() == TYPE_BOOLEAN) {
-					uint8_t state = read();
+				if (msg_get() == TYPE_BOOLEAN) {
+					uint8_t state = msg_get();
 					if (state == BOOL_TRUE) {
 						set_mode(MODE_PLAYLIST);
 					} else if (state == BOOL_FALSE) {
@@ -534,8 +526,8 @@ static enum zcl_status process_write_cmd(void) {
 				//TODO
 				break;
 			case ATTR_IEEE_ADDRESS:
-				if (read() == TYPE_IEEE_ADDRESS) {
-					mac = read_64();
+				if (msg_get() == TYPE_IEEE_ADDRESS) {
+					mac = msg_get_64();
 				} else {
 					success = false;
 					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -549,8 +541,8 @@ static enum zcl_status process_write_cmd(void) {
 		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_OPERATING_MODE:
-				if (read() == TYPE_ENUM) {
-					uint8_t mode = read();
+				if (msg_get() == TYPE_ENUM) {
+					uint8_t mode = msg_get();
 					set_mode(mode);
 				} else {
 					success = false;
@@ -558,7 +550,7 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
-				if (read() == TYPE_OCTET_STRING) {
+				if (msg_get() == TYPE_OCTET_STRING) {
 					/*uint8_t slen = read_hex_crc();
 					for (uint8_t i = 0; i < slen; i++) {
 						effect_text[i] = read_hex_crc(); // TODO
@@ -569,8 +561,8 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_PLAYLIST:
-				if (read() == TYPE_UINT8) {
-					change_playlist(read());
+				if (msg_get() == TYPE_UINT8) {
+					change_playlist(msg_get());
 				} else {
 					success = false;
 					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -578,7 +570,7 @@ static enum zcl_status process_write_cmd(void) {
 				break;
 			case ATTR_TIMEZONE:
 			{
-				if (read() == TYPE_INT32) {
+				if (msg_get() == TYPE_INT32) {
 					//TODO
 				} else {
 					success = false;
@@ -587,8 +579,8 @@ static enum zcl_status process_write_cmd(void) {
 				break;
 			}
 			case ATTR_TIME:
-				if (read() == TYPE_UTC_TIME) {
-					time_t t = read_32()+ZIGBEE_TIME_OFFSET;
+				if (msg_get() == TYPE_UTC_TIME) {
+					time_t t = msg_get_32()+ZIGBEE_TIME_OFFSET;
 					stime(&t);
 				} else {
 					success = false;
@@ -596,8 +588,8 @@ static enum zcl_status process_write_cmd(void) {
 				}
 				break;
 			case ATTR_EFFECT:
-				if (read() == TYPE_UINT8) {
-					change_current_effect(read());
+				if (msg_get() == TYPE_UINT8) {
+					change_current_effect(msg_get());
 				} else {
 					success = false;
 					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -698,11 +690,8 @@ static void reset_write_crc(void) {
  * Hex encodes data and sends it to the serial port
  */
 static inline void serial_send_hex(uint8_t data) {
-	hex_value_t val;
-	val = itohval(data);
-
-	serial_send(val.high);
-	serial_send(val.low);
+	serial_send(itoh(data >> 4));
+	serial_send(itoh(data & 0x0f));
 }
 
 // Reads
@@ -710,38 +699,28 @@ static inline void serial_send_hex(uint8_t data) {
 /**
  * Reads and returns single byte from message buffer
  */
-static uint8_t read(void) {
+static uint8_t msg_get(void) {
 	uint8_t p = *(uint8_t *)msg_i;
 	msg_i += sizeof(uint8_t);
 	return p;
 }
 
-static uint16_t read_16(void) {
+static uint16_t msg_get_16(void) {
 	uint16_t p = *(uint16_t *)msg_i;
 	msg_i += sizeof(uint16_t);
 	return p;
 }
 
-static uint32_t read_32(void) {
+static uint32_t msg_get_32(void) {
 	uint32_t p = *(uint32_t *)msg_i;
 	msg_i += sizeof(uint32_t);
 	return p;
 }
 
-static uint64_t read_64(void) {
+static uint64_t msg_get_64(void) {
 	uint64_t p = *(uint64_t *)msg_i;
 	msg_i += sizeof(uint64_t);
 	return p;
-}
-
-/**
- * Convert an integer to hex characters.
- */
-static hex_value_t itohval(uint8_t i) {
-	hex_value_t val;
-	val.high = itoh(i >> 4);
-	val.low = itoh(i & 0x0f);
-	return val;
 }
 
 /**
