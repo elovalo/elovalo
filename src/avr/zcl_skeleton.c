@@ -177,6 +177,11 @@ static void reset_msg_ptr(void);
 static bool dry_run;
 static uint16_t response_length;
 
+/* Helper for local PROGMEM string writing. sizeof() includes \0 and
+ * ZigBee has no terminator, therefore substracting 1 from length. */
+#define write_local_pgm_str(s) write_local_pgm_str_(s,sizeof(s)-1)
+static void write_local_pgm_str_(const char *s, uint8_t len);
+
 uint16_t write_crc = 0xffff;
 void *msg_i; // Packet message read index
 
@@ -185,7 +190,11 @@ uint64_t mac = 0x0123456789abcdef;
 
 // ATI
 #define ATI 'A'
-PROGMEM const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
+
+// Some version-specific constants
+PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
+PROGMEM static const char sw_resp[] = "0.2012.11.15";
+PROGMEM static const char hw_resp[] = "EV-1-C2";
 
 void process_serial(void)
 {
@@ -370,15 +379,15 @@ static bool process_read_cmd() {
 				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
 				serial_send_hex_crc(current_effect);
 				break;
+			*/
 			case ATTR_HW_VERSION:
 				write_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
-				write_hw_version(); //TODO
+				write_local_pgm_str(hw_resp);
 				break;
 			case ATTR_SW_VERSION:
 				write_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
-				write_sw_version(); //TODO
+				write_local_pgm_str(sw_resp);
 				break;
-			*/
 			default:
 				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
@@ -688,6 +697,15 @@ static uint8_t itoh(uint8_t i) {
 static void reset_msg_ptr(void)
 {
 	msg_i = zcl.packet.msg;
+}
+
+static void write_local_pgm_str_(const char *s, uint8_t len)
+{
+	serial_send_hex_crc(len);
+	for (uint8_t i = 0; i < len; i++) {
+		char c = pgm_get(s[i],byte);
+		serial_send_hex_crc(c);
+	}
 }
 
 #endif //AVR_ZCL
