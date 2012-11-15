@@ -117,10 +117,6 @@
 // Serial port
 #define NOT_HEX 'G'
 
-// Parser states
-#define PARSER_STATE_DEFAULT 0x00
-#define PARSER_STATE_INCORRECT_MAC 0x01
-
 // Read buffer defines
 #define READ_BUF_CAPACITY 32
 #define READ_BUF_OK 0x00
@@ -128,10 +124,6 @@
 
 // ZigBee time starts at Sat Jan 01 00:00:00 UTC 2000
 #define ZIGBEE_TIME_OFFSET 946684800
-
-// Data reading functions
-typedef uint8_t (*reader_t)(void);
-typedef void (*writer_t)(uint8_t);
 
 enum zcl_status {
 	ZCL_SUCCESS,
@@ -153,8 +145,6 @@ static bool process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_cmd_status(uint16_t attr, uint8_t status);
 
-static bool msg_available(void);
-
 static void write_16(uint16_t);
 static void write_16_without_crc(uint16_t);
 static void write_32(uint32_t);
@@ -165,6 +155,7 @@ static void serial_send_hex_crc(uint8_t);
 static void reset_write_crc(void);
 static inline void serial_send_hex(uint8_t);
 
+static bool msg_available(void);
 static uint8_t msg_get(void);
 static uint16_t msg_get_16(void);
 static uint32_t msg_get_32(void);
@@ -568,14 +559,7 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
 
 //------ Serial port functions ---------
 
-/**
- * Returns true if there data left in a packet.
- */
-static bool msg_available(void)
-{
-	void *end = zcl.packet.msg + zcl.packet.length - PACKET_HEADER_LEN;
-	return msg_i < end;
-}
+
 
 // Write functions write hex encoded data to the serial port and update
 // the internal CRC value
@@ -648,7 +632,16 @@ static inline void serial_send_hex(uint8_t data) {
 	serial_send(itoh(data & 0x0f));
 }
 
-// Reads
+// Message reading
+
+/**
+ * Returns true if there data left in a packet.
+ */
+static bool msg_available(void)
+{
+	void *end = zcl.packet.msg + zcl.packet.length - PACKET_HEADER_LEN;
+	return msg_i < end;
+}
 
 /**
  * Reads and returns single byte from message buffer
