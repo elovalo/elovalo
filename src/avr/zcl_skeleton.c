@@ -178,11 +178,8 @@ static void send_local_pgm_str_(const char *s, uint8_t len);
 uint16_t send_crc = 0xffff;
 void *msg_i; // Packet message read index
 
-//uint64_t mac = 0xefcdab8967452301;
+// MAC in original byte order (not reversed like in XML format)
 uint64_t mac = 0x0123456789abcdef;
-
-// ATI
-#define ATI 'A'
 
 // Some version-specific constants
 PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
