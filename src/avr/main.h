@@ -38,3 +38,4 @@ void set_mode(uint8_t m);
 
 // It might be nice to use this for single effect too (set via serial).
 uint8_t active_effect; // Index of the active effect. Used for playlist
+uint8_t active_playlist; // Index of the active playlist

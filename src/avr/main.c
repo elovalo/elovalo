@@ -154,8 +154,7 @@ static void pick_startup_mode(void)
 		init_current_effect();
 		break;
 	case MODE_PLAYLIST:
-		select_playlist_item(playlists[0]);
-		init_current_effect();
+		change_playlist(0);
 		break;
 	default:
 		mode = MODE_IDLE;
@@ -168,9 +167,7 @@ static void pick_startup_mode(void)
 	cube_start(0);
 
 	// Quick fix to start in kiosk mode
-	mode = MODE_PLAYLIST;
-	select_playlist_item(playlists[0]);
-	init_current_effect();
+	change_playlist(0);
 }
 #endif
 
@@ -233,6 +230,8 @@ uint8_t change_current_effect(uint8_t i) {
 
 uint8_t change_playlist(uint8_t i) {
 	if (i >= playlists_len) { return 1; }
+
+	active_playlist = 1;
 
 	// Change mode and run init
 	mode = MODE_PLAYLIST;

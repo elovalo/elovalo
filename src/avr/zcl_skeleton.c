@@ -346,10 +346,12 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
+			*/
 			case ATTR_PLAYLIST:
 				send_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				send_payload(current_playlist);
+				send_payload(active_playlist);
 				break;
+			/*
 			case ATTR_TIMEZONE:
 				send_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
 				write_timezone(); //TODO
