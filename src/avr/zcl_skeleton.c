@@ -29,6 +29,7 @@
 #include "../common/pgmspace.h"
 #include "main.h"
 #include "serial_zcl.h"
+#include "../common/playlists.h"
 
 // Sharing tlc5940 gs_buf_back to conserve memory
 #include "../common/cube.h" 
@@ -371,11 +372,28 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_PLAYLIST_NAMES, TYPE_LONG_OCTET_STRING);
 				write_playlist_names(); //TODO
 				break;
-			case ATTR_PLAYLIST_EFFECTS:
-				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
-				write_playlist_effects(); //TODO
-				break;
 			*/
+			case ATTR_PLAYLIST_EFFECTS:
+			{
+				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
+				 // current playlist index
+				uint8_t pl_i = playlists[active_playlist];
+				// End index to playlist, not included to playlist
+				uint8_t pl_end;
+
+				if (active_playlist == playlists_len - 1) {
+					pl_end = master_playlist_len;
+				} else {
+					pl_end = playlists[active_playlist + 1];
+				}
+
+				send_payload(pl_end - pl_i);
+				for (uint8_t i = pl_i; i < pl_end; i++) {
+					send_payload(master_playlist[i].id);
+				}
+
+				break;
+			}
 			case ATTR_EFFECT:
 				send_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
 				send_payload(active_effect);
