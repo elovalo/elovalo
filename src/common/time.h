@@ -26,3 +26,15 @@
 #else
 #include <time.h>
 #endif
+
+#include <stdint.h>
+
+/**
+ * Gets timezone as second offset.
+ */
+int32_t get_timezone(void);
+
+/**
+ * Set timezone as second offset and writes it to EEPROM.
+ */
+void set_timezone(int32_t tz);

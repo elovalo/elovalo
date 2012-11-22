@@ -22,11 +22,16 @@
 #include "common.h"
 
 #define SECS_IN_DAY ((time_t)60*60*24)
-#define TIMEZONE_SECS (3*60*60)
 
 struct {
 	struct glyph_buf text;
+	int32_t timezone;
 } vars;
+
+void init(void)
+{
+	vars.timezone = get_timezone();
+}
 
 void effect(void)
 {
@@ -34,7 +39,7 @@ void effect(void)
 	const struct glyph **buf = vars.text.buf;
 
 	time_t now = time(NULL);
-	time_t since_midnight = (now+TIMEZONE_SECS) % SECS_IN_DAY;
+	time_t since_midnight = (now+vars.timezone) % SECS_IN_DAY;
 
 	uint8_t secs = since_midnight%60;
 	uint8_t minutes = since_midnight/60%60;

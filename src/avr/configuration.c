@@ -34,6 +34,8 @@ struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 	END_OF_CRONTAB
 };
 
+int32_t EEMEM eeprom_timezone = 0; // UTC by default
+
 void get_crontab_entry(struct event *p,uint8_t i)
 {
 	eeprom_read_block(p,eeprom_crontab+i,sizeof(struct event));
@@ -48,3 +50,16 @@ void set_crontab_entry(struct event *p,uint8_t i)
 {
 	eeprom_update_block(p,eeprom_crontab+i,sizeof(struct event));
 }
+
+int32_t get_timezone(void)
+{
+	int32_t tz;
+	eeprom_read_block(&tz,&eeprom_timezone,sizeof(tz));
+	return tz;
+}
+
+void set_timezone(int32_t tz)
+{
+	eeprom_update_block(&tz,&eeprom_timezone,sizeof(tz));
+}
+

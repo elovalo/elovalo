@@ -16,30 +16,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define CRONTAB_SIZE 10
-
-#include "cron.h"
 
 /**
- * Gets single crontab entry from crontab (stored on EEPROM).
+ * Timezone functions on desktop platform. TODO implement those if
+ * needed. These affect the way clock is shown in effects. Currently
+ * time zone in effect exporting is hard-wired to UTC and can not be
+ * changed.
  */
-void get_crontab_entry(struct event *p, uint8_t i);
+
+#include <stdint.h>
 
 /**
- * Truncates crontab to contain n elements. When n is zero, it
- * effectively clears the crontab.
+ * Gets timezone as second offset.
  */
-void truncate_crontab(uint8_t n);
+int32_t get_timezone(void)
+{
+	return 0; // Hard-wired to UTC
+}
 
 /**
- * Sets crontab entry. If you append to crontab, remember to
- * truncate_crontab() afterwards to ensure there are no "dangling"
- * objects left there. Do not leave gaps to crontab. If you need to
- * clear an element, use kind of EMPTY.
+ * Set timezone as second offset and writes it to EEPROM.
  */
-void set_crontab_entry(struct event *p,uint8_t i);
-
-/*
- * NB! get_timezone() and set_timezone() are defined in porting layer at
- * ../common/time.h
- */
+void set_timezone(int32_t tz)
+{
+	// NOT IMPLEMENTED
+}
