@@ -30,6 +30,7 @@
 #include "main.h"
 #include "serial_zcl.h"
 #include "../common/playlists.h"
+#include "../common/time.h"
 
 // Sharing tlc5940 gs_buf_back to conserve memory
 #include "../common/cube.h" 
@@ -152,6 +153,7 @@ static void send_cmd_status(uint16_t attr, uint8_t status);
 static void send_16(uint16_t);
 static void send_16_without_crc(uint16_t);
 static void send_32(uint32_t);
+static void send_i32(int32_t);
 static void send_64(uint64_t);
 static void send_pgm_string(const char * const* pgm_p);
 
@@ -163,6 +165,7 @@ static bool msg_available(void);
 static uint8_t msg_get(void);
 static uint16_t msg_get_16(void);
 static uint32_t msg_get_32(void);
+static uint32_t msg_get_i32(void);
 static uint64_t msg_get_64(void);
 
 static uint8_t itoh(uint8_t i);
@@ -352,12 +355,10 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
 				send_payload(active_playlist);
 				break;
-			/*
 			case ATTR_TIMEZONE:
 				send_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
-				write_timezone(); //TODO
+				send_i32(get_timezone());
 				break;
-			*/
 			case ATTR_TIME:
 				send_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
 				send_32(time(NULL)-ZIGBEE_TIME_OFFSET);
@@ -386,7 +387,7 @@ static bool process_read_cmd() {
 				} else {
 					pl_end = playlists[active_playlist + 1];
 				}
-
+				//Send string length length
 				send_payload(pl_end - pl_i);
 				for (uint8_t i = pl_i; i < pl_end; i++) {
 					send_payload(master_playlist[i].id);
@@ -540,7 +541,7 @@ static bool process_write_cmd(void) {
 			case ATTR_TIMEZONE:
 			{
 				if (msg_get() == TYPE_INT32) {
-					//TODO
+					set_timezone(msg_get_i32());
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -609,6 +610,12 @@ static void send_16_without_crc(uint16_t data) {
 
 static void send_32(uint32_t data) {
 	for (uint8_t i = 0; i < 4; i++) {
+		send_payload(data >> (8 * i));
+	}
+}
+
+static void send_i32(int32_t data) {
+	for (uint8_t i = 0; i < sizeof(int32_t); i++) {
 		send_payload(data >> (8 * i));
 	}
 }
@@ -696,6 +703,12 @@ static uint16_t msg_get_16(void) {
 static uint32_t msg_get_32(void) {
 	uint32_t p = *(uint32_t *)msg_i;
 	msg_i += sizeof(uint32_t);
+	return p;
+}
+
+static uint32_t msg_get_i32(void) {
+	uint32_t p = *(int32_t *)msg_i;
+	msg_i += sizeof(int32_t);
 	return p;
 }
 
