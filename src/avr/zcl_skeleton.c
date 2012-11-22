@@ -104,7 +104,8 @@
 // Status IDs
 #define STATUS_SUCCESS 0x00
 #define STATUS_FAILURE 0x01
-#define STATUS_UNSUP_CLUSTER_COMMAND 0x80
+#define STATUS_UNSUP_CLUSTER_COMMAND 0x81
+#define STATUS_UNSUP_GENERAL_COMMAND 0x82
 #define STATUS_UNSUPPORTED_ATTRIBUTE 0x86
 #define STATUS_INVALID_VALUE 0x87
 #define STATUS_INVALID_DATA_TYPE 0x8d
@@ -287,9 +288,12 @@ static bool process_cmd_frame(void) {
 	case CMDID_DEFAULT_RESPONSE:
 		return false;
 	default:
-		// Unknown command
-		// TODO generate error msg
-		return false;
+		// FIXME: See if correct way to handle unsupport command type
+		if (!zcl.packet.disable_def_resp) {
+			send_default_response(zcl.packet.cmd_type,
+				STATUS_UNSUP_GENERAL_COMMAND);
+		}
+		return true;
 	}
 }
 
@@ -384,7 +388,11 @@ static bool process_read_cmd() {
 				break;
 			}
 		} else {
-			// TODO generate correct answer 
+			// FIXME: See if correct way to handle incorrect cluster
+			if (!zcl.packet.disable_def_resp) {
+				send_default_response(CMDID_READ,
+					STATUS_UNSUP_CLUSTER_COMMAND);
+			}
 			return false;
 		}
 	}
@@ -538,7 +546,11 @@ static bool process_write_cmd(void) {
 				break;
 			}
 		} else {
-			// TODO proper answer to invalid cluster
+			// FIXME: See if correct way to handle incorrect cluster
+			if (!zcl.packet.disable_def_resp) {
+				send_default_response(CMDID_WRITE,
+					STATUS_UNSUP_CLUSTER_COMMAND);
+			}
 			return false;
 		}
 	}
@@ -551,17 +563,14 @@ static bool process_write_cmd(void) {
 }
 
 static void send_default_response(uint8_t cmd, uint8_t status) {
-	//send_packet_header();
-	send_zcl_header(2); //FIXME: wtf?
+	send_zcl_header(CMDID_DEFAULT_RESPONSE);
 	send_payload(cmd);
 	send_payload(status);
 }
 
 //------ Serial port functions ---------
 
-
-
-// Write functions write hex encoded data to the serial port and update
+// Send functions write hex encoded data to the serial port and update
 // the internal CRC value
 static void send_16(uint16_t data) {
 	send_payload(data & 0x00ff);
