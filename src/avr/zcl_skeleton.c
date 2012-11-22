@@ -357,11 +357,12 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
 				send_32(time(NULL)-ZIGBEE_TIME_OFFSET);
 				break;
-			/*
 			case ATTR_EFFECT_NAMES:
-				send_attr_resp_header(ATTR_EFFECT_NAMES, TYPE_LONG_OCTET_STRING);
+				send_attr_resp_header(ATTR_EFFECT_NAMES,
+					TYPE_LONG_OCTET_STRING);
 				send_effect_names();
 				break;
+			/*
 			case ATTR_PLAYLIST_NAMES:
 				send_attr_resp_header(ATTR_PLAYLIST_NAMES, TYPE_LONG_OCTET_STRING);
 				write_playlist_names(); //TODO
