@@ -151,7 +151,7 @@ static void send_32(uint32_t);
 static void send_64(uint64_t);
 static void write_pgm_string(const char * const* pgm_p);
 
-static void serial_send_hex_crc(uint8_t);
+static void send_payload(uint8_t);
 static void reset_write_crc(void);
 static inline void serial_send_hex(uint8_t);
 
@@ -304,11 +304,11 @@ static bool process_read_cmd() {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
 				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
-				serial_send_hex_crc(get_mode());
+				send_payload(get_mode());
 				break;
 			/*case ATTR_ALARM_MASK:
 				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
-				//serial_send_hex_crc(ALARM_MASK); //TODO
+				//send_payload(ALARM_MASK); //TODO
 				break;*/
 			default:
 				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
@@ -327,11 +327,11 @@ static bool process_read_cmd() {
 				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
 				uint8_t mode = get_mode();
 				if (mode == MODE_SLEEP || mode == MODE_IDLE) {
-					serial_send_hex_crc(0);
+					send_payload(0);
 				} else if (mode == MODE_EFFECT) {
-					serial_send_hex_crc(1);
+					send_payload(1);
 				} else if (mode == MODE_PLAYLIST) {
-					serial_send_hex_crc(2);
+					send_payload(2);
 				}
 				break;
 			}
@@ -342,7 +342,7 @@ static bool process_read_cmd() {
 				break;
 			case ATTR_PLAYLIST:
 				write_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				serial_send_hex_crc(current_playlist);
+				send_payload(current_playlist);
 				break;
 			case ATTR_TIMEZONE:
 				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
@@ -368,7 +368,7 @@ static bool process_read_cmd() {
 				break;
 			case ATTR_EFFECT:
 				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				serial_send_hex_crc(current_effect);
+				send_payload(current_effect);
 				break;
 			*/
 			case ATTR_HW_VERSION:
@@ -393,13 +393,13 @@ static bool process_read_cmd() {
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
 	send_16(attr);
-	serial_send_hex_crc(STATUS_SUCCESS);
-	serial_send_hex_crc(type);
+	send_payload(STATUS_SUCCESS);
+	send_payload(type);
 }
 
 static void write_cmd_status(uint16_t attr, uint8_t status) {
 	send_16(attr);
-	serial_send_hex_crc(status);
+	send_payload(status);
 }
 
 static void write_packet_header(uint16_t length) {
@@ -409,32 +409,32 @@ static void write_packet_header(uint16_t length) {
 }
 
 static void write_zcl_header(uint8_t cmd) {
-	serial_send_hex_crc(ZCL_CHANNEL);
+	send_payload(ZCL_CHANNEL);
 	send_64(mac);
 
-	serial_send_hex_crc(zcl.packet.endpoint);
+	send_payload(zcl.packet.endpoint);
 	send_16(zcl.packet.profile);
 	send_16(zcl.packet.cluster);
 
 	// Send out the frame control byte
 	//FIXME: see if needs to be non-zero
-	serial_send_hex_crc(0);
+	send_payload(0);
 
-	serial_send_hex_crc(zcl.packet.transaction_id);
-	serial_send_hex_crc(cmd);
+	send_payload(zcl.packet.transaction_id);
+	send_payload(cmd);
 }
 
 static void write_effect_names(void) {
-	serial_send_hex_crc('[');
+	send_payload('[');
 	for (uint8_t i = 0; i < effects_len; i++) {
-		serial_send_hex_crc('"');
+		send_payload('"');
 		write_pgm_string(&effects[i].name);
-		serial_send_hex_crc('"');
+		send_payload('"');
 		if (i < effects_len - 1) {
-			serial_send_hex_crc(',');
+			send_payload(',');
 		};
 	}
-	serial_send_hex_crc(']');
+	send_payload(']');
 }
 
 static bool process_write_cmd(void) {
@@ -545,7 +545,7 @@ static bool process_write_cmd(void) {
 
 	// If no error reports has been written
 	if (success) {
-		serial_send_hex_crc(STATUS_SUCCESS);
+		send_payload(STATUS_SUCCESS);
 	}
 	return true;
 }
@@ -553,8 +553,8 @@ static bool process_write_cmd(void) {
 static void write_default_response(uint8_t cmd, uint8_t status) {
 	//write_packet_header();
 	write_zcl_header(2); //FIXME: wtf?
-	serial_send_hex_crc(cmd);
-	serial_send_hex_crc(status);
+	send_payload(cmd);
+	send_payload(status);
 }
 
 //------ Serial port functions ---------
@@ -564,8 +564,8 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
 // Write functions write hex encoded data to the serial port and update
 // the internal CRC value
 static void send_16(uint16_t data) {
-	serial_send_hex_crc(data & 0x00ff);
-	serial_send_hex_crc(data >> 8);
+	send_payload(data & 0x00ff);
+	send_payload(data >> 8);
 }
 
 // Same as send_16 but does not update the CRC
@@ -576,13 +576,13 @@ static void send_16_without_crc(uint16_t data) {
 
 static void send_32(uint32_t data) {
 	for (uint8_t i = 0; i < 4; i++) {
-		serial_send_hex_crc(data >> (8 * i));
+		send_payload(data >> (8 * i));
 	}
 }
 
 static void send_64(uint64_t data) {
 	for (uint8_t i = 0; i < 8; i++) {
-		serial_send_hex_crc(data >> (8 * i));
+		send_payload(data >> (8 * i));
 	}
 }
 
@@ -592,23 +592,25 @@ static void write_pgm_string(const char * const* pgm_p) {
 
 	// If is NULL, print is as zero-length string
 	if ( p == NULL) {
-		serial_send_hex_crc(' ');
+		send_payload(' ');
 		return;
 	}
 	
 	// Read byte-by-byte and write, not including NUL byte
 	c = pgm_read_byte_near(p++);
 	while (c != '\0') {
-		serial_send_hex_crc(c);
+		send_payload(c);
 		c = pgm_read_byte_near(p++);
 	}
 }
 
 
 /**
- * Sends data to the serial port and updates the write CRC value
+ * Hex encodes data and then sends it to the serial port while updating the
+ * write CRC value. When dry_run is true, no data is sent, only added to the
+ * response_length counter.
  */
-static void serial_send_hex_crc(uint8_t data) {
+static void send_payload(uint8_t data) {
 	if (dry_run) {
 		response_length++;
 	} else {
@@ -694,10 +696,10 @@ static void reset_msg_ptr(void)
 
 static void write_local_pgm_str_(const char *s, uint8_t len)
 {
-	serial_send_hex_crc(len);
+	send_payload(len);
 	for (uint8_t i = 0; i < len; i++) {
 		char c = pgm_get(s[i],byte);
-		serial_send_hex_crc(c);
+		send_payload(c);
 	}
 }
 
