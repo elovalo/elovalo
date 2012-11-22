@@ -145,10 +145,10 @@ static bool process_write_cmd(void);
 static void write_default_response(uint8_t cmd, uint8_t status);
 static void write_cmd_status(uint16_t attr, uint8_t status);
 
-static void write_16(uint16_t);
-static void write_16_without_crc(uint16_t);
-static void write_32(uint32_t);
-static void write_64(uint64_t);
+static void send_16(uint16_t);
+static void send_16_without_crc(uint16_t);
+static void send_32(uint32_t);
+static void send_64(uint64_t);
 static void write_pgm_string(const char * const* pgm_p);
 
 static void serial_send_hex_crc(uint8_t);
@@ -256,7 +256,7 @@ static void process_payload(void) {
 	write_packet_header(response_length);
 	reset_write_crc();
 	process_cmd_frame();
-	write_16_without_crc(write_crc);
+	send_16_without_crc(write_crc);
 }
 
 /**
@@ -319,7 +319,7 @@ static bool process_read_cmd() {
 			case ATTR_IEEE_ADDRESS:
 			{
 				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
-				write_64(mac);
+				send_64(mac);
 				break;
 			}
 			case ATTR_OPERATING_MODE:
@@ -351,7 +351,7 @@ static bool process_read_cmd() {
 			*/
 			case ATTR_TIME:
 				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
-				write_32(time(NULL)-ZIGBEE_TIME_OFFSET);
+				send_32(time(NULL)-ZIGBEE_TIME_OFFSET);
 				break;
 			/*
 			case ATTR_EFFECT_NAMES:
@@ -392,29 +392,29 @@ static bool process_read_cmd() {
 }
 
 static void write_attr_resp_header(uint16_t attr, uint8_t type) {
-	write_16(attr);
+	send_16(attr);
 	serial_send_hex_crc(STATUS_SUCCESS);
 	serial_send_hex_crc(type);
 }
 
 static void write_cmd_status(uint16_t attr, uint8_t status) {
-	write_16(attr);
+	send_16(attr);
 	serial_send_hex_crc(status);
 }
 
 static void write_packet_header(uint16_t length) {
 	serial_send(STX);
 	serial_send(PACKET_BEGIN);
-	write_16_without_crc(length);
+	send_16_without_crc(length);
 }
 
 static void write_zcl_header(uint8_t cmd) {
 	serial_send_hex_crc(ZCL_CHANNEL);
-	write_64(mac);
+	send_64(mac);
 
 	serial_send_hex_crc(zcl.packet.endpoint);
-	write_16(zcl.packet.profile);
-	write_16(zcl.packet.cluster);
+	send_16(zcl.packet.profile);
+	send_16(zcl.packet.cluster);
 
 	// Send out the frame control byte
 	//FIXME: see if needs to be non-zero
@@ -563,24 +563,24 @@ static void write_default_response(uint8_t cmd, uint8_t status) {
 
 // Write functions write hex encoded data to the serial port and update
 // the internal CRC value
-static void write_16(uint16_t data) {
+static void send_16(uint16_t data) {
 	serial_send_hex_crc(data & 0x00ff);
 	serial_send_hex_crc(data >> 8);
 }
 
-// Same as write_16 but does not update the CRC
-static void write_16_without_crc(uint16_t data) {
+// Same as send_16 but does not update the CRC
+static void send_16_without_crc(uint16_t data) {
 	serial_send_hex(data & 0x00ff);
 	serial_send_hex(data >> 8);
 }
 
-static void write_32(uint32_t data) {
+static void send_32(uint32_t data) {
 	for (uint8_t i = 0; i < 4; i++) {
 		serial_send_hex_crc(data >> (8 * i));
 	}
 }
 
-static void write_64(uint64_t data) {
+static void send_64(uint64_t data) {
 	for (uint8_t i = 0; i < 8; i++) {
 		serial_send_hex_crc(data >> (8 * i));
 	}
