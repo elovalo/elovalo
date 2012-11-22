@@ -373,22 +373,19 @@ static bool process_read_cmd() {
 			{
 				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
 				 // current playlist index
-				uint8_t pl_i = playlists[active_playlist];
+				uint8_t pl_i = pgm_get(playlists[active_playlist], byte);
 				// End index to playlist, not included to playlist
 				uint8_t pl_end;
 
 				if (active_playlist == playlists_len - 1) {
 					pl_end = master_playlist_len;
 				} else {
-					pl_end = playlists[active_playlist + 1];
+					pl_end = pgm_get(playlists[active_playlist + 1], byte);
 				}
 				//Send string length
 				send_payload(pl_end - pl_i);
-
-				const playlistitem_t *item;
 				for (uint8_t i = pl_i; i < pl_end; i++) {
-					item = master_playlist + i;
-					send_payload(item->id);
+					send_payload(pgm_get(master_playlist[i].id, byte));
 				}
 
 				break;
