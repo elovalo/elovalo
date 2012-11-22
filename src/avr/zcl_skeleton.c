@@ -69,7 +69,7 @@
 #define ATTR_ALARM_MASK 0x0013
 
 // Elovalo cluster
-#define ATTR_IEEE_ADDRESS 0x401
+#define ATTR_IEEE_ADDRESS 0x12
 #define ATTR_OPERATING_MODE 0x01
 #define ATTR_EFFECT_TEXT 0x02
 #define ATTR_PLAYLIST 0x03
@@ -490,6 +490,13 @@ static bool process_write_cmd(void) {
 			case ATTR_ALARM_MASK:
 				//TODO
 				break;
+			default:
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				success = false;
+				break;
+			}
+		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
+			switch(attr) {
 			case ATTR_IEEE_ADDRESS:
 				if (msg_get() == TYPE_IEEE_ADDRESS) {
 					mac = msg_get_64();
@@ -498,13 +505,6 @@ static bool process_write_cmd(void) {
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
-			default:
-				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
-				success = false;
-				break;
-			}
-		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
-			switch(attr) {
 			case ATTR_OPERATING_MODE:
 				if (msg_get() == TYPE_ENUM) {
 					uint8_t mode = msg_get();
