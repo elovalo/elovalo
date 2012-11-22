@@ -387,10 +387,13 @@ static bool process_read_cmd() {
 				} else {
 					pl_end = playlists[active_playlist + 1];
 				}
-				//Send string length length
+				//Send string length
 				send_payload(pl_end - pl_i);
+
+				const playlistitem_t *item;
 				for (uint8_t i = pl_i; i < pl_end; i++) {
-					send_payload(master_playlist[i].id);
+					item = master_playlist + i;
+					send_payload(item->id);
 				}
 
 				break;
