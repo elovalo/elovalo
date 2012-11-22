@@ -68,6 +68,18 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.functions)
 
+def generate_defines(source, target):
+    # FIXME Not effective, reads all contents to get just file names
+    inp = SourceFiles(glob(source))
+
+    with open(target, 'w') as t:
+        t.write('''/* GENERATED FILE! DON'T MODIFY!!!
+ * Effect related constants
+ */
+
+#define EFFECT_JSON_LEN ''')
+        t.write(str(inp.effect_json_len))
+        t.write('\n')
 
 class SourceFiles(object):
 
@@ -99,6 +111,10 @@ class SourceFiles(object):
         return '\n'.join([
                 init(f.name) for f in self._files if getattr(f, k)
             ]) + '\n'
+
+    @property
+    def effect_json_len(self):
+        return 1+sum([f.name.__len__()+3 for f in self._files])
 
     @property
     def function_names(self):

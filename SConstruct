@@ -10,16 +10,23 @@ subprocess.check_call(["scons","-s","-f","preprocessor.sconstruct"])
 
 cwd = GetLaunchDir()
 
+effects_src = os.path.join(cwd, 'src', 'effects') + '/*.c'
+
 effects.generate(
-    os.path.join(cwd, 'src', 'effects') + '/*.c',
+    effects_src,
     os.path.join(cwd, 'src/generated', 'effects.c')
+)
+
+effects.generate_defines(
+    effects_src,
+    os.path.join(cwd, 'src/generated', 'effect_constants.h')
 )
 
 playlists.generate(
     os.path.join(cwd, 'src/playlists/'),
     os.path.join(cwd, 'src/generated', 'playlists.c'),
     os.path.join(cwd, 'src', 'playlists.json'),
-    effects=glob(os.path.join(cwd, 'src', 'effects') + '/*.c')
+    effects=glob(effects_src)
 )
 
 AddOption('--no-avr',
