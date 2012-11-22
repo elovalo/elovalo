@@ -69,7 +69,7 @@
 #define ATTR_ALARM_MASK 0x0013
 
 // Elovalo cluster
-#define ATTR_IEEE_ADDRESS 0x401
+#define ATTR_IEEE_ADDRESS 0x12
 #define ATTR_OPERATING_MODE 0x01
 #define ATTR_EFFECT_TEXT 0x02
 #define ATTR_PLAYLIST 0x03
@@ -178,11 +178,8 @@ static void send_local_pgm_str_(const char *s, uint8_t len);
 uint16_t send_crc = 0xffff;
 void *msg_i; // Packet message read index
 
-//uint64_t mac = 0xefcdab8967452301;
+// MAC in original byte order (not reversed like in XML format)
 uint64_t mac = 0x0123456789abcdef;
-
-// ATI
-#define ATI 'A'
 
 // Some version-specific constants
 PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
@@ -490,6 +487,13 @@ static bool process_write_cmd(void) {
 			case ATTR_ALARM_MASK:
 				//TODO
 				break;
+			default:
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				success = false;
+				break;
+			}
+		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
+			switch(attr) {
 			case ATTR_IEEE_ADDRESS:
 				if (msg_get() == TYPE_IEEE_ADDRESS) {
 					mac = msg_get_64();
@@ -498,13 +502,6 @@ static bool process_write_cmd(void) {
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
-			default:
-				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
-				success = false;
-				break;
-			}
-		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
-			switch(attr) {
 			case ATTR_OPERATING_MODE:
 				if (msg_get() == TYPE_ENUM) {
 					uint8_t mode = msg_get();
