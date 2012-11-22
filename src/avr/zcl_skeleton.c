@@ -123,6 +123,8 @@
 #define READ_BUF_OK 0x00
 #define READ_BUF_OVERFLOW 0x01
 
+#define EFFECT_NAMES_LEN 348
+
 // ZigBee time starts at Sat Jan 01 00:00:00 UTC 2000
 #define ZIGBEE_TIME_OFFSET 946684800
 
@@ -434,6 +436,7 @@ static void send_zcl_header(uint8_t cmd) {
 }
 
 static void send_effect_names(void) {
+	send_16(EFFECT_NAMES_LEN);
 	send_payload('[');
 	for (uint8_t i = 0; i < effects_len; i++) {
 		send_payload('"');
