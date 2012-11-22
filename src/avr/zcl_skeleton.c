@@ -370,11 +370,11 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
 				write_playlist_effects(); //TODO
 				break;
+			*/
 			case ATTR_EFFECT:
 				send_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				send_payload(current_effect);
+				send_payload(active_effect);
 				break;
-			*/
 			case ATTR_HW_VERSION:
 				send_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
 				send_local_pgm_str(hw_resp);

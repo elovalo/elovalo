@@ -40,8 +40,6 @@ uint8_t mode = MODE_IDLE; // Starting with no operation on.
 //const effect_t *effect; // Current effect. Note: points to PGM
 
 uint16_t effect_length; // Length of the current effect. Used for playlist
-// It might be nice to use this for single effect too (set via serial).
-uint8_t active_effect; // Index of the active effect. Used for playlist
 
 // Variables used only in simulation mode
 #ifdef SIMU
@@ -251,6 +249,7 @@ uint8_t get_mode(void) {
 void set_mode(uint8_t m) {
 	mode = m;
 }
+
 //If an interrupt happens and there isn't an interrupt handler, we go here!
 ISR(BADISR_vect)
 {
