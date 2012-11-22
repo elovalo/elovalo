@@ -310,10 +310,10 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
 				send_payload(get_mode());
 				break;
-			/*case ATTR_ALARM_MASK:
+			case ATTR_ALARM_MASK:
 				send_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
-				//send_payload(ALARM_MASK); //TODO
-				break;*/
+				send_payload(0); //FIXME: implement
+				break;
 			default:
 				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
@@ -393,7 +393,7 @@ static bool process_read_cmd() {
 				send_default_response(CMDID_READ,
 					STATUS_UNSUP_CLUSTER_COMMAND);
 			}
-			return false;
+			return true;
 		}
 	}
 	return true;
@@ -551,7 +551,7 @@ static bool process_write_cmd(void) {
 				send_default_response(CMDID_WRITE,
 					STATUS_UNSUP_CLUSTER_COMMAND);
 			}
-			return false;
+			return true;
 		}
 	}
 
