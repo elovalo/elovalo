@@ -127,7 +127,7 @@ There is enough EEPROM but the SRAM usage is quite high because of
 front and back buffers uses 0x300 bytes each. This leaves very scarce
 resources for effect development. To see contents of SRAM, run:
 
-    avr-objdump -t -j .data -j .bss build/release/firmware.elf
+    avr-objdump -t -j .data -j .bss build/zcl/release/firmware.elf
 
 Bytes used in SRAM is printed every time scons is run. SRAM size in
 ATmega328p is 2048 bytes. If SRAM gets too full, there is not enough
