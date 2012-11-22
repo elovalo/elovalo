@@ -231,7 +231,7 @@ uint8_t change_current_effect(uint8_t i) {
 uint8_t change_playlist(uint8_t i) {
 	if (i >= playlists_len) { return 1; }
 
-	active_playlist = 1;
+	active_playlist = i;
 
 	// Change mode and run init
 	mode = MODE_PLAYLIST;

@@ -370,7 +370,7 @@ static bool process_read_cmd() {
 			{
 				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
 				 // current playlist index
-				uint8_t pl_i = pgm_get(playlists[active_playlist], byte);
+				uint8_t pl_begin = pgm_get(playlists[active_playlist], byte);
 				// End index to playlist, not included to playlist
 				uint8_t pl_end;
 
@@ -380,9 +380,10 @@ static bool process_read_cmd() {
 					pl_end = pgm_get(playlists[active_playlist + 1], byte);
 				}
 				//Send string length
-				send_payload(pl_end - pl_i);
-				for (uint8_t i = pl_i; i < pl_end; i++) {
+				send_payload(pl_end - pl_begin);
+				for (uint8_t i = pl_begin; i < pl_end; i++) {
 					send_payload(pgm_get(master_playlist[i].id, byte));
+					//send_payload(i);
 				}
 
 				break;
