@@ -136,23 +136,23 @@ enum zcl_status {
 static void process_payload();
 static bool process_cmd_frame();
 static bool process_read_cmd();
-static void write_attr_resp_header(uint16_t attr, uint8_t type);
+static void send_attr_resp_header(uint16_t attr, uint8_t type);
 
-static void write_packet_header(uint16_t length);
-static void write_zcl_header(uint8_t cmd);
-static void write_effect_names(void);
+static void send_packet_header(uint16_t length);
+static void send_zcl_header(uint8_t cmd);
+static void send_effect_names(void);
 static bool process_write_cmd(void);
-static void write_default_response(uint8_t cmd, uint8_t status);
-static void write_cmd_status(uint16_t attr, uint8_t status);
+static void send_default_response(uint8_t cmd, uint8_t status);
+static void send_cmd_status(uint16_t attr, uint8_t status);
 
 static void send_16(uint16_t);
 static void send_16_without_crc(uint16_t);
 static void send_32(uint32_t);
 static void send_64(uint64_t);
-static void write_pgm_string(const char * const* pgm_p);
+static void send_pgm_string(const char * const* pgm_p);
 
 static void send_payload(uint8_t);
-static void reset_write_crc(void);
+static void reset_send_crc(void);
 static inline void serial_send_hex(uint8_t);
 
 static bool msg_available(void);
@@ -170,10 +170,10 @@ static uint16_t response_length;
 
 /* Helper for local PROGMEM string writing. sizeof() includes \0 and
  * ZigBee has no terminator, therefore substracting 1 from length. */
-#define write_local_pgm_str(s) write_local_pgm_str_(s,sizeof(s)-1)
-static void write_local_pgm_str_(const char *s, uint8_t len);
+#define send_local_pgm_str(s) send_local_pgm_str_(s,sizeof(s)-1)
+static void send_local_pgm_str_(const char *s, uint8_t len);
 
-uint16_t write_crc = 0xffff;
+uint16_t send_crc = 0xffff;
 void *msg_i; // Packet message read index
 
 //uint64_t mac = 0xefcdab8967452301;
@@ -253,10 +253,10 @@ static void process_payload(void) {
 
 	/* Sending actual response */
 	dry_run = false;
-	write_packet_header(response_length);
-	reset_write_crc();
+	send_packet_header(response_length);
+	reset_send_crc();
 	process_cmd_frame();
-	send_16_without_crc(write_crc);
+	send_16_without_crc(send_crc);
 }
 
 /**
@@ -294,7 +294,7 @@ static bool process_cmd_frame(void) {
 }
 
 static bool process_read_cmd() {
-	write_zcl_header(CMDID_READ_RESPONSE);
+	send_zcl_header(CMDID_READ_RESPONSE);
 
 	while(msg_available()) {
 		uint16_t attr;
@@ -303,28 +303,28 @@ static bool process_read_cmd() {
 		if (zcl.packet.cluster == CLUSTERID_BASIC) {
 			switch(attr) {
 			case ATTR_DEVICE_ENABLED:
-				write_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
+				send_attr_resp_header(ATTR_DEVICE_ENABLED, TYPE_BOOLEAN);
 				send_payload(get_mode());
 				break;
 			/*case ATTR_ALARM_MASK:
-				write_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
+				send_attr_resp_header(ATTR_ALARM_MASK, TYPE_BOOLEAN);
 				//send_payload(ALARM_MASK); //TODO
 				break;*/
 			default:
-				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		} else if (zcl.packet.cluster == CLUSTERID_ELOVALO) {
 			switch(attr) {
 			case ATTR_IEEE_ADDRESS:
 			{
-				write_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
+				send_attr_resp_header(ATTR_IEEE_ADDRESS, TYPE_IEEE_ADDRESS);
 				send_64(mac);
 				break;
 			}
 			case ATTR_OPERATING_MODE:
 			{
-				write_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
+				send_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
 				uint8_t mode = get_mode();
 				if (mode == MODE_SLEEP || mode == MODE_IDLE) {
 					send_payload(0);
@@ -337,50 +337,50 @@ static bool process_read_cmd() {
 			}
 			/*
 			case ATTR_EFFECT_TEXT:
-				write_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
+				send_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
 				write_effect_text(); //TODO
 				break;
 			case ATTR_PLAYLIST:
-				write_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
+				send_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
 				send_payload(current_playlist);
 				break;
 			case ATTR_TIMEZONE:
-				write_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
+				send_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
 				write_timezone(); //TODO
 				break;
 			*/
 			case ATTR_TIME:
-				write_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
+				send_attr_resp_header(ATTR_TIME, TYPE_UTC_TIME);
 				send_32(time(NULL)-ZIGBEE_TIME_OFFSET);
 				break;
 			/*
 			case ATTR_EFFECT_NAMES:
-				write_attr_resp_header(ATTR_EFFECT_NAMES, TYPE_LONG_OCTET_STRING);
-				write_effect_names();
+				send_attr_resp_header(ATTR_EFFECT_NAMES, TYPE_LONG_OCTET_STRING);
+				send_effect_names();
 				break;
 			case ATTR_PLAYLIST_NAMES:
-				write_attr_resp_header(ATTR_PLAYLIST_NAMES, TYPE_LONG_OCTET_STRING);
+				send_attr_resp_header(ATTR_PLAYLIST_NAMES, TYPE_LONG_OCTET_STRING);
 				write_playlist_names(); //TODO
 				break;
 			case ATTR_PLAYLIST_EFFECTS:
-				write_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
+				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
 				write_playlist_effects(); //TODO
 				break;
 			case ATTR_EFFECT:
-				write_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
+				send_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
 				send_payload(current_effect);
 				break;
 			*/
 			case ATTR_HW_VERSION:
-				write_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
-				write_local_pgm_str(hw_resp);
+				send_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
+				send_local_pgm_str(hw_resp);
 				break;
 			case ATTR_SW_VERSION:
-				write_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
-				write_local_pgm_str(sw_resp);
+				send_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
+				send_local_pgm_str(sw_resp);
 				break;
 			default:
-				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
 			}
 		} else {
@@ -391,24 +391,24 @@ static bool process_read_cmd() {
 	return true;
 }
 
-static void write_attr_resp_header(uint16_t attr, uint8_t type) {
+static void send_attr_resp_header(uint16_t attr, uint8_t type) {
 	send_16(attr);
 	send_payload(STATUS_SUCCESS);
 	send_payload(type);
 }
 
-static void write_cmd_status(uint16_t attr, uint8_t status) {
+static void send_cmd_status(uint16_t attr, uint8_t status) {
 	send_16(attr);
 	send_payload(status);
 }
 
-static void write_packet_header(uint16_t length) {
+static void send_packet_header(uint16_t length) {
 	serial_send(STX);
 	serial_send(PACKET_BEGIN);
 	send_16_without_crc(length);
 }
 
-static void write_zcl_header(uint8_t cmd) {
+static void send_zcl_header(uint8_t cmd) {
 	send_payload(ZCL_CHANNEL);
 	send_64(mac);
 
@@ -424,11 +424,11 @@ static void write_zcl_header(uint8_t cmd) {
 	send_payload(cmd);
 }
 
-static void write_effect_names(void) {
+static void send_effect_names(void) {
 	send_payload('[');
 	for (uint8_t i = 0; i < effects_len; i++) {
 		send_payload('"');
-		write_pgm_string(&effects[i].name);
+		send_pgm_string(&effects[i].name);
 		send_payload('"');
 		if (i < effects_len - 1) {
 			send_payload(',');
@@ -439,7 +439,7 @@ static void write_effect_names(void) {
 
 static bool process_write_cmd(void) {
 	bool success = true;
-	write_zcl_header(CMDID_WRITE_RESPONSE);
+	send_zcl_header(CMDID_WRITE_RESPONSE);
 
 	while(msg_available()) {
 		uint16_t attr = msg_get_16();
@@ -456,7 +456,7 @@ static bool process_write_cmd(void) {
 					}
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_ALARM_MASK:
@@ -467,11 +467,11 @@ static bool process_write_cmd(void) {
 					mac = msg_get_64();
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
@@ -483,7 +483,7 @@ static bool process_write_cmd(void) {
 					set_mode(mode);
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT_TEXT:
@@ -494,7 +494,7 @@ static bool process_write_cmd(void) {
 					}*/
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_PLAYLIST:
@@ -502,7 +502,7 @@ static bool process_write_cmd(void) {
 					change_playlist(msg_get());
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_TIMEZONE:
@@ -511,7 +511,7 @@ static bool process_write_cmd(void) {
 					//TODO
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			}
@@ -521,7 +521,7 @@ static bool process_write_cmd(void) {
 					stime(&t);
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			case ATTR_EFFECT:
@@ -529,11 +529,11 @@ static bool process_write_cmd(void) {
 					change_current_effect(msg_get());
 				} else {
 					success = false;
-					write_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
+					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
 				break;
 			default:
-				write_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
+				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				success = false;
 				break;
 			}
@@ -550,9 +550,9 @@ static bool process_write_cmd(void) {
 	return true;
 }
 
-static void write_default_response(uint8_t cmd, uint8_t status) {
-	//write_packet_header();
-	write_zcl_header(2); //FIXME: wtf?
+static void send_default_response(uint8_t cmd, uint8_t status) {
+	//send_packet_header();
+	send_zcl_header(2); //FIXME: wtf?
 	send_payload(cmd);
 	send_payload(status);
 }
@@ -586,7 +586,7 @@ static void send_64(uint64_t data) {
 	}
 }
 
-static void write_pgm_string(const char * const* pgm_p) {
+static void send_pgm_string(const char * const* pgm_p) {
 	char *p = (char*)pgm_read_word_near(pgm_p);
 	char c;
 
@@ -607,23 +607,23 @@ static void write_pgm_string(const char * const* pgm_p) {
 
 /**
  * Hex encodes data and then sends it to the serial port while updating the
- * write CRC value. When dry_run is true, no data is sent, only added to the
+ * send_crc value. When dry_run is true, no data is sent, only added to the
  * response_length counter.
  */
 static void send_payload(uint8_t data) {
 	if (dry_run) {
 		response_length++;
 	} else {
-		write_crc = _crc_xmodem_update(write_crc, data);
+		send_crc = _crc_xmodem_update(send_crc, data);
 		serial_send_hex(data);
 	}
 }
 
 /**
- * Resets the internally used write CRC value
+ * Resets the internally used send CRC value
  */
-static void reset_write_crc(void) {
-	write_crc = 0xffff;
+static void reset_send_crc(void) {
+	send_crc = 0xffff;
 }
 
 /**
@@ -694,7 +694,7 @@ static void reset_msg_ptr(void)
 	msg_i = zcl.packet.msg;
 }
 
-static void write_local_pgm_str_(const char *s, uint8_t len)
+static void send_local_pgm_str_(const char *s, uint8_t len)
 {
 	send_payload(len);
 	for (uint8_t i = 0; i < len; i++) {
