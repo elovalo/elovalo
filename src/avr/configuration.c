@@ -27,14 +27,12 @@
 
 #define TIME(h,m) ((h)*60+(m))
 
-/* Initial contents of EEPROM after programming. In future this may be
- * empty but currently it holds schedule for daily powersave from
- * 02:00–19:00. */
+/* Initial contents of EEPROM after programming: empty */
 struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 	END_OF_CRONTAB
 };
 
-int32_t EEMEM eeprom_timezone = 0; // UTC by default
+uint32_t EEMEM eeprom_timezone = 0; // UTC by default
 
 void get_crontab_entry(struct event *p,uint8_t i)
 {
@@ -53,13 +51,11 @@ void set_crontab_entry(struct event *p,uint8_t i)
 
 int32_t get_timezone(void)
 {
-	int32_t tz;
-	eeprom_read_block(&tz,&eeprom_timezone,sizeof(tz));
-	return tz;
+	return eeprom_read_dword(&eeprom_timezone);
 }
 
 void set_timezone(int32_t tz)
 {
-	eeprom_update_block(&tz,&eeprom_timezone,sizeof(tz));
+	eeprom_update_dword(&eeprom_timezone,tz);
 }
 
