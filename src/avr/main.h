@@ -33,6 +33,9 @@ void init_current_effect(void);
 uint8_t change_current_effect(uint8_t i);
 uint8_t change_playlist(uint8_t i);
 
+void use_stored_effect(void);
+void use_stored_playlist(void);
+
 uint8_t get_mode(void);
 void set_mode(uint8_t m);
 

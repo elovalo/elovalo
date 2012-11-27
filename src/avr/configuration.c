@@ -33,6 +33,9 @@ struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 };
 
 uint32_t EEMEM eeprom_timezone = 0; // UTC by default
+uint8_t EEMEM eeprom_effect = 0;
+uint8_t EEMEM eeprom_playlist = 0;
+uint8_t EEMEM eeprom_mode = 0;
 
 void get_crontab_entry(struct event *p,uint8_t i)
 {
@@ -59,3 +62,32 @@ void set_timezone(int32_t tz)
 	eeprom_update_dword(&eeprom_timezone,tz);
 }
 
+uint8_t read_effect(void)
+{
+	return eeprom_read_byte(&eeprom_effect);
+}
+
+void store_effect(uint8_t e)
+{
+	eeprom_update_byte(&eeprom_effect,e);
+}
+
+uint8_t read_playlist(void)
+{
+	return eeprom_read_byte(&eeprom_playlist);
+}
+
+void store_playlist(uint8_t p)
+{
+	eeprom_update_byte(&eeprom_playlist,p);
+}
+
+uint8_t read_mode(void)
+{
+	return eeprom_read_byte(&eeprom_mode);
+}
+
+void store_mode(uint8_t m)
+{
+	eeprom_update_byte(&eeprom_mode,m);
+}

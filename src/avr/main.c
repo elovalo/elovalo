@@ -47,6 +47,11 @@ uint8_t simulation_mode __attribute__ ((section (".noinit")));
 uint8_t simulation_effect __attribute__ ((section (".noinit")));
 #endif
 
+struct {
+	bool playlist:1;
+	bool effect:1;
+} dirty = {false, false};
+
 // Private functions
 static void init_playlist(void);
 static void next_effect();
@@ -228,6 +233,36 @@ uint8_t change_current_effect(uint8_t i) {
 	return 0;
 }
 
+void use_stored_effect(void)
+{
+	if (!dirty.effect) return;
+	dirty.effect = false;
+
+	uint8_t new_effect = read_effect();
+	// Avoid dangling pointers and extra initialization
+      	if (new_effect >= effects_len) new_effect = 0;
+	if (effects+new_effect == effect) return;
+
+	effect = effects + new_effect;
+	init_current_effect();
+}
+
+void use_stored_playlist(void)
+{
+	if (!dirty.playlist) return;
+	dirty.playlist = false;
+
+	uint8_t new_playlist = read_playlist();
+	// Avoid dangling pointers and extra initialization
+	if (new_playlist >= playlists_len) new_playlist = 0;
+	if (active_playlist == new_playlist) return;
+
+	// Activate
+	active_playlist = new_playlist;
+	select_playlist_item(playlists[new_playlist]);
+	init_current_effect();
+}
+
 uint8_t change_playlist(uint8_t i) {
 	if (i >= playlists_len) { return 1; }
 
@@ -246,7 +281,13 @@ uint8_t get_mode(void) {
 }
 
 void set_mode(uint8_t m) {
+	if (mode == m) return;
+	store_mode(m);
 	mode = m;
+
+	// Cleaning some old info
+	if (mode == MODE_EFFECT) dirty.effect = true;
+	else if (mode == MODE_PLAYLIST) dirty.playlist = true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

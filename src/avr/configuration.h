@@ -43,3 +43,34 @@ void set_crontab_entry(struct event *p,uint8_t i);
  * NB! get_timezone() and set_timezone() are defined in porting layer at
  * ../common/time.h
  */
+
+/**
+ * Read effect variable from persistent storage. NB: This is different than current effect.
+ */
+uint8_t read_effect(void);
+
+/**
+ * Stores effect name used after switching to single effect mode
+ */
+void store_effect(uint8_t e);
+
+/**
+ * Read playlist variable from persistent storage. This should be read
+ * at boot time only.
+ */
+uint8_t read_playlist(void);
+
+/**
+ * Store playlist name to persistent storage.
+ */
+void store_playlist(uint8_t e);
+
+/**
+ * Read operating mode persistent storage. This should be read at boot time only.
+ */
+uint8_t read_mode(void);
+
+/**
+ * Store operating mode to persistent storage
+ */
+void store_mode(uint8_t m);

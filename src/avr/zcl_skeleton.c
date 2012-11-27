@@ -26,6 +26,7 @@
 
 #include "serial.h"
 #include "clock.h"
+#include "configuration.h"
 #include "../common/pgmspace.h"
 #include "main.h"
 #include "serial_zcl.h"
@@ -327,14 +328,7 @@ static bool process_read_cmd() {
 			case ATTR_OPERATING_MODE:
 			{
 				send_attr_resp_header(ATTR_OPERATING_MODE, TYPE_ENUM);
-				uint8_t mode = get_mode();
-				if (mode == MODE_SLEEP || mode == MODE_IDLE) {
-					send_payload(0);
-				} else if (mode == MODE_EFFECT) {
-					send_payload(1);
-				} else if (mode == MODE_PLAYLIST) {
-					send_payload(2);
-				}
+				send_payload(get_mode());
 				break;
 			}
 			/*
@@ -345,7 +339,7 @@ static bool process_read_cmd() {
 			*/
 			case ATTR_PLAYLIST:
 				send_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
-				send_payload(active_playlist);
+				send_payload(read_playlist());
 				break;
 			case ATTR_TIMEZONE:
 				send_attr_resp_header(ATTR_TIMEZONE, TYPE_INT32);
@@ -390,7 +384,7 @@ static bool process_read_cmd() {
 			}
 			case ATTR_EFFECT:
 				send_attr_resp_header(ATTR_EFFECT, TYPE_UINT8);
-				send_payload(active_effect);
+				send_payload(read_effect());
 				break;
 			case ATTR_HW_VERSION:
 				send_attr_resp_header(ATTR_HW_VERSION, TYPE_OCTET_STRING);
@@ -525,7 +519,7 @@ static bool process_write_cmd(void) {
 				break;
 			case ATTR_PLAYLIST:
 				if (msg_get() == TYPE_UINT8) {
-					change_playlist(msg_get());
+					store_playlist(msg_get());
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -552,7 +546,7 @@ static bool process_write_cmd(void) {
 				break;
 			case ATTR_EFFECT:
 				if (msg_get() == TYPE_UINT8) {
-					change_current_effect(msg_get());
+					store_effect(msg_get());
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -577,6 +571,13 @@ static bool process_write_cmd(void) {
 	if (success) {
 		send_payload(STATUS_SUCCESS);
 	}
+
+	// Ensure internal state is correct
+	if (!dry_run) {
+		use_stored_playlist();
+		use_stored_effect();
+	}
+
 	return true;
 }
 
