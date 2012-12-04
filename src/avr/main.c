@@ -48,9 +48,10 @@ uint8_t simulation_effect __attribute__ ((section (".noinit")));
 #endif
 
 struct {
+	bool mode:1;
 	bool playlist:1;
 	bool effect:1;
-} modified = {true,true};
+} modified = {true,true,true};
 
 // Private functions
 static void init_playlist(void);
@@ -251,7 +252,7 @@ uint8_t change_current_effect(uint8_t i) {
 void use_stored_effect(void)
 {
 	if (mode != MODE_EFFECT) return;
-	if (!modified.effect) return;
+	if (!(modified.effect || modified.mode)) return;
 
 	uint8_t new_effect = read_effect();
 	// Avoid dangling pointers and extra initialization
@@ -265,7 +266,7 @@ void use_stored_effect(void)
 void use_stored_playlist(void)
 {
 	if (mode != MODE_PLAYLIST) return;
-	if (!modified.playlist) return;
+	if (!(modified.playlist || modified.mode)) return;
 
 	uint8_t new_playlist = read_playlist();
 	// Avoid dangling pointers and extra initialization
@@ -299,6 +300,7 @@ void set_mode(uint8_t m) {
 	if (mode == m) return;
 	store_mode(m);
 	mode = m;
+	modified.mode = true;
 
 	// FIXME sleep mode check
 }
@@ -307,6 +309,7 @@ void reset_modified_state(void)
 {
 	modified.effect = false;
 	modified.playlist = false;
+	modified.mode = false;
 }
 
 void mark_playlist_modified(void) {
