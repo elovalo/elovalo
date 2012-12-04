@@ -38,6 +38,11 @@ void use_stored_playlist(void);
 uint8_t get_mode(void);
 void set_mode(uint8_t m);
 
+// Some functions to alter AVR_ZCL states
+void reset_modified_state(void);
+void mark_playlist_modified(void);
+void mark_effect_modified(void);
+
 // It might be nice to use this for single effect too (set via serial).
 uint8_t active_effect; // Index of the active effect. Used for playlist
 uint8_t active_playlist; // Index of the active playlist

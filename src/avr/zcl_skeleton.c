@@ -351,7 +351,7 @@ static bool process_read_cmd() {
 				break;
 			case ATTR_EFFECT_NAMES:
 				send_attr_resp_header(ATTR_EFFECT_NAMES,
-					TYPE_LONG_OCTET_STRING);
+						      TYPE_LONG_OCTET_STRING);
 				send_effect_names();
 				break;
 			/*
@@ -459,6 +459,7 @@ static void send_effect_names(void) {
 
 static bool process_write_cmd(void) {
 	bool success = true;
+	reset_modified_state();
 	send_zcl_header(CMDID_WRITE_RESPONSE);
 
 	while(msg_available()) {

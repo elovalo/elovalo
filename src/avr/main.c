@@ -50,7 +50,7 @@ uint8_t simulation_effect __attribute__ ((section (".noinit")));
 struct {
 	bool playlist:1;
 	bool effect:1;
-} dirty = {false, false};
+} modified = {true,true};
 
 // Private functions
 static void init_playlist(void);
@@ -169,24 +169,15 @@ static void pick_startup_mode(void)
 static void pick_startup_mode(void)
 {
 	uint8_t start_mode = read_mode();
-	//uint8_t start_mode = MODE_EFFECT;
-	dirty.playlist = true;
-	dirty.effect = true;
-	
-	switch (mode) {
-	case MODE_EFFECT:
-		cube_start(0); // Start ISRs etc.
-		use_stored_effect();
-		break;
-	case MODE_PLAYLIST:
-		cube_start(0); // Start ISRs etc.
-		use_stored_playlist();
-		break;
+
+	if (start_mode != MODE_SLEEP) {
+		cube_start(0);
+		// cube_start() does implicit modification to 'mode'.
 	}
 
-	/* mode must be set after cube_start() because that function
-	 * performs implicit mode change. */
 	mode = start_mode;
+	use_stored_effect();
+	use_stored_playlist();	
 }
 #elif defined AVR_ELO
 static void pick_startup_mode(void)
@@ -259,8 +250,8 @@ uint8_t change_current_effect(uint8_t i) {
 
 void use_stored_effect(void)
 {
-	if (!dirty.effect) return;
-	dirty.effect = false;
+	if (mode != MODE_EFFECT) return;
+	if (!modified.effect) return;
 
 	uint8_t new_effect = read_effect();
 	// Avoid dangling pointers and extra initialization
@@ -273,8 +264,8 @@ void use_stored_effect(void)
 
 void use_stored_playlist(void)
 {
-	if (!dirty.playlist) return;
-	dirty.playlist = false;
+	if (mode != MODE_PLAYLIST) return;
+	if (!modified.playlist) return;
 
 	uint8_t new_playlist = read_playlist();
 	// Avoid dangling pointers and extra initialization
@@ -309,9 +300,21 @@ void set_mode(uint8_t m) {
 	store_mode(m);
 	mode = m;
 
-	// Cleaning some old info
-	if (mode == MODE_EFFECT) dirty.effect = true;
-	else if (mode == MODE_PLAYLIST) dirty.playlist = true;
+	// FIXME sleep mode check
+}
+
+void reset_modified_state(void)
+{
+	modified.effect = false;
+	modified.playlist = false;
+}
+
+void mark_playlist_modified(void) {
+	modified.playlist = true;
+}
+
+void mark_effect_modified(void) {
+	modified.effect = true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

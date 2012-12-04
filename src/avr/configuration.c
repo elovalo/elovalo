@@ -18,6 +18,7 @@
  */
 
 #include <avr/eeprom.h>
+#include "main.h"
 #include "cron.h"
 #include "configuration.h"
 #include "powersave.h"
@@ -70,6 +71,7 @@ uint8_t read_effect(void)
 void store_effect(uint8_t e)
 {
 	eeprom_update_byte(&eeprom_effect,e);
+	mark_effect_modified();
 }
 
 uint8_t read_playlist(void)
@@ -80,6 +82,7 @@ uint8_t read_playlist(void)
 void store_playlist(uint8_t p)
 {
 	eeprom_update_byte(&eeprom_playlist,p);
+	mark_playlist_modified();
 }
 
 uint8_t read_mode(void)
