@@ -171,6 +171,8 @@ static void reset_msg_ptr(void);
 static bool dry_run;
 static uint16_t response_length;
 
+#define WET if (!dry_run)
+
 /* Helper for local PROGMEM string writing. sizeof() includes \0 and
  * ZigBee has no terminator, therefore substracting 1 from length. */
 #define send_local_pgm_str(s) send_local_pgm_str_(s,sizeof(s)-1)
@@ -471,9 +473,9 @@ static bool process_write_cmd(void) {
 				if (msg_get() == TYPE_BOOLEAN) {
 					uint8_t state = msg_get();
 					if (state == BOOL_TRUE) {
-						set_mode(MODE_PLAYLIST);
+						WET set_mode(MODE_PLAYLIST);
 					} else if (state == BOOL_FALSE) {
-						set_mode(MODE_IDLE);
+						WET set_mode(MODE_IDLE);
 					}
 				} else {
 					success = false;
@@ -492,7 +494,9 @@ static bool process_write_cmd(void) {
 			switch(attr) {
 			case ATTR_IEEE_ADDRESS:
 				if (msg_get() == TYPE_IEEE_ADDRESS) {
-					mac = msg_get_64();
+					// TODO write to EEPROM
+					uint64_t x = msg_get_64();
+					WET mac = x;
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -501,7 +505,7 @@ static bool process_write_cmd(void) {
 			case ATTR_OPERATING_MODE:
 				if (msg_get() == TYPE_ENUM) {
 					uint8_t mode = msg_get();
-					set_mode(mode);
+					WET set_mode(mode);
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -520,7 +524,8 @@ static bool process_write_cmd(void) {
 				break;
 			case ATTR_PLAYLIST:
 				if (msg_get() == TYPE_UINT8) {
-					store_playlist(msg_get());
+					uint8_t x = msg_get();
+					WET store_playlist(x);
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -529,7 +534,8 @@ static bool process_write_cmd(void) {
 			case ATTR_TIMEZONE:
 			{
 				if (msg_get() == TYPE_INT32) {
-					set_timezone(msg_get_i32());
+					int32_t x = msg_get_i32();
+					WET set_timezone(x);
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -539,7 +545,7 @@ static bool process_write_cmd(void) {
 			case ATTR_TIME:
 				if (msg_get() == TYPE_UTC_TIME) {
 					time_t t = msg_get_32()+ZIGBEE_TIME_OFFSET;
-					stime(&t);
+					WET stime(&t);
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
@@ -547,7 +553,8 @@ static bool process_write_cmd(void) {
 				break;
 			case ATTR_EFFECT:
 				if (msg_get() == TYPE_UINT8) {
-					store_effect(msg_get());
+					uint8_t x = msg_get();
+					WET store_effect(x);
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
