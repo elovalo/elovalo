@@ -1,0 +1,21 @@
+testattu:
+
+- aika
+- aikavyöhyke
+- operating moden kirjoitus ja luku
+- efektin kirjoitus
+- operating mode vaihtuu oikein
+- WET-makro paikkoihin, jotka ajetaan vain kun ei dry run
+- bootin aikainen moodin ja efektin palauttaminen
+- sammutettu-moodi toimii oikein
+
+rikkinäinen:
+
+- basic clusteriin vastaukset
+- hyytyminen, ei vastaa oikein
+- kellonaika (clock-efekti)
+
+aloittamatta:
+
+- MAC-osoitteen tallennus EEPROMiin
+- tekstin kirjoittaminen
