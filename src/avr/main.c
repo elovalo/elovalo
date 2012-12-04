@@ -293,13 +293,18 @@ uint8_t get_mode(void) {
 	return mode;
 }
 
-void set_mode(uint8_t m) {
-	if (mode == m) return;
-	store_mode(m);
-	mode = m;
+void set_mode(uint8_t new_mode) {
+	if (mode == new_mode) return;
+	store_mode(new_mode);
 	modified.mode = true;
 
-	// FIXME sleep mode check
+	if (mode == MODE_SLEEP) {
+		cube_start(0);
+	} else if (new_mode == MODE_SLEEP) {
+		cube_shutdown(0);
+	}
+
+	mode = new_mode;
 }
 
 void reset_modified_state(void)
