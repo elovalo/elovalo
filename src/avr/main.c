@@ -37,7 +37,7 @@
 #include "../common/playlists.h"
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
-//const effect_t *effect; // Current effect. Note: points to PGM
+const effect_t *effect; // Current effect. Note: points to PGM
 
 uint16_t effect_length; // Length of the current effect. Used for playlist
 
@@ -146,7 +146,7 @@ int main() {
 	return 0;
 }
 
-#ifdef SIMU
+#if defined SIMU
 static void pick_startup_mode(void)
 {
 	// Start normally
@@ -165,8 +165,30 @@ static void pick_startup_mode(void)
 		mode = MODE_IDLE;
 	}
 }
-#else
+#elif defined AVR_ZCL
+static void pick_startup_mode(void)
+{
+	uint8_t start_mode = read_mode();
+	//uint8_t start_mode = MODE_EFFECT;
+	dirty.playlist = true;
+	dirty.effect = true;
+	
+	switch (mode) {
+	case MODE_EFFECT:
+		cube_start(0); // Start ISRs etc.
+		use_stored_effect();
+		break;
+	case MODE_PLAYLIST:
+		cube_start(0); // Start ISRs etc.
+		use_stored_playlist();
+		break;
+	}
 
+	/* mode must be set after cube_start() because that function
+	 * performs implicit mode change. */
+	mode = start_mode;
+}
+#elif defined AVR_ELO
 static void pick_startup_mode(void)
 {
 	cube_start(0);
@@ -174,6 +196,8 @@ static void pick_startup_mode(void)
 	// Quick fix to start in kiosk mode
 	change_playlist(0);
 }
+#else
+#error Unknown variant
 #endif
 
 static void init_playlist(void) {

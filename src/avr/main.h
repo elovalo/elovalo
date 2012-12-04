@@ -25,7 +25,6 @@
 #define MODE_PLAYLIST       0x02 // Playlist
 #define MODE_SLEEP          0x03 // Same as idle, but cube must be started first
 
-const effect_t *effect; // Current effect. Note: points to PGM
 extern uint8_t mode; // If you need to change the running effeet
 
 void select_playlist_item(uint8_t index);
