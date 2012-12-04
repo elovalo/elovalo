@@ -13,9 +13,17 @@ rikkinäinen:
 
 - basic clusteriin vastaukset
 - hyytyminen, ei vastaa oikein
-- kellonaika (clock-efekti)
+- kellonaika ei vastaa raudan kelloa clock-efektissä
+- current playlist effect ei tule oikein
+- dokumentaatio ei vastaa palvelinsoftan toimintaa (Teemu)
 
 aloittamatta:
 
 - MAC-osoitteen tallennus EEPROMiin
 - tekstin kirjoittaminen
+- tekstin lukeminen
+- playlistien nimet
+
+ei-kriittisiä
+
+- kellonaikaraportin vastaanotto FCG:ltä
