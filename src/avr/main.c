@@ -40,6 +40,7 @@ uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
 uint16_t effect_length; // Length of the current effect. Used for playlist
+static uint16_t next_draw_at = 0; // Used for FPS limiting
 
 // Variables used only in simulation mode
 #ifdef SIMU
@@ -82,8 +83,6 @@ int main() {
 	// Select correct startup mode
 	pick_startup_mode();
 
-	uint16_t next_draw_at = 0;
-
 	while(1) {
 		/* Serial processing is implementation specific and defined in
 		 * serial_common.c */
@@ -101,7 +100,6 @@ int main() {
 			if (ticks > effect_length) {
 				next_effect();
 				init_current_effect();
-				next_draw_at = 0;
 			}
 
 			// no need to break!
@@ -178,7 +176,7 @@ static void pick_startup_mode(void)
 
 	mode = start_mode;
 	use_stored_effect();
-	use_stored_playlist();	
+	use_stored_playlist();
 }
 #elif defined AVR_ELO
 static void pick_startup_mode(void)
@@ -232,8 +230,9 @@ void init_current_effect(void) {
 		gs_buf_back = gs_buf_front;
 	}
 	
-	// Restart tick counter
+	// Restart tick counter and FPS limiter
 	reset_time();
+	next_draw_at = 0;
 }
 
 uint8_t change_current_effect(uint8_t i) {
