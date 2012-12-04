@@ -36,7 +36,7 @@ struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
 uint32_t EEMEM eeprom_timezone = 0; // UTC by default
 uint8_t EEMEM eeprom_effect = 0;
 uint8_t EEMEM eeprom_playlist = 0;
-uint8_t EEMEM eeprom_mode = 0;
+uint8_t EEMEM eeprom_mode = MODE_SLEEP;
 
 void get_crontab_entry(struct event *p,uint8_t i)
 {
