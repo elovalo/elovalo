@@ -256,7 +256,6 @@ void use_stored_effect(void)
 	uint8_t new_effect = read_effect();
 	// Avoid dangling pointers and extra initialization
       	if (new_effect >= effects_len) new_effect = 0;
-	if (effects+new_effect == effect) return;
 
 	effect = effects + new_effect;
 	init_current_effect();
@@ -270,7 +269,6 @@ void use_stored_playlist(void)
 	uint8_t new_playlist = read_playlist();
 	// Avoid dangling pointers and extra initialization
 	if (new_playlist >= playlists_len) new_playlist = 0;
-	if (active_playlist == new_playlist) return;
 
 	// Activate
 	active_playlist = new_playlist;
