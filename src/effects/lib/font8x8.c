@@ -22,6 +22,7 @@
 #include "font8x8_generated.h"
 
 #define BIT_NOT_SET(x,y) (!((x) & (1 << (y))))
+static uint8_t utf8_len(const char x);
 
 const struct glyph *get_glyph_utf8(const char *p, uint8_t char_len)
 {
@@ -53,25 +54,10 @@ bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph
 		if (dest_p >= dest->buf + dest->len)
 			return false;
 
-		char x = *src;
-		uint8_t bytes;
-		
-		if (BIT_NOT_SET(x,7))
-			bytes = 1;
-		else if (BIT_NOT_SET(x,6))
-			return false; // UTF-8 decoding error
-		else if (BIT_NOT_SET(x,5))
-			bytes = 2;
-		else if (BIT_NOT_SET(x,4))
-			bytes = 3;
-		else if (BIT_NOT_SET(x,3))
-			bytes = 4;
-		else if (BIT_NOT_SET(x,2))
-			bytes = 5;
-		else if (BIT_NOT_SET(x,1))
-			bytes = 6;
-		else
-			return false; // Reserved
+		uint8_t bytes = utf8_len(*src);
+
+		if (bytes == 0)
+			return false; // Decoding error
 
 		if (src+bytes > end)
 			return false; // End was malformedly truncated
@@ -86,4 +72,16 @@ bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph
 	// Update array data length
 	dest->len = dest_p - dest->buf;
 	return true;
+}
+
+static uint8_t utf8_len(const char x)
+{
+	if (BIT_NOT_SET(x,7)) return 1;
+	if (BIT_NOT_SET(x,6)) return 0; // UTF-8 decoding error
+	if (BIT_NOT_SET(x,5)) return 2;
+	if (BIT_NOT_SET(x,4)) return 3;
+	if (BIT_NOT_SET(x,3)) return 4;
+	if (BIT_NOT_SET(x,2)) return 5;
+	if (BIT_NOT_SET(x,1)) return 6;
+	return 0; // Reserved
 }
