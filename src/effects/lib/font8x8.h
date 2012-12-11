@@ -51,4 +51,9 @@ const struct glyph *get_glyph_ascii(const char c);
  */
 bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest);
 
+/**
+ * Convert given UTF-8 string to glyph array and stores it to EEPROM.
+ */
+bool utf8_string_to_eeprom(const char *src, const uint16_t src_len);
+
 #endif /* FONT8x8_H_ */

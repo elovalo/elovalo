@@ -21,6 +21,7 @@
 #include "../../common/pgmspace.h"
 #include "font8x8_generated.h"
 
+#define EEPROM_TEXT_MAX_LEN 100
 #define BIT_NOT_SET(x,y) (!((x) & (1 << (y))))
 static uint8_t utf8_len(const char x);
 
@@ -85,3 +86,43 @@ static uint8_t utf8_len(const char x)
 	if (BIT_NOT_SET(x,1)) return 6;
 	return 0; // Reserved
 }
+
+#ifdef AVR
+// Not very clean but refactored later
+
+#include <avr/eeprom.h>
+
+const struct glyph* eeprom_text_buf[EEPROM_TEXT_MAX_LEN] EEMEM;
+uint16_t EEMEM eeprom_text_len = 0;
+
+bool utf8_string_to_eeprom(const char *src, const uint16_t src_len)
+{
+	const char *end = src+src_len;
+	const struct glyph **dest_p = eeprom_text_buf;
+
+	while (src < end) {
+		// Is there enough room to store one glyph
+		if (dest_p >= eeprom_text_buf + EEPROM_TEXT_MAX_LEN)
+			return false;
+
+		uint8_t bytes = utf8_len(*src);
+
+		if (bytes == 0)
+			return false; // Decoding error
+
+		if (src+bytes > end)
+			return false; // End was malformedly truncated
+
+		const struct glyph *x = get_glyph_utf8(src,bytes);
+		eeprom_update_word((uint16_t*)dest_p,(uint16_t)x);
+
+		// Advance pointers. *dest has always length of single item
+		dest_p++;
+		src += bytes;
+	}
+
+	// Update array data length
+	eeprom_update_word(&eeprom_text_len, dest_p - eeprom_text_buf);
+	return true;
+}
+#endif
