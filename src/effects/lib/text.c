@@ -30,27 +30,25 @@
 #include "text.h"
 #include "../../common/pgmspace.h"
 
-#define mb_pgm_get(a,b,progmem) progmem? pgm_get(a,b): a
-
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const struct glyph_buf *text, bool progmem, int16_t offset, render_t f)
+void scroll_text(const struct glyph_buf *text, enum mem_type mem, int16_t offset, render_t f)
 {
 	int16_t base_pos = (LEDS_X+1)-offset;
 	int16_t i = -base_pos / spacing;
 	uint16_t pos = i*spacing + base_pos;
 	const struct glyph *c;
-	uint16_t len = mb_pgm_get(text->len,word,progmem);
+	uint16_t len = multimem_get(text->len,word,mem);
 
 	// Render only two characters which fit to screen
 
 	if (i >= 0 && i < len) {
-		mb_pgm_copy(c,text->buf[i],progmem);
+		multimem_copy(c,text->buf[i],mem);
 		render_character(c, pos, f);
 	}
 
 	if (i+1 >= 0 && i+1<len) {
-		mb_pgm_copy(c,text->buf[i+1],progmem);
+		multimem_copy(c,text->buf[i+1],mem);
 		render_character(c, pos+spacing, f);
 	}
 }

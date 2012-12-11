@@ -30,7 +30,7 @@ void effect(void)
 	const struct glyph_buf *text = (const struct glyph_buf *)custom_data;
 
 	int16_t pos = ticks >> 3;
-	scroll_text(text, true, pos, render_xy);
-	scroll_text(text, true, pos-7, render_yz);
+	scroll_text(text, MEM_PROG, pos, render_xy);
+	scroll_text(text, MEM_PROG, pos-7, render_yz);
 }
 

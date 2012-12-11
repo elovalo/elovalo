@@ -39,8 +39,8 @@ void effect(void)
 
 	clear_buffer();
 
-	scroll_text(&vars.text, false, 9, render_yz);
-	scroll_text(&vars.text, false, 16, render_xy);
+	scroll_text(&vars.text, MEM_SRAM, 9, render_yz);
+	scroll_text(&vars.text, MEM_SRAM, 16, render_xy);
 
 	if(vars.cur > 0) vars.cur--;
 }
