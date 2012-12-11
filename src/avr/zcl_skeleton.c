@@ -33,6 +33,7 @@
 #include "../generated/effect_constants.h"
 #include "../common/playlists.h"
 #include "../common/time.h"
+#include "../effects/lib/font8x8.h"
 
 // Lengths
 #define PACKET_HEADER_LEN 17
@@ -511,10 +512,10 @@ static bool process_write_cmd(void) {
 				break;
 			case ATTR_EFFECT_TEXT:
 				if (msg_get() == TYPE_OCTET_STRING) {
-					/*uint8_t slen = read_hex_crc();
-					for (uint8_t i = 0; i < slen; i++) {
-						effect_text[i] = read_hex_crc(); // TODO
-					}*/
+					uint8_t len = msg_get();
+					if (len == 0xff) len = 0; // Invalid value
+					WET utf8_string_to_eeprom(msg_i,len);
+					msg_i += len; // Put pointer to the end
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
