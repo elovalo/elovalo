@@ -110,6 +110,7 @@
 #define STATUS_INVALID_VALUE 0x87
 #define STATUS_INVALID_DATA_TYPE 0x8d
 #define STATUS_READ_ONLY 0x88
+#define STATUS_WRITE_ONLY 0x8f
 
 // Values
 #define BOOL_TRUE 0x01
@@ -333,12 +334,9 @@ static bool process_read_cmd() {
 				send_payload(get_mode());
 				break;
 			}
-			/*
 			case ATTR_EFFECT_TEXT:
-				send_attr_resp_header(ATTR_EFFECT_TEXT, TYPE_OCTET_STRING);
-				write_effect_text(); //TODO
+				send_cmd_status(ATTR_EFFECT_TEXT, STATUS_WRITE_ONLY);
 				break;
-			*/
 			case ATTR_PLAYLIST:
 				send_attr_resp_header(ATTR_PLAYLIST, TYPE_UINT8);
 				send_payload(read_playlist());
