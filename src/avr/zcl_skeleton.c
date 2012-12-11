@@ -83,6 +83,7 @@
 #define ATTR_EFFECT 0x09
 #define ATTR_HW_VERSION 0x10
 #define ATTR_SW_VERSION 0x11
+#define ATTR_PLAYLIST_POSITION 0x13
 
 // Data types
 #define TYPE_BOOLEAN 0x10
@@ -395,6 +396,10 @@ static bool process_read_cmd() {
 				send_attr_resp_header(ATTR_SW_VERSION, TYPE_OCTET_STRING);
 				send_local_pgm_str(sw_resp);
 				break;
+			case ATTR_PLAYLIST_POSITION:
+				send_attr_resp_header(ATTR_PLAYLIST_POSITION, TYPE_UINT8);
+				send_payload(active_effect);
+				break;
 			default:
 				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
 				break;
@@ -558,6 +563,10 @@ static bool process_write_cmd(void) {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);
 				}
+				break;
+			case ATTR_PLAYLIST_POSITION:
+				send_cmd_status(attr, STATUS_READ_ONLY);
+				success = false;
 				break;
 			default:
 				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
