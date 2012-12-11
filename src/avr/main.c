@@ -42,6 +42,10 @@ const effect_t *effect; // Current effect. Note: points to PGM
 uint16_t effect_length; // Length of the current effect. Used for playlist
 static uint16_t next_draw_at = 0; // Used for FPS limiting
 
+// It might be nice to use this for single effect too (set via serial).
+uint8_t active_effect; // Index of the active effect. Used for playlist
+uint8_t active_playlist; // Index of the active playlist
+
 // Variables used only in simulation mode
 #ifdef SIMU
 uint8_t simulation_mode __attribute__ ((section (".noinit")));
