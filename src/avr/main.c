@@ -31,6 +31,7 @@
 #include "configuration.h"
 #include "powersave.h"
 #include "main.h"
+#include "zcl_skeleton.h"
 #include "../common/pgmspace.h"
 #include "../common/cube.h"
 #include "../common/effects.h"
@@ -171,8 +172,11 @@ static void pick_startup_mode(void)
 #elif defined AVR_ZCL
 static void pick_startup_mode(void)
 {
+	// Reading configrutaion etc. from non-volatile memory
+	init_zcl();
 	uint8_t start_mode = read_mode();
 
+	// Actual mode selection
 	if (start_mode != MODE_SLEEP) {
 		cube_start(0);
 		// cube_start() does implicit modification to 'mode'.

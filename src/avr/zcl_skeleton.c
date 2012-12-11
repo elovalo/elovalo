@@ -185,12 +185,19 @@ uint16_t send_crc = 0xffff;
 void *msg_i; // Packet message read index
 
 // MAC in original byte order (not reversed like in XML format)
-uint64_t mac = 0x0123456789abcdef;
+uint64_t eeprom_mac EEMEM = 0x0123456789abcdef;
+// SRAM MAC cache for quicker access
+uint64_t mac;
 
 // Some version-specific constants
 PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
 PROGMEM static const char sw_resp[] = "0.2012.11.15";
 PROGMEM static const char hw_resp[] = "EV-1-C2";
+
+void init_zcl(void)
+{
+	eeprom_read_block(&mac,&eeprom_mac,sizeof(mac));
+}
 
 void process_serial(void)
 {
@@ -500,7 +507,11 @@ static bool process_write_cmd(void) {
 				if (msg_get() == TYPE_IEEE_ADDRESS) {
 					// TODO write to EEPROM
 					uint64_t x = msg_get_64();
-					WET mac = x;
+					WET {
+						mac = x;
+						eeprom_update_block(&mac, &eeprom_mac,
+								    sizeof(mac));
+					}
 				} else {
 					success = false;
 					send_cmd_status(attr, STATUS_INVALID_DATA_TYPE);

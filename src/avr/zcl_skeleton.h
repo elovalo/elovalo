@@ -19,3 +19,7 @@
 
 void process_serial(void);
 
+/**
+ * Initializes ZCL stack. Must be run ONCE before processing messages.
+ */
+void init_zcl(void);
