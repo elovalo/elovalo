@@ -92,17 +92,19 @@ static uint8_t utf8_len(const char x)
 
 #include <avr/eeprom.h>
 
-const struct glyph* eeprom_text_buf[EEPROM_TEXT_MAX_LEN] EEMEM;
-uint16_t EEMEM eeprom_text_len = 0;
+static struct {
+	struct glyph_buf gp;
+	uint16_t raw[EEPROM_TEXT_MAX_LEN]; // ensures glyph_buf is allocated
+} eeprom_text EEMEM;
 
 bool utf8_string_to_eeprom(const char *src, const uint16_t src_len)
 {
 	const char *end = src+src_len;
-	const struct glyph **dest_p = eeprom_text_buf;
+	const struct glyph **dest_p = eeprom_text.gp.buf;
 
 	while (src < end) {
 		// Is there enough room to store one glyph
-		if (dest_p >= eeprom_text_buf + EEPROM_TEXT_MAX_LEN)
+		if (dest_p >= eeprom_text.gp.buf + EEPROM_TEXT_MAX_LEN)
 			return false;
 
 		uint8_t bytes = utf8_len(*src);
@@ -122,7 +124,7 @@ bool utf8_string_to_eeprom(const char *src, const uint16_t src_len)
 	}
 
 	// Update array data length
-	eeprom_update_word(&eeprom_text_len, dest_p - eeprom_text_buf);
+	eeprom_update_word(&eeprom_text.gp.len, dest_p - eeprom_text.gp.buf);
 	return true;
 }
 #endif
