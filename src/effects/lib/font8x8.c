@@ -97,6 +97,10 @@ static struct {
 	uint16_t raw[EEPROM_TEXT_MAX_LEN]; // ensures glyph_buf is allocated
 } eeprom_text EEMEM;
 
+const struct glyph_buf* stored_glyphs(void) {
+	return &eeprom_text.gp;
+}
+
 bool utf8_string_to_eeprom(const char *src, const uint16_t src_len)
 {
 	const char *end = src+src_len;
@@ -126,5 +130,13 @@ bool utf8_string_to_eeprom(const char *src, const uint16_t src_len)
 	// Update array data length
 	eeprom_update_word(&eeprom_text.gp.len, dest_p - eeprom_text.gp.buf);
 	return true;
+}
+
+#else
+
+// Returns empty text in case of exporter
+const struct glyph_buf gp = {0};
+const struct glyph_buf* stored_glyphs(void) {
+	return &gp;
 }
 #endif

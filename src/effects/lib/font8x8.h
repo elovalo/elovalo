@@ -52,8 +52,15 @@ const struct glyph *get_glyph_ascii(const char c);
 bool utf8_string_to_glyphs(const char *src, const uint16_t src_len, struct glyph_buf *dest);
 
 /**
- * Convert given UTF-8 string to glyph array and stores it to EEPROM.
+ * Convert given UTF-8 string to glyph array and stores it to
+ * EEPROM. Implemented only on AVR.
  */
 bool utf8_string_to_eeprom(const char *src, const uint16_t src_len);
+
+/**
+ * Returns user stored text. On exporter this return an empty string,
+ * on AVR it returns glyph pointer to non-volatile memory.
+ */
+const struct glyph_buf* stored_glyphs(void);
 
 #endif /* FONT8x8_H_ */

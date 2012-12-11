@@ -21,16 +21,29 @@
 
 #include "common.h"
 
+struct {
+	const void *data;
+	enum mem_type mem;
+} vars;
+
+void init(void)
+{
+	if (custom_data == NULL) {
+		// Use stored text in EEPROM
+		vars.data = stored_glyphs();
+		vars.mem = MEM_EEPROM;
+	} else {
+		// Use text constants
+		vars.data = custom_data; //(const struct glyph_buf *)custom_data;
+		vars.mem = MEM_PROG;
+	}
+}
+
 void effect(void)
 {
 	clear_buffer();
-
-	// If no custom data, do nothing
-	if (custom_data == NULL) return;
-	const struct glyph_buf *text = (const struct glyph_buf *)custom_data;
-
-	int16_t pos = ticks >> 3;
-	scroll_text(text, MEM_PROG, pos, render_xy);
-	scroll_text(text, MEM_PROG, pos-7, render_yz);
+	int16_t pos = ticks >> 3; // Slow down scrolling speed
+	scroll_text(vars.data, vars.mem, pos, render_xy);
+	scroll_text(vars.data, vars.mem, pos-7, render_yz);
 }
 

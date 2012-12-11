@@ -241,6 +241,7 @@ uint8_t change_current_effect(uint8_t i) {
 	// Change mode and pick correct effect from the array.
 	mode = MODE_EFFECT;
 	effect = effects + i;
+	custom_data = NULL; // Used in playlists only
 
 	// Prepare running of the new effect
 	init_current_effect();
@@ -258,6 +259,7 @@ void use_stored_effect(void)
       	if (new_effect >= effects_len) new_effect = 0;
 
 	effect = effects + new_effect;
+	custom_data = NULL; // Used in playlists only
 	init_current_effect();
 }
 
