@@ -190,7 +190,7 @@ uint64_t eeprom_mac EEMEM = 0x0123456789abcdef;
 uint64_t mac;
 
 // Some version-specific constants
-PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,01:23:45:67:89:AB:CD:EF\n";
+PROGMEM static const char ati_resp[] = "C2IS,elovalo,v1.5,";
 PROGMEM static const char sw_resp[] = "0.2012.11.15";
 PROGMEM static const char hw_resp[] = "EV-1-C2";
 
@@ -207,6 +207,25 @@ void process_serial(void)
 			char c = pgm_get(ati_resp[i],byte);
 			serial_send(c);
 		}
+
+		// MAC address, big endian, colon separated
+		serial_send_hex(mac >> 56);
+		serial_send(':');
+		serial_send_hex(mac >> 48);
+		serial_send(':');
+		serial_send_hex(mac >> 40);
+		serial_send(':');
+		serial_send_hex(mac >> 32);
+		serial_send(':');
+		serial_send_hex(mac >> 24);
+		serial_send(':');
+		serial_send_hex(mac >> 16);
+		serial_send(':');
+		serial_send_hex(mac >> 8);
+		serial_send(':');
+		serial_send_hex(mac >> 0);
+		serial_send('\n');
+
 		// May continue to packet processing
 	}
 
