@@ -53,8 +53,10 @@ def export(effect, output, length=1.0, data='', sensors=''):
     if not os.path.exists(output):
         os.mkdir(output)
 
-    sensor_output = os.path.join(output, 'sensors.json')
-    sensor_file = write_sensor_data(sensors, sensor_output, length)
+    sensor_output = ''
+    if sensors:
+        sensor_output = os.path.join(output, 'sensors.json')
+        sensor_file = write_sensor_data(sensors, sensor_output, length)
 
     os.chdir('..')
 
