@@ -18,6 +18,7 @@
  */
 
 # pragma FLIP
+# pragma DYNAMIC_TEXT
 
 #include "common.h"
 

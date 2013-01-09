@@ -137,10 +137,12 @@ class SourceFiles(object):
     @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ', ' + \
+            dynamic_text(f) + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
+        dynamic_text = lambda f: 'true' if f.dynamic_text else 'false'
 
         ret = ['const effect_t effects[] PROGMEM = {']
 
@@ -176,6 +178,7 @@ class SourceFile(object):
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
         self.max_fps = self._max_fps(content)
+        self.dynamic_text = self._dynamic_text(content)
         self.variables = self._variables(content)
 
     def _globals(self, c):
@@ -207,6 +210,9 @@ class SourceFile(object):
             return str(int(1.0 / (TICK_GRANULARITY * i)))
 
         return DEFAULT_MINIMUM_TICKS
+
+    def _dynamic_text(self, c):
+        return filter(lambda line: 'dynamic_text' in line['types'], c)
 
     def _variables(self, c):
         a = filter(lambda line: 'struct' in line['types'], c)
@@ -244,6 +250,7 @@ def analyze(name, content):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('dynamic_text', '#\s*pragma\s+DYNAMIC_TEXT\s*'),
             ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
@@ -270,7 +277,7 @@ def analyze(name, content):
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if 'flip' in ret['types'] or 'max_fps' in ret['types']:
+        if 'flip' in ret['types'] or 'max_fps' in ret['types'] or 'dynamic_text' in ret['types']:
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
