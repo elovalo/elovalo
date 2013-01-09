@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# ./render <effect> <path> <frame>?
+# ./render <effect> <target> <frame>?
 # renders starting from the first frame
 import os
 
