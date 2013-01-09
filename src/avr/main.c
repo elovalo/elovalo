@@ -57,7 +57,8 @@ struct {
 	bool mode:1;
 	bool playlist:1;
 	bool effect:1;
-} modified = {true,true,true};
+	bool text:1;
+} modified = {true,true,true,true};
 
 // Private functions
 static void init_playlist(void);
@@ -260,7 +261,11 @@ uint8_t change_current_effect(uint8_t i) {
 void use_stored_effect(void)
 {
 	if (mode != MODE_EFFECT) return;
-	if (!(modified.effect || modified.mode)) return;
+	if (!(modified.effect || modified.mode ||
+	      (modified.text && pgm_get(effect->dynamic_text, byte))))
+	{
+		return;
+	}
 
 	uint8_t new_effect = read_effect();
 	// Avoid dangling pointers and extra initialization
@@ -322,6 +327,7 @@ void reset_modified_state(void)
 	modified.effect = false;
 	modified.playlist = false;
 	modified.mode = false;
+	modified.text = false;
 }
 
 void mark_playlist_modified(void) {
@@ -330,6 +336,10 @@ void mark_playlist_modified(void) {
 
 void mark_effect_modified(void) {
 	modified.effect = true;
+}
+
+void mark_text_modified(void) {
+	modified.text = true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

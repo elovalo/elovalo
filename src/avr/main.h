@@ -42,6 +42,7 @@ void set_mode(uint8_t m);
 void reset_modified_state(void);
 void mark_playlist_modified(void);
 void mark_effect_modified(void);
+void mark_text_modified(void);
 
 extern uint8_t active_effect; // Index of the active effect. Used for playlist
 extern uint8_t active_playlist; // Index of the active playlist
