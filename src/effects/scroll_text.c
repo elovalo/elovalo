@@ -24,6 +24,7 @@
 struct {
 	const void *data;
 	enum mem_type mem;
+	uint16_t width;
 } vars;
 
 void init(void)
@@ -37,12 +38,17 @@ void init(void)
 		vars.data = custom_data; //(const struct glyph_buf *)custom_data;
 		vars.mem = MEM_PROG;
 	}
+	
+	// Get string length a bit hard way. 2 is padding and 8 is char width.
+	const struct glyph_buf *p = (const struct glyph_buf *)vars.data;
+	vars.width = 8*(multimem_get(p->len,word,vars.mem)+2);
 }
 
 void effect(void)
 {
 	clear_buffer();
-	int16_t pos = ticks >> 3; // Slow down scrolling speed
+	// Slow down scrolling speed and wrap to beginning if needed
+	int16_t pos = (ticks >> 3) % vars.width;
 	scroll_text(vars.data, vars.mem, pos, render_xy);
 	scroll_text(vars.data, vars.mem, pos-7, render_yz);
 }
