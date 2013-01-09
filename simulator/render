@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# ./anim <effect> <path>
+# ./render <effect> <path> <frame>?
 # renders starting from the first frame
 import os
 
@@ -7,14 +7,19 @@ import utils
 
 if __name__ == '__main__':
     p = utils.effect_parser()
+    p.add_argument('frame', nargs='?', help="number of the frame to render")
     p.add_argument('--length', help="Animation length in seconds", type=float)
 
     args = p.parse_args()
 
     length = args.length or ''
-    os.environ['length'] = str(length)
 
     ok = utils.export(args.effect, args.output, length, sensors=args.sensors)
 
     if ok:
-        utils.render_animation(args.effect, args.output, length)
+        if args.frame:
+            utils.render_frame(args.effect, args.output, args.frame)
+        else:
+            os.environ['length'] = str(length)
+
+            utils.render_animation(args.effect, args.output, length)

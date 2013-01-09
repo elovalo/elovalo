@@ -33,7 +33,7 @@ bothered to export it some specific effect.
 
 To make it render perpetually, execute
 
-./anim sine tmp
+./render sine tmp
 
 This will render the sine effect in /tmp directory below the current path.
 
@@ -46,7 +46,7 @@ animation you want. Use either -h or --help flags to see all available options.
 
 If you want to render just one frame, use
 
-./frame sine tmp 25
+./render sine tmp 25
 
 where 25 is the frame number you want.
 
@@ -67,7 +67,7 @@ using ffplay (ffplay test.avi) or some other app.
 If your effect happens to use sensor data, it can be handy to pass mock it.
 This is done by passing a Python file containing mock generators to a renderer.
 
-./frame sine tmp 25 --sensors sensors/data
+./render sine tmp 25 --sensors sensors/data
 
 In this case "data" is a Python module residing in the sensors package. It is
 important this file contains a definition along this:
