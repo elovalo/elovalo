@@ -550,6 +550,7 @@ static bool process_write_cmd(void) {
 					uint8_t len = msg_get();
 					if (len == 0xff) len = 0; // Invalid value
 					WET utf8_string_to_eeprom(msg_i,len);
+					WET mark_text_modified();
 					msg_i += len; // Put pointer to the end
 				} else {
 					success = false;
