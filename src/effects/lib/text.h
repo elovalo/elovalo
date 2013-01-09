@@ -19,6 +19,8 @@
 
 typedef void(*render_t)(uint8_t x, uint8_t y);
 
+uint8_t get_text_len(const char text[], bool progmem);
+
 /**
  * Scrolls given text using given callback
  */

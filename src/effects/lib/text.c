@@ -34,10 +34,15 @@
 
 static const uint8_t spacing = 8; // Seems like a good pick for this charset
 
-void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
+uint8_t get_text_len(const char text[], bool progmem)
 {
 	// text format is ZCL octet string, where the length is at byte 0
-	uint8_t text_len = mb_pgm_get(*text++, byte, progmem);
+	return mb_pgm_get(*text++, byte, progmem);
+}
+
+void scroll_text(const char text[], bool progmem, int16_t offset, render_t f)
+{
+	uint8_t text_len = get_text_len(text, progmem);
 	int16_t base_pos = (LEDS_X+1)-offset;
 	int16_t i = -base_pos / spacing;
 	uint16_t pos = i*spacing + base_pos;

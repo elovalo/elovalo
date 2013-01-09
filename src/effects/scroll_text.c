@@ -30,7 +30,8 @@ void effect(void)
 
 	clear_buffer();
 
-	int16_t pos = ticks >> 3;
+	uint8_t text_len = get_text_len(text, true);
+	int16_t pos = (ticks >> 3) % ((text_len + 2) * 8);
 	scroll_text(text, true, pos, render_xy);
 	scroll_text(text, true, pos-7, render_yz);
 }
