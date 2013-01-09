@@ -49,18 +49,18 @@ int main(int argc, char **argv) {
 void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data) {
 	const int size = 50;
 	char filename[size];
+	uint8_t use_sensors = strlen(sensor_path) > 0;
 
-	// XXX: figure out how to fetch array size
-	int distance1[10000];
-	int distance2[10000];
-	int ambient_light[10000];
-	int sound_pressure_level[10000];
+	json_t *distance1;
+	json_t *distance2;
+	json_t *ambient_light;
+	json_t *sound_pressure_level;
 
 	/* Attach custom data */
 	custom_data = data;
 
 	/* Parse sensor json */
-	if(strlen(sensor_path) > 0) {
+	if(use_sensors) {
 		json_error_t error;
 		json_t *root = json_load_file(sensor_path, 0, &error);
 
@@ -71,11 +71,11 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 			fprintf(stderr, "error: root is not an object\n");
 		}
 		else {
-			json_unpack(root, "{s:[i], s:[i], s:[i], s:[i]}",
-				"distance1", distance1,
-				"distance2", distance2,
-				"ambient_light", ambient_light,
-				"sound_pressure", sound_pressure_level
+			json_unpack(root, "{s:o, s:o, s:o, s:o}",
+				"distance1", &distance1,
+				"distance2", &distance2,
+				"ambient_light", &ambient_light,
+				"sound_pressure", &sound_pressure_level
 			);
 		}
 	}
@@ -117,10 +117,12 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 
 	int i;
 	for (i = 0, ticks = 0; ticks < length * 10; ticks += drawing_time, i++) {
-		sensors.distance1 = distance1[i];
-		sensors.distance2 = distance2[i];
-		sensors.ambient_light = ambient_light[i];
-		sensors.sound_pressure_level = sound_pressure_level[i];
+		if(use_sensors) {
+			sensors.distance1 = json_integer_value(json_array_get(distance1, i));
+			sensors.distance2 = json_integer_value(json_array_get(distance2, i));
+			sensors.ambient_light = json_integer_value(json_array_get(ambient_light, i));
+			sensors.sound_pressure_level = json_integer_value(json_array_get(sound_pressure_level, i));
+		}
 
 		if(effect->draw != NULL) effect->draw();
 
