@@ -170,7 +170,9 @@ def playlist_source(data):
 
     def playlist_names(data):
         o = [x['name'] for x in data]
-        return 'PROGMEM const char playlists_json[] = ' + c_string(json.dumps(o)) + ';\n'
+        s = json.dumps(o)
+        return ('PROGMEM const char playlists_json[] = ' + c_string(s) + ';\n' +
+                'const uint16_t playlists_json_len = ' + str(len(s)) + ';\n')
 
     return '\n'.join([
         file_start,
