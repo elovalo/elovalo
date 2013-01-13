@@ -58,7 +58,9 @@ void effect(void)
 
 	clear_buffer();
 
-	int16_t pos = ticks >> 3;
+	/* Position is calculated with modulus to keep it rolling over
+	 * and over again */
+	int16_t pos = (ticks >> 3) % ((CLOCK_CHARS+4)*8);
 
 	scroll_text(&vars.text, MEM_SRAM, pos, render_xy);
 	scroll_text(&vars.text, MEM_SRAM, pos-7, render_yz);
