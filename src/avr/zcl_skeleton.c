@@ -155,6 +155,7 @@ static void send_32(uint32_t);
 static void send_i32(int32_t);
 static void send_64(uint64_t);
 static void send_pgm_string(const char * const* pgm_p);
+static void send_pgm_string_direct(const char *p);
 
 static void send_payload(uint8_t);
 static void reset_send_crc(void);
@@ -382,12 +383,13 @@ static bool process_read_cmd() {
 						      TYPE_LONG_OCTET_STRING);
 				send_effect_names();
 				break;
-			/*
 			case ATTR_PLAYLIST_NAMES:
-				send_attr_resp_header(ATTR_PLAYLIST_NAMES, TYPE_LONG_OCTET_STRING);
-				write_playlist_names(); //TODO
+				send_attr_resp_header(ATTR_PLAYLIST_NAMES,
+						      TYPE_LONG_OCTET_STRING);
+				send_16(playlists_json_len);
+				send_pgm_string_direct(playlists_json);
+
 				break;
-			*/
 			case ATTR_PLAYLIST_EFFECTS:
 			{
 				send_attr_resp_header(ATTR_PLAYLIST_EFFECTS, TYPE_OCTET_STRING);
@@ -667,24 +669,34 @@ static void send_64(uint64_t data) {
 	}
 }
 
+/**
+ * Sends a string at given PROGMEM pointer. The pointer is at PROGMEM
+ * and needs to be loaded first.
+ */
 static void send_pgm_string(const char * const* pgm_p) {
 	char *p = (char*)pgm_read_word_near(pgm_p);
-	char c;
 
 	// If is NULL, print is as zero-length string
+	// FIXME: Is this zero-length or 1-length?
 	if ( p == NULL) {
 		send_payload(' ');
 		return;
 	}
-	
+	send_pgm_string_direct(p);
+}
+
+/**
+ * Send a string at given program memory pointer
+ */
+static void send_pgm_string_direct(const char *p)
+{
 	// Read byte-by-byte and write, not including NUL byte
-	c = pgm_read_byte_near(p++);
+	char c = pgm_read_byte_near(p++);
 	while (c != '\0') {
 		send_payload(c);
 		c = pgm_read_byte_near(p++);
 	}
 }
-
 
 /**
  * Hex encodes data and then sends it to the serial port while updating the
