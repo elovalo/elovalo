@@ -168,11 +168,16 @@ def playlist_source(data):
 
         return '\n'.join(ret) + '\n'
 
+    def playlist_names(data):
+        o = [x['name'] for x in data]
+        return 'PROGMEM const char playlists_json[] = ' + c_string(json.dumps(o)) + ';\n'
+
     return '\n'.join([
         file_start,
         custom_data(data),
         master_playlist(data),
         playlist_indices(data),
+        playlist_names(data),
     ])
 
 
@@ -189,3 +194,6 @@ def load_xml(src):
         })
 
     return ret
+
+def c_string(s):
+    return '"' + s.replace('\\', r'\\').replace('"', r'\"') + '"'

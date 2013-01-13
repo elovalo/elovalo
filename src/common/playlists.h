@@ -30,3 +30,4 @@ extern const playlistitem_t master_playlist[];
 extern const uint8_t master_playlist_len;
 extern const uint8_t playlists[];
 extern const uint8_t playlists_len;
+extern const char playlists_json[];
