@@ -24,8 +24,8 @@
 #define SECS_IN_DAY ((time_t)60*60*24)
 
 struct {
-	struct glyph_buf text;
 	int32_t timezone;
+	struct glyph_buf text;
 } vars;
 
 void init(void)
