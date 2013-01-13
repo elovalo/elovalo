@@ -50,12 +50,17 @@
 // Payload Channels
 #define ZCL_CHANNEL 0x01 // ZCL message channel
 
+// Reporting related
+#define ENDPOINT_DEVICE_CONF 1
+#define ATTR_TIMEANDZONE 0x403
+
 // Elovalo end point id
 #define PROFILE 1024
 #define ENDPOINT 70
 
 // Cluster IDs
 #define CLUSTERID_BASIC 0x00
+#define CLUSTERID_TIME 0x0A
 #define CLUSTERID_ELOVALO 0x500
 
 // Command IDs
@@ -63,6 +68,7 @@
 #define CMDID_READ_RESPONSE 0x01
 #define CMDID_WRITE 0x02
 #define CMDID_WRITE_RESPONSE 0x04
+#define CMDID_REPORT_ATTRS 0x0a
 #define CMDID_DEFAULT_RESPONSE 0x0b
 
 // Attributes
@@ -140,6 +146,7 @@ enum zcl_status {
 static void process_payload();
 static bool process_cmd_frame();
 static bool process_read_cmd();
+static void process_time_report();
 static void send_attr_resp_header(uint16_t attr, uint8_t type);
 
 static void send_packet_header(uint16_t length);
@@ -269,7 +276,7 @@ static void process_payload(void) {
 	if (zcl.packet.channel != ZCL_CHANNEL) return;
 
 	// Filter out messages that do not belong to me
-	if (zcl.packet.mac != mac) {
+	if (zcl.packet.mac != mac && zcl.packet.mac != 0) {
 		return;
 	}
 
@@ -302,29 +309,54 @@ static bool process_cmd_frame(void) {
 
 	/* Filter out profiles and endpoints that are not supported on
 	 * this device. FIXME: Generate error responses for these. */
-	if (zcl.packet.endpoint != ENDPOINT) {
-		// TODO generate error msg
-		return false;
-	}
 	if (zcl.packet.profile != PROFILE) {
 		// TODO generate error msg
 		return false;
 	}
-	switch (zcl.packet.cmd_type) {
-	case CMDID_READ:
+
+	if (zcl.packet.cmd_type == CMDID_DEFAULT_RESPONSE) {
+		return false;
+	}
+
+	if (zcl.packet.endpoint == ENDPOINT &&
+	    zcl.packet.cmd_type == CMDID_READ) {
 		return process_read_cmd();
-	case CMDID_WRITE:
+	}
+	
+	if (zcl.packet.endpoint == ENDPOINT &&
+	    zcl.packet.cmd_type == CMDID_WRITE) {
 		process_write_cmd();
 		return true;
-	case CMDID_DEFAULT_RESPONSE:
+	}
+
+	if (zcl.packet.endpoint == ENDPOINT_DEVICE_CONF &&
+	    zcl.packet.cmd_type == CMDID_REPORT_ATTRS &&
+	    zcl.packet.cluster == CLUSTERID_TIME) {
+		process_time_report();
 		return false;
-	default:
-		// FIXME: See if correct way to handle unsupport command type
-		if (!zcl.packet.disable_def_resp) {
-			send_default_response(zcl.packet.cmd_type,
-				STATUS_UNSUP_GENERAL_COMMAND);
-		}
-		return true;
+	}
+
+	// FIXME: See if correct way to handle unsupport command type
+	if (!zcl.packet.disable_def_resp) {
+		send_default_response(zcl.packet.cmd_type,
+				      STATUS_UNSUP_GENERAL_COMMAND);
+	}
+	return true;
+}
+
+static void process_time_report() {
+	while(msg_available()) {
+		if (msg_get_16() != ATTR_TIMEANDZONE) return;
+		if (msg_get() != TYPE_OCTET_STRING) return;
+		if (msg_get() != 8) return; // Weird length
+		time_t t = msg_get_32()+ZIGBEE_TIME_OFFSET;
+		int32_t zone = msg_get_i32();
+
+		/* Setting time and zone must be done without WET
+		 * macro because this function is only run in dry mode
+		 * (no response generated, because it's a report) */
+		stime(&t);
+		set_timezone(zone);
 	}
 }
 
