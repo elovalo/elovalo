@@ -26,6 +26,7 @@
 struct {
 	int32_t timezone;
 	struct glyph_buf text;
+	const struct glyph *force_text_allocation[8];
 } vars;
 
 void init(void)
