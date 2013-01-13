@@ -22,11 +22,12 @@
 #include "common.h"
 
 #define SECS_IN_DAY ((time_t)60*60*24)
+#define CLOCK_CHARS 8
 
 struct {
 	int32_t timezone;
 	struct glyph_buf text;
-	const struct glyph *force_text_allocation[8];
+	const struct glyph *force_text_allocation[CLOCK_CHARS];
 } vars;
 
 void init(void)
@@ -36,7 +37,7 @@ void init(void)
 
 void effect(void)
 {
-	vars.text.len=8;
+	vars.text.len=CLOCK_CHARS;
 	const struct glyph **buf = vars.text.buf;
 
 	time_t now = time(NULL);
