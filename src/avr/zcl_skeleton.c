@@ -426,7 +426,8 @@ static bool process_read_cmd() {
 				break;
 			case ATTR_PLAYLIST_POSITION:
 				send_attr_resp_header(ATTR_PLAYLIST_POSITION, TYPE_UINT8);
-				send_payload(active_effect);
+				uint8_t start = pgm_get(playlists[active_playlist],byte);
+				send_payload(active_effect-start);
 				break;
 			default:
 				send_cmd_status(attr, STATUS_UNSUPPORTED_ATTRIBUTE);
