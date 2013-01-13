@@ -204,8 +204,14 @@ static void init_playlist(void) {
 }
 
 static void next_effect() {
-	if(active_effect + 1 == master_playlist_len) select_playlist_item(0);
-	else select_playlist_item(active_effect + 1);
+	if (active_effect+1 == master_playlist_len ||
+	    active_effect+1 == pgm_get(playlists[active_playlist+1],byte)) {
+		// End reached. Go to the first item of the playlist.
+		select_playlist_item(pgm_get(playlists[active_playlist],byte));
+	} else {
+		// Advance to the next item in playlist
+		select_playlist_item(active_effect + 1);
+	}
 }
 
 void select_playlist_item(uint8_t index) {
@@ -287,7 +293,7 @@ void use_stored_playlist(void)
 
 	// Activate
 	active_playlist = new_playlist;
-	select_playlist_item(playlists[new_playlist]);
+	select_playlist_item(pgm_get(playlists[new_playlist],byte));
 	init_current_effect();
 }
 
@@ -298,7 +304,7 @@ uint8_t change_playlist(uint8_t i) {
 
 	// Change mode and run init
 	mode = MODE_PLAYLIST;
-	select_playlist_item(playlists[i]);
+	select_playlist_item(pgm_get(playlists[i],byte));
 	init_current_effect();
 
 	return 0;
