@@ -128,6 +128,14 @@ int main() {
 				break;
 			}
 
+			/* Restart effect if maximum ticks is
+			 * reached. This may result a glitch but is
+			 * better than the effect to stop. */
+			if (ticks == ~0) {
+				init_current_effect();
+				ticks = 0;
+			}	
+
 			// Update sensor values
 			sensors.distance1 = hcsr04_get_distance_in_cm();
 			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
