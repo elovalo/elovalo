@@ -4,8 +4,9 @@
         "length": 4
     },
     {
-        "name": "wave",
-        "length": 4
+	"name": "scroll_text",
+	"data": "This works!",
+	"length": 10
     },
     {
         "name": "all_on",
