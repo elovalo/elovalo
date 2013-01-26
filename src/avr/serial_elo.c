@@ -1,3 +1,22 @@
+/* -*- mode: c; c-file-style: "linux" -*-
+ *  vi: set shiftwidth=8 tabstop=8 noexpandtab:
+ *
+ *  Copyright 2012 Elovalo project group 
+ *  
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* Serial communication constants. Please note when allocating new CMD
  * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
  * the values in serial_escaped.h .
@@ -6,6 +25,7 @@
 #ifdef AVR_ELO
 
 #include <avr/io.h>
+#include <avr/sleep.h>
 #include <stdlib.h>
 
 #include "main.h"
@@ -14,6 +34,8 @@
 #include "serial_escaped.h"
 #include "../common/pgmspace.h"
 #include "serial_elo.h"
+#include "tlc5940.h" // Frame uploading needs this
+#include "../common/cube.h"
 
 // Commands issued by the sender
 #define CMD_STOP            '.'
@@ -195,6 +217,33 @@ void serial_elo_process(uint8_t cmd) {
 		 * is truncated to the length of first valid
 		 * entries. */
 		truncate_crontab(i);
+	} ELSEIFCMD(CMD_SERIAL_FRAME) {
+		// Start by sending frame byte count
+		send_escaped(GS_BUF_BYTES >> 8);
+		send_escaped(GS_BUF_BYTES & 0xff);
+		
+		// Loop for serial data
+		while (true) {
+			// Wait for the back buffer to get freed
+			while (flags.may_flip) {
+				sleep_mode();
+			}
+			send_escaped('%');
+
+			// Then fill in back buffer
+			uint16_t bytes_read = serial_to_sram(gs_buf_back,GS_BUF_BYTES);
+
+			// Stop receiving if we receive a command
+			if (bytes_read == 0) {
+				break; // It's okay to stop in frame boundary
+			} else if (bytes_read < GS_BUF_BYTES) {
+				send_escaped(RESP_INTERRUPTED);
+				break;
+			}
+
+			// Then, allow flipping
+			allow_flipping(true);
+		}
 	} else {
 		report(REPORT_INVALID_CMD);
 		return;
