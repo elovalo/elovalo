@@ -31,9 +31,16 @@
 #include "../effects/lib/utils.h"
 #include "../common/effect_utils.h"
 #include "../common/cube.h"
+#include "../effects/lib/font8x8.h"
 
 void export_effect(const effect_t *effect, double length, const char *sensor_path,
 		   const char *data, bool binary);
+
+/**
+ * Allocates glyph buffer which contains given text. The user is
+ * responsible for freeing the contents with free()
+ */
+struct glyph_buf *convert_to_glyphs(const char *text);
 
 int main(int argc, char **argv) {
 	bool binary = false;
@@ -79,8 +86,18 @@ void export_effect(const effect_t *effect, double length, const char *sensor_pat
 	json_t *ambient_light;
 	json_t *sound_pressure_level;
 
-	/* Attach custom data */
-	custom_data = data;
+	if (data == NULL) {
+		custom_data = NULL;
+	} else {
+		/* Attach custom text data. FIXME the buffer is never
+		 * unallocated, so this will leak memory! */
+		custom_data = convert_to_glyphs(data);
+		if (custom_data == NULL) {
+			fprintf(stderr,"Custom data conversion error. "
+				"Not UTF-8 or out of memory\n");
+			return;
+		}
+	}
 
 	/* Parse sensor json */
 	if(use_sensors) {
@@ -196,4 +213,24 @@ void export_effect(const effect_t *effect, double length, const char *sensor_pat
 		fputs("]}\n",f); // TODO handle errors
 	}
 	fclose(f); // TODO handle errors
+}
+
+struct glyph_buf *convert_to_glyphs(const char *text) {
+	const int glyph_array_len = 200;
+
+	// Allocate glyph array
+	struct glyph_buf *result =
+		(struct glyph_buf *)malloc(sizeof(struct glyph_buf) +
+					   sizeof(struct glyph*) * 
+					   glyph_array_len);
+	if (result == NULL) return NULL;
+
+	result->len = glyph_array_len;
+
+	bool ret = utf8_string_to_glyphs(text, strlen(text), result);
+	if (!ret) {
+		free(result);
+		return NULL;
+	}
+	return result;
 }
