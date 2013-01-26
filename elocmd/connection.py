@@ -34,12 +34,11 @@ class Connection():
         )
 
     def send_command(self, kind, body=bytes()):
-        if kind not in config.Command:
-            print("Error: Unknown command given")
-            return
-
-        cmd = bytearray(config.Core.ESCAPE)
-        cmd.append(kind)
+        if kind:
+            cmd = bytearray(config.Core.ESCAPE)
+            cmd.append(kind)
+        else:
+            cmd = bytearray()
         try:
             for i in body:
                 cmd.append(i)
@@ -51,6 +50,7 @@ class Connection():
         if config.DEBUG:
             print("Sent: {0} | {1}".format(cmd, binascii.hexlify(cmd)))
         self.ser.write(cmd)
+        self.ser.flush()
 
     def read(self):
         time.sleep(0.5)
