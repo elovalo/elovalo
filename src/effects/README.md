@@ -136,3 +136,34 @@ your advantage.
 3. Read through /lib to see what kind of utilities are available.
 4. If the API is missing something, let us know or implement it yourself and
 drop a pull request.
+
+## Debugging with exporter
+
+You may find exporter handy for testing and debugging the
+effects. Exported effects may be displayed in hardware via elocmd in
+binary format or rendered using Blender in json format.
+
+If your effect is not working correctly you may want to debug them using real debugger. Its quite easy because exporter is running on your computer, not in the MCU. Just use the ordinary debugging tools.
+
+Here is an example using gdb. You may use a graphical debugger, too. Remember to 
+
+    $ ulimit -c unlimited
+    $ ./build/exporter/exporter -b scroll_text 10 "" kaatuu
+    Exporting 10.000000 seconds of scroll_text to file exports/scroll_text.elo
+    Segmentation fault (core dumped)
+
+Then run gdb:
+
+    $ gdb build/exporter/exporter core 
+    GNU gdb (Ubuntu/Linaro 7.4-2012.04-0ubuntu2.1) 7.4-2012.04
+    ...
+
+Then run backtrace, for example:
+
+    (gdb) backtrace 
+    #0  render_character (glyph_p=0x544e4547415f4853, offset=9, f=0x401c20 <render_xy>) at /usr/include/x86_64-linux-gnu/bits/string3.h:52
+    #1  0x0000000000403531 in effect_scroll_text () at src/effects/scroll_text.c:53
+    #2  0x0000000000403c98 in export_effect (effect=0x404fc0, length=10, sensor_path=<optimised out>, data=<optimised out>, binary=true) at src/exporter/exporter.c:164
+    #3  0x0000000000400c0b in main (argc=<optimised out>, argv=0x7fff478e2dc0) at src/exporter/exporter.c:68
+
+See more at http://www.network-theory.co.uk/articles/gccdebug.html
