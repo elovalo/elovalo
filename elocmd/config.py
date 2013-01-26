@@ -23,7 +23,7 @@ import configtuple
 
 # Serial connection configuration
 PORT     = ''
-BAUDRATE = 9600
+BAUDRATE = 250000
 TIMEOUT  = 1
 PARITY   = serial.PARITY_NONE
 BYTESIZE = serial.EIGHTBITS
