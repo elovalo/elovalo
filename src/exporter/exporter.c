@@ -19,8 +19,6 @@
 
 /**
  * JSON exporter for non-embedded use.
- *
- * Usage: ./exporter <effect> <length in ms>
  */
 
 #include <assert.h>
@@ -34,19 +32,44 @@
 #include "../common/effect_utils.h"
 #include "../common/cube.h"
 
-void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data);
+void export_effect(const effect_t *effect, int length, const char *sensor_path,
+		   const char *data, bool binary);
 
 int main(int argc, char **argv) {
+	bool binary = false;
+	const char* prog = argv[0];
+
 	mkdir("exports", S_IRWXU);
 
+	/* TODO use GNU getopt or similar to parse the output of
+	 * this. Now this is quite a hack. */
+
+	if (argc > 0) {
+		if (strcmp("--binary",argv[1]) == 0 ||
+		    strcmp("-b",argv[1]) == 0)
+		{
+			// Switch on binary mode and shift arguments by one
+			binary = true;
+			argc--;
+			argv++;
+		}
+	}
+
 	// TODO: figure out what should happen if an effect is not found by name
-	if(argc < 3) printf("Missing effect and length arguments!\n");
-	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]), "", NULL);
-	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], NULL);
-	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]), argv[3], argv[4]);
+	if(argc < 3) {
+		fprintf(stderr,"Missing effect and length arguments!\n\n"
+			"Usage: %s [-b|--binary] name [length] [sensor_file] "
+			"[custom_data]\n",prog);
+	}
+	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]),
+					 "", NULL, binary);
+	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]),
+					 argv[3], NULL, binary);
+	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]),
+					 argv[3], argv[4], binary);
 }
 
-void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data) {
+void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data, bool binary) {
 	const int size = 50;
 	char filename[size];
 	uint8_t use_sensors = strlen(sensor_path) > 0;
@@ -83,8 +106,10 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	/* Increment frame counter always by 5 * 8 ms (25 fps)
 	   to simulate slow drawing. */
 	const uint16_t drawing_time = 5;
+	const uint8_t fps = 125/drawing_time;
 	
-	int bytes = snprintf(filename, size, "exports/%s.json", effect->name);
+	int bytes = snprintf(filename, size, "exports/%s.%s", effect->name, 
+			     binary ? "elo" : "json");
 	assert(bytes <= size);
 
 	printf("Exporting %f seconds of %s to file %s\n",
@@ -112,8 +137,19 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 				* accessible by get_led() */
 	}
 
-	// Draw the frames
-	fputs("{\"fps\":25,\"geometry\":[8,8,8],\"frames\":[[",f); // TODO handle errors
+	// TODO handle errors on file operations!
+
+	if (binary) {
+		// Hard coded frame size
+		fputs("EV1",f);
+		fputc(fps,f);
+		fputc(GS_BUF_BYTES >> 8,f);
+		fputc(GS_BUF_BYTES,f);
+	} else {
+		// Draw the frames
+		fprintf(f,"{\"fps\":%d,\"geometry\":[%d,%d,%d],\"frames\":[[",
+			fps,LEDS_X,LEDS_Y,LEDS_Z);
+	}
 
 	int i;
 	for (i = 0, ticks = 0; ticks < length * 10; ticks += drawing_time, i++) {
@@ -130,26 +166,33 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 		gs_buf_swap();
 
 		// Export stuff
-		for (int j=0; j<768; j+=3) {
-			uint16_t fst =
-				gs_buf_front[j] << 4 |
-				gs_buf_front[j+1] >> 4;
-			uint16_t snd =
-				((gs_buf_front[j+1] & 0x0f) << 8) |
-				gs_buf_front[j+2];
-
-			fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
+		if (binary) {
+			// Write the raw buffer
+			fwrite(gs_buf_front,GS_BUF_BYTES,1,f);
+		} else {
+			for (int j=0; j<GS_BUF_BYTES; j+=3) {
+				uint16_t fst =
+					gs_buf_front[j] << 4 |
+					gs_buf_front[j+1] >> 4;
+				uint16_t snd =
+					((gs_buf_front[j+1] & 0x0f) << 8) |
+					gs_buf_front[j+2];
+				
+				fprintf(f,"%f,%f,",(float)fst/4095,(float)snd/4095);
+			}
+			
+			// Unwind last comma
+			fseek(f,-1,SEEK_CUR); // TODO handle errors
+			fputs("],[",f); // TODO handle errors
 		}
-
-		// Unwind last comma
-		fseek(f,-1,SEEK_CUR); // TODO handle errors
-		fputs("],[",f); // TODO handle errors
 	}
 
 	// Return buffers back to original
 	if (!effect->flip_buffers) gs_buf_front = old_front;
 
-	fseek(f,-2,SEEK_CUR); // TODO handle errors
-	fputs("]}\n",f); // TODO handle errors
+	if (!binary) {
+		fseek(f,-2,SEEK_CUR); // TODO handle errors
+		fputs("]}\n",f); // TODO handle errors
+	}
 	fclose(f); // TODO handle errors
 }
