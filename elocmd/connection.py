@@ -50,7 +50,6 @@ class Connection():
 
         if config.DEBUG:
             print("Sent: {0} | {1}".format(cmd, binascii.hexlify(cmd)))
-
         self.ser.write(cmd)
 
     def read(self):

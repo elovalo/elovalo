@@ -64,6 +64,36 @@ class EloCmd(cmd.Cmd):
         self.conn.send_command(config.Command.SELECT_PLAYLIST, pl)
         self.response_parser().parse_ok()
 
+    def do_file(self, line):
+        """Open an effect data file and send its contents to the serial port"""
+        with open(line, 'r') as f:
+            m = f.read(3)
+            if m != "EV1":
+                print("Not an Elovalo effect file")
+                return
+            fps = struct.unpack(">B", f.read(1))[0]
+            frame_size = struct.unpack(">H", f.read(2))[0]
+
+            self.conn.send_command(config.Command.SERIAL_FRAME)
+            device_fs = struct.unpack(">H", serial.parse_resp()[:2])[0]
+            if frame_size != device_fs:
+                print("Incompatible frame sizes {} != {}".format(frame_size,
+                    device_fs))
+                return
+            
+            while True:
+                frame = f.read(frame_size)
+                if not frame: break
+                t = time.time()
+                self.conn.send_command('', frame)
+                d = (t + (1.0/fps)) - time.time()
+                if d > 0:
+                    time.sleep(d)
+
+                if not self.response_parser().parse_flip():
+                    print("Incorrect response, expected FLIP")
+                    return
+
     def do_time(self, line):
         """Get and synchronize device time"""
         local_t = int(time.time())
