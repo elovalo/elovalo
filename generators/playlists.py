@@ -1,18 +1,18 @@
 #
-# Copyright 2012 Elovalo project group 
-# 
+# Copyright 2012 Elovalo project group
+#
 # This file is part of Elovalo.
-# 
+#
 # Elovalo is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Elovalo is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Elovalo.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -20,13 +20,20 @@
 import os
 import json
 import itertools
+import subprocess
 import yaml
 import xml.etree.ElementTree as ET
 from glob import glob
 
 TICK_GRANULARITY = 0.008
 
+
 def generate(source, target, conf, effects=None):
+    parent_dir = os.path.split(target)[0]
+
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
+
     write(target, playlist_source(attach_ids(get_playlists(
         load(source), load_conf(conf)), get_names(effects))))
 
@@ -63,9 +70,10 @@ def get_playlists(data, conf):
 
         return ret
 
-    print 'Missing playlist conf! Using all playlists instead.'
+    print 'Missing src/playlists.json! Using all playlists instead.'
 
     return data
+
 
 def attach_ids(data, effects):
     for d in data:
@@ -96,25 +104,35 @@ def playlist_source(data):
     file_start = '''/* GENERATED FILE! DON'T MODIFY!!! */
 #include <stdint.h>
 #include <stdlib.h>
-#include "playlists.h"
-#include "pgmspace.h"
+#include "../common/playlists.h"
+#include "../common/pgmspace.h"
+#include "../effects/lib/font8x8.h"
 '''
 
     def custom_data(data):
+        process = subprocess.Popen(["build/preprocessor/convert_glyphs"],
+                                   stdin=subprocess.PIPE,
+                                   stdout=subprocess.PIPE)
+
+        def glyph_convert(s):
+            sutf8 = s.encode('UTF-8')
+            process.stdin.write(sutf8)
+            process.stdin.write('\n')
+            process.stdin.flush()
+            return process.stdout.readline()
+
         def get_str(d):
             if d:
-                h = str(hex(len(d)))[2:]
+                return glyph_convert(d)
 
-                if len(h) == 1:
-                    return '"\\x0' + h + "\"\"" + d + '"'
-
-                return '"\\x' + h + "\"\"" + d +'"'
-
-            return '"\\x00"'  # NULL seems to fail (invalid initializer error)
+            return '{0}'
 
         effects = list(itertools.chain(*[d['playlist'] for d in data]))
-        ret = ['PROGMEM const char s_playlist_item_' + str(i) + '[] = ' + \
+        ret = ['PROGMEM const struct glyph_buf s_playlist_item_' + \
+            str(i) + ' = ' + \
             get_str(d.get('data', '')) + ';' for i, d in enumerate(effects)]
+
+        process.terminate()
 
         return '\n'.join(ret) + '\n'
 
@@ -124,8 +142,10 @@ def playlist_source(data):
         ret = ['const playlistitem_t master_playlist[' + effects_len +
             '] PROGMEM = {']
 
-        [ret.append('\t{ ' + str(fx['id']) + ', ' + str(int(fx['length']/TICK_GRANULARITY)) + \
-            ', &s_playlist_item_' + str(i)  + ' },') for i, fx in enumerate(effects)]
+        [ret.append('\t{ ' + str(fx['id']) + ', ' + \
+            str(int(fx['length'] / TICK_GRANULARITY)) + \
+            ', &s_playlist_item_' + str(i) + \
+            ' },') for i, fx in enumerate(effects)]
 
         ret.append('};')
 
@@ -148,11 +168,18 @@ def playlist_source(data):
 
         return '\n'.join(ret) + '\n'
 
+    def playlist_names(data):
+        o = [x['name'] for x in data]
+        s = json.dumps(o)
+        return ('PROGMEM const char playlists_json[] = ' + c_string(s) + ';\n' +
+                'const uint16_t playlists_json_len = ' + str(len(s)) + ';\n')
+
     return '\n'.join([
         file_start,
         custom_data(data),
         master_playlist(data),
         playlist_indices(data),
+        playlist_names(data),
     ])
 
 
@@ -169,3 +196,6 @@ def load_xml(src):
         })
 
     return ret
+
+def c_string(s):
+    return '"' + s.replace('\\', r'\\').replace('"', r'\"') + '"'

@@ -17,19 +17,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include <string.h>
-#include "effects/lib/utils.h"
-#include "effects.h"
-#include "effect_utils.h"
+/* The C file for this header is automatically generated and located
+ * at ../generated/playlists.c */
 
-const effect_t *find_effect(const char *name) {
-	for(int i = 0; i < effects_len; i++) {
-		if(strcmp(effects[i].name, name) == 0) {
-			return &effects[i];
-		}
-	}
+typedef struct {
+	uint8_t id;
+	uint16_t length;
+	const void *data;
+} playlistitem_t;
 
-	// TODO: deal with this situation at top level
-	return &effects[effects_len];
-}
+extern const playlistitem_t master_playlist[];
+extern const uint8_t master_playlist_len;
+extern const uint8_t playlists[];
+extern const uint8_t playlists_len;
+extern const char playlists_json[];
+extern const uint16_t playlists_json_len;

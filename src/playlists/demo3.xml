@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <playlist>
     <effect name="sine">
-        <length>4000</length>
+        <length>32</length>
     </effect>
     <effect name="wave">
-        <length>2000</length>
+        <length>16</length>
     </effect>
 </playlist>

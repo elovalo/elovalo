@@ -5,6 +5,10 @@ from generators.build import *
 # Build default environment with optimization enabled
 env = avr_build_env(flags = '-O2')
 
+# Add AVR variant name
+Import('build_type')
+env.Append(CPPDEFINES = 'AVR_'+build_type.upper())
+
 # Make elf
 env.Program(Elf,avr_source_files())
 
@@ -17,10 +21,10 @@ env.Command("fuse.hex", Elf, 'avr-objcopy -j .fuse -O ihex $SOURCE $TARGET')
 env.Command("assembly.lss", Elf, 'avr-objdump -h -S $SOURCE >$TARGET')
 
 # Show memory usage
-env.Command(None, Elf, "avr-size -C --mcu=atmega328p $SOURCE")
+env.Command(None, Elf, 'echo "'+build_type.upper()+' environment";avr-size -C --mcu=atmega328p $SOURCE')
 
 # Program the thing
-if GetOption('program'):
+if GetOption('program-'+build_type):
     pgm = env.Command('pgm', ["flash.hex","eeprom.hex","fuse.hex"],
                       'avrdude -pm328p -cusbasp -y -u '+
                       '-Uflash:w:${SOURCES[0]}:a '+

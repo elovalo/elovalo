@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef AVR_ELO
+
 #include <avr/pgmspace.h>
 #include <stdlib.h>
 #include "serial.h"
@@ -80,3 +82,5 @@ read_t read_escaped() {
 	}
 	return ret;
 }
+
+#endif //AVR_ELO

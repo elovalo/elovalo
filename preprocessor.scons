@@ -1,0 +1,8 @@
+# -*- mode: python; coding: utf-8 -*-
+import os
+
+env = Environment(ENV=os.environ)
+env.Append(CCFLAGS = "-O2 -Wall -std=gnu99")
+
+# Make glyph array converter
+env.Program('convert_glyphs', [Glob('src/effects/lib/font8x8.c'), Glob('src/preprocessor/glyph_array.c')])

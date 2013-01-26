@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../common/effects.h"
+
 // Operating modes
 #define MODE_IDLE           0x00 // Do not update display buffers
 #define MODE_EFFECT         0x01 // Draw effect
@@ -24,3 +26,23 @@
 #define MODE_SLEEP          0x03 // Same as idle, but cube must be started first
 
 extern uint8_t mode; // If you need to change the running effeet
+
+void select_playlist_item(uint8_t index);
+void init_current_effect(void);
+uint8_t change_current_effect(uint8_t i);
+uint8_t change_playlist(uint8_t i);
+
+void use_stored_effect(void);
+void use_stored_playlist(void);
+
+uint8_t get_mode(void);
+void set_mode(uint8_t m);
+
+// Some functions to alter AVR_ZCL states
+void reset_modified_state(void);
+void mark_playlist_modified(void);
+void mark_effect_modified(void);
+void mark_text_modified(void);
+
+extern uint8_t active_effect; // Index of the active effect. Used for playlist
+extern uint8_t active_playlist; // Index of the active playlist

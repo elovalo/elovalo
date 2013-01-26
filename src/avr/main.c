@@ -26,65 +26,26 @@
 #include "tlc5940.h"
 #include "hcsr04.h"
 #include "adc.h"
-#include "serial.h"
-#include "serial_escaped.h"
+#include "serial_target.h"
 #include "clock.h"
 #include "configuration.h"
 #include "powersave.h"
 #include "main.h"
-#include "../pgmspace.h"
-#include "../cube.h"
-#include "../effects.h"
-#include "../playlists.h"
-#include "sleep.h"
-
-/* Serial communication constants. Please note when allocating new CMD
- * and REPORT codes: LITERAL_ESCAPE and ESCAPE should not be used. See
- * the values in serial_escaped.h .
- */
-
-// Commands issued by the sender
-#define CMD_STOP            '.'
-#define CMD_LIST_EFFECTS    'e'
-#define CMD_CHANGE_EFFECT   'E'
-#define CMD_SERIAL_FRAME    'F'
-#define CMD_GET_TIME        't'
-#define CMD_SET_TIME        'T'
-#define CMD_SET_SENSOR      'S'
-#define CMD_LIST_ACTIONS    'a'
-#define CMD_RUN_ACTION      'A'
-#define CMD_READ_CRONTAB    'c'
-#define CMD_WRITE_CRONTAB   'C'
-#define CMD_SELECT_PLAYLIST 'P'
-#define CMD_NOTHING         '*' // May be used to end binary transmission
-
-// Autonomous responses. These may occur anywhere, anytime
-#define REPORT_JUNK_CHAR    '@' // Unsolicited data received
-#define REPORT_INVALID_CMD  '?' // Unknown command type
-#define REPORT_ANSWERING    '(' // Command received, starting to process input
-#define REPORT_READY        ')' // Processing of command is ready
-#define REPORT_BOOT         'B' // Device has been (re)booted
-#define REPORT_FLIP         '%' // Frame has been flipped, ready to receive new
-
-// Typical answers to commands. Use of these is command-specific
-
-#define RESP_INTERRUPTED    0x00
-#define RESP_BAD_ARG_A      0x01
-#define RESP_BAD_ARG_B      0x02
-
-#define CRON_ITEM_NOT_VALID 0x01
-
-// Dirty trick to ease building of CMD handling blocks
-#define ELSEIFCMD(CMD) else if (cmd==CMD && answering())
-// Fills in a variable and leaves handler if it cannot be read
-#define SERIAL_READ(x) if (serial_to_sram(&(x),sizeof(x)) < sizeof(x)) goto interrupted
+#include "zcl_skeleton.h"
+#include "../common/pgmspace.h"
+#include "../common/cube.h"
+#include "../common/effects.h"
+#include "../common/playlists.h"
 
 uint8_t mode = MODE_IDLE; // Starting with no operation on.
 const effect_t *effect; // Current effect. Note: points to PGM
 
 uint16_t effect_length; // Length of the current effect. Used for playlist
+static uint16_t next_draw_at = 0; // Used for FPS limiting
+
 // It might be nice to use this for single effect too (set via serial).
 uint8_t active_effect; // Index of the active effect. Used for playlist
+uint8_t active_playlist; // Index of the active playlist
 
 // Variables used only in simulation mode
 #ifdef SIMU
@@ -92,14 +53,16 @@ uint8_t simulation_mode __attribute__ ((section (".noinit")));
 uint8_t simulation_effect __attribute__ ((section (".noinit")));
 #endif
 
+struct {
+	bool mode:1;
+	bool playlist:1;
+	bool effect:1;
+	bool text:1;
+} modified = {true,true,true,true};
+
 // Private functions
-static void process_cmd(void);
-static void report(uint8_t code);
-static bool answering(void);
 static void init_playlist(void);
 static void next_effect();
-static void select_playlist_item(uint8_t index);
-static void init_current_effect(void);
 static void pick_startup_mode(void);
 
 int main() {
@@ -120,27 +83,23 @@ int main() {
 
 	hcsr04_start_continuous_meas();
 	adc_start();
-	
-	// Greet the serial user
-	report(REPORT_BOOT);
 
+	serial_boot_report();
+	
 	// Select correct startup mode
 	pick_startup_mode();
 
 	while(1) {
-		if(serial_available()) {
-			uint8_t cmd = serial_read();
-
-			if (cmd == ESCAPE) process_cmd();
-			else report(REPORT_JUNK_CHAR);
-		}
+		/* Serial processing is implementation specific and defined in
+		 * serial_common.c */
+		process_serial();
 
 		switch (mode) {
 		case MODE_SLEEP:
 			// Fall through to MODE_IDLE
 		case MODE_IDLE:
 			// No operation
-			sleep_mode();
+			sleep_if_no_traffic();
 			break;
 		case MODE_PLAYLIST:
 			ticks = centisecs();
@@ -152,11 +111,32 @@ int main() {
 			// no need to break!
 			// fall to MODE_EFFECT on purpose
 		case MODE_EFFECT:
-			// If a buffer is not yet flipped
-			if (flags.may_flip) break;
+			// If a buffer is not yet flipped, wait interrupts
+			if (flags.may_flip) {
+				sleep_if_no_traffic();
+				break;
+			}
 
-			// Update clock and sensor values
+			// Update clock
 			ticks = centisecs();
+	
+			/* Go back to serial handler if drawing time
+			 * is reached. By doing this we avoid serial
+			 * port slowdown when FPS is low */
+			if (ticks < next_draw_at ) {
+				sleep_if_no_traffic();
+				break;
+			}
+
+			/* Restart effect if maximum ticks is
+			 * reached. This may result a glitch but is
+			 * better than the effect to stop. */
+			if (ticks == ~0) {
+				init_current_effect();
+				ticks = 0;
+			}	
+
+			// Update sensor values
 			sensors.distance1 = hcsr04_get_distance_in_cm();
 			sensors.distance2 = hcsr04_get_distance_in_cm(); //TODO: use separate sensor
 			sensors.ambient_light = adc_get(0) >> 2;
@@ -169,12 +149,8 @@ int main() {
 				allow_flipping(true);
 			}
 
-			// Slow down drawing if FPS is going to be too high
-			uint16_t target_ticks =
-				ticks + pgm_get(effect->minimum_ticks,byte);
-			while (centisecs() < target_ticks ) {
-				sleep_mode();
-			}
+			// Update time when next drawing is allowed
+			next_draw_at = ticks + pgm_get(effect->minimum_ticks,byte);
 
 			break;
 		}
@@ -183,168 +159,7 @@ int main() {
 	return 0;
 }
 
-/**
- * Processes a command. The escape character is already read in
- * main(). This function may block because of reading serial data, but
- * that is okay for now.
- */
-void process_cmd(void)
-{
-	uint8_t cmd = serial_read_blocking();
-
-	if (cmd == ESCAPE) {
-		// Put the character back
-		serial_ungetc(ESCAPE);
-		return; // Skip out:
-	} if (cmd == CMD_NOTHING) {
-		/* Outputs nothing, just ensures that previous command
-		 * has ended */
-		return;
-	} ELSEIFCMD(CMD_STOP) {
-		mode = MODE_IDLE;
-	} ELSEIFCMD(CMD_CHANGE_EFFECT) {
-		uint8_t i;
-		SERIAL_READ(i);
-		if (i >= effects_len)
-			goto bad_arg_a;
-
-		// Change mode and pick correct effect from the array.
-		mode = MODE_EFFECT;
-		effect = effects + i;
-
-		// Prepare running of the new effect
-		init_current_effect();
-	} ELSEIFCMD(CMD_SELECT_PLAYLIST) {
-		uint8_t i;
-		SERIAL_READ(i);
-		if (i >= playlists_len)
-			goto bad_arg_a;
-
-		// Change mode and run init
-		mode = MODE_PLAYLIST;
-		select_playlist_item(playlists[i]);
-		init_current_effect();
-	} ELSEIFCMD(CMD_SET_TIME) {
-		time_t tmp_time;
-		SERIAL_READ(tmp_time);
-		stime(&tmp_time);
-	} ELSEIFCMD(CMD_GET_TIME) {
-		time_t tmp_time = time(NULL);
-		sram_to_serial(&tmp_time,sizeof(time_t));
-	} ELSEIFCMD(CMD_SET_SENSOR) {
-		struct {
-			uint8_t start;
-			uint8_t len;
-		} data;
-		SERIAL_READ(data);
-
-		// Check boundaries
-		if (data.start >= sizeof(sensors_t))
-			goto bad_arg_a;
-
-		if (data.start + data.len > sizeof(sensors_t))
-			goto bad_arg_b;
-
-		// Fill in sensor structure
-		void *p = &sensors;
-		if (serial_to_sram(p+data.start,data.len) < data.len)
-			goto interrupted;
-	} ELSEIFCMD(CMD_LIST_EFFECTS) {
-		// Print effect names separated by '\0' character
-		for (uint8_t i=0; i<effects_len; i++) {
-			send_string_from_pgm(&effects[i].name);
-		}
-	} ELSEIFCMD(CMD_LIST_ACTIONS) {
-		// Report function pointers and their values.
-		for (uint8_t i=0; i<cron_actions_len; i++) {
-			// Send function pointer, little-endian
-			uint16_t fp = pgm_get(cron_actions[i].act,word);
-			send_escaped(fp);
-			send_escaped(fp >> 8);
-
-			// Send action and arg name
-			send_string_from_pgm(&cron_actions[i].act_key);
-			send_string_from_pgm(&cron_actions[i].act_name);
-			send_string_from_pgm(&cron_actions[i].arg_name);
-		}
-	} ELSEIFCMD(CMD_RUN_ACTION) {
-		// Runs given action immediately
-		struct {
-			action_t act;
-			uint8_t arg;
-		} a;
-		SERIAL_READ(a);
-		if (!is_action_valid(a.act))
-			goto bad_arg_a;
-		a.act(a.arg);
-	} ELSEIFCMD(CMD_READ_CRONTAB) {
-		// Print all entries in crontab
-		for (uint8_t i=0; i<CRONTAB_SIZE; i++) {
-			// Read one crotab entry from EEPROM
-			struct event e;
-			get_crontab_entry(&e,i);
-
-			// If it's end, stop reading, otherwise send bytes
-			if (e.kind == END) break; // from for
-			sram_to_serial(&e,sizeof(e));
-		}
-	} ELSEIFCMD(CMD_WRITE_CRONTAB) {
-		uint8_t i;
-		for (i=0; i<CRONTAB_SIZE; i++) {
-			// Writing a crontab entry
-			struct event e;
-
-			/* Read a single element. If user stops
-			 * sending in element boundary, that is
-			 * acceptable. If not, then report error. */
-			uint8_t bytes_read = serial_to_sram(&e,sizeof(e));
-			if (bytes_read == 0) {
-				break; // It's okay to stop in element boundary
-			} else if (bytes_read < sizeof(e)) {
-				send_escaped(RESP_INTERRUPTED);
-				break;
-			}
-			
-			// Validating
-			if (!is_event_valid(&e)) {
-				send_escaped(CRON_ITEM_NOT_VALID);
-				send_escaped(i);
-				break;
-			}
-
-			// Write to EEPROM
-			set_crontab_entry(&e,i);
-		}
-
-		/* Truncating crontab to element count. This is done
-		 * even in case of an error. In that case the crontab
-		 * is truncated to the length of first valid
-		 * entries. */
-		truncate_crontab(i);
-	} else {
-		report(REPORT_INVALID_CMD);
-		return;
-	}
-	goto out;
-
-bad_arg_a:
-	send_escaped(RESP_BAD_ARG_A);
-	goto out;
-
-bad_arg_b:
-	send_escaped(RESP_BAD_ARG_B);
-	goto out;
-
-interrupted:
-	send_escaped(RESP_INTERRUPTED);
-	goto out;
-
-out:
-	// All commands should be ended, successful or not
-	report(REPORT_READY);
-}
-
-#ifdef SIMU
+#if defined SIMU
 static void pick_startup_mode(void)
 {
 	// Start normally
@@ -357,24 +172,39 @@ static void pick_startup_mode(void)
 		init_current_effect();
 		break;
 	case MODE_PLAYLIST:
-		select_playlist_item(playlists[0]);
-		init_current_effect();
+		change_playlist(0);
 		break;
 	default:
 		mode = MODE_IDLE;
 	}
 }
-#else
+#elif defined AVR_ZCL
 static void pick_startup_mode(void)
 {
-	// Quick fix to start in kiosk mode
-	mode = MODE_PLAYLIST;
-	select_playlist_item(playlists[0]);
-	init_current_effect();
+	// Reading configrutaion etc. from non-volatile memory
+	init_zcl();
+	uint8_t start_mode = read_mode();
 
-	// Shut down the cube at the beginning
-	cube_shutdown(0);
+	// Actual mode selection
+	if (start_mode != MODE_SLEEP) {
+		cube_start(0);
+		// cube_start() does implicit modification to 'mode'.
+	}
+
+	mode = start_mode;
+	use_stored_effect();
+	use_stored_playlist();
 }
+#elif defined AVR_ELO
+static void pick_startup_mode(void)
+{
+	cube_start(0);
+
+	// Quick fix to start in kiosk mode
+	change_playlist(0);
+}
+#else
+#error Unknown variant
 #endif
 
 static void init_playlist(void) {
@@ -382,11 +212,17 @@ static void init_playlist(void) {
 }
 
 static void next_effect() {
-	if(active_effect + 1 == master_playlist_len) select_playlist_item(0);
-	else select_playlist_item(active_effect + 1);
+	if (active_effect+1 == master_playlist_len ||
+	    active_effect+1 == pgm_get(playlists[active_playlist+1],byte)) {
+		// End reached. Go to the first item of the playlist.
+		select_playlist_item(pgm_get(playlists[active_playlist],byte));
+	} else {
+		// Advance to the next item in playlist
+		select_playlist_item(active_effect + 1);
+	}
 }
 
-static void select_playlist_item(uint8_t index) {
+void select_playlist_item(uint8_t index) {
 	active_effect = index;
 	const playlistitem_t *item = master_playlist + index;
 	uint8_t e_id = pgm_get(item->id,byte);
@@ -395,7 +231,7 @@ static void select_playlist_item(uint8_t index) {
 	custom_data = (void*)pgm_get(item->data,word);
 }
 
-static void init_current_effect(void) {
+void init_current_effect(void) {
 	// Disable flipping until first frame is drawn
 	allow_flipping(false);
 
@@ -417,22 +253,107 @@ static void init_current_effect(void) {
 		gs_buf_back = gs_buf_front;
 	}
 	
-	// Restart tick counter
+	// Restart tick counter and FPS limiter
 	reset_time();
+	next_draw_at = 0;
 }
 
+uint8_t change_current_effect(uint8_t i) {
+	if (i >= effects_len) { return 1; }
 
-/**
- * Send response via serial port.
- */
-static void report(uint8_t code) {
-	serial_send(ESCAPE);
-	serial_send(code);
+	// Change mode and pick correct effect from the array.
+	mode = MODE_EFFECT;
+	effect = effects + i;
+	custom_data = NULL; // Used in playlists only
+
+	// Prepare running of the new effect
+	init_current_effect();
+
+	return 0;
 }
 
-static bool answering(void) {
-	report(REPORT_ANSWERING);
-	return true;
+void use_stored_effect(void)
+{
+	if (mode != MODE_EFFECT) return;
+	if (!(modified.effect || modified.mode ||
+	      (modified.text && pgm_get(effect->dynamic_text, byte))))
+	{
+		return;
+	}
+
+	uint8_t new_effect = read_effect();
+	// Avoid dangling pointers and extra initialization
+      	if (new_effect >= effects_len) new_effect = 0;
+
+	effect = effects + new_effect;
+	custom_data = NULL; // Used in playlists only
+	init_current_effect();
+}
+
+void use_stored_playlist(void)
+{
+	if (mode != MODE_PLAYLIST) return;
+	if (!(modified.playlist || modified.mode)) return;
+
+	uint8_t new_playlist = read_playlist();
+	// Avoid dangling pointers and extra initialization
+	if (new_playlist >= playlists_len) new_playlist = 0;
+
+	// Activate
+	active_playlist = new_playlist;
+	select_playlist_item(pgm_get(playlists[new_playlist],byte));
+	init_current_effect();
+}
+
+uint8_t change_playlist(uint8_t i) {
+	if (i >= playlists_len) { return 1; }
+
+	active_playlist = i;
+
+	// Change mode and run init
+	mode = MODE_PLAYLIST;
+	select_playlist_item(pgm_get(playlists[i],byte));
+	init_current_effect();
+
+	return 0;
+}
+
+uint8_t get_mode(void) {
+	return mode;
+}
+
+void set_mode(uint8_t new_mode) {
+	if (mode == new_mode) return;
+	store_mode(new_mode);
+	modified.mode = true;
+
+	if (mode == MODE_SLEEP) {
+		cube_start(0);
+	} else if (new_mode == MODE_SLEEP) {
+		cube_shutdown(0);
+	}
+
+	mode = new_mode;
+}
+
+void reset_modified_state(void)
+{
+	modified.effect = false;
+	modified.playlist = false;
+	modified.mode = false;
+	modified.text = false;
+}
+
+void mark_playlist_modified(void) {
+	modified.playlist = true;
+}
+
+void mark_effect_modified(void) {
+	modified.effect = true;
+}
+
+void mark_text_modified(void) {
+	modified.text = true;
 }
 
 //If an interrupt happens and there isn't an interrupt handler, we go here!

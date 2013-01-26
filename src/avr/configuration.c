@@ -18,6 +18,7 @@
  */
 
 #include <avr/eeprom.h>
+#include "main.h"
 #include "cron.h"
 #include "configuration.h"
 #include "powersave.h"
@@ -27,24 +28,15 @@
 
 #define TIME(h,m) ((h)*60+(m))
 
-/* Initial contents of EEPROM after programming. In future this may be
- * empty but currently it holds schedule for daily powersave from
- * 02:00–19:00. */
+/* Initial contents of EEPROM after programming: empty */
 struct event eeprom_crontab[CRONTAB_SIZE] EEMEM = {
-	{ .kind = WEEKLY,
-	  .act = &cube_shutdown,
-	  .u = { .weekly = { .weekdays = EVERY_DAY,
-			     .minutes = TIME(23,15) },
-		}
-	},
-	{ .kind = WEEKLY,
-	  .act = &cube_start,
-	  .u = { .weekly = { .weekdays = EVERY_DAY,
-			     .minutes = TIME(15,0) },
-		}
-	},
 	END_OF_CRONTAB
 };
+
+uint32_t EEMEM eeprom_timezone = 0; // UTC by default
+uint8_t EEMEM eeprom_effect = 0;
+uint8_t EEMEM eeprom_playlist = 0;
+uint8_t EEMEM eeprom_mode = MODE_SLEEP;
 
 void get_crontab_entry(struct event *p,uint8_t i)
 {
@@ -59,4 +51,46 @@ void truncate_crontab(uint8_t n) {
 void set_crontab_entry(struct event *p,uint8_t i)
 {
 	eeprom_update_block(p,eeprom_crontab+i,sizeof(struct event));
+}
+
+int32_t get_timezone(void)
+{
+	return eeprom_read_dword(&eeprom_timezone);
+}
+
+void set_timezone(int32_t tz)
+{
+	eeprom_update_dword(&eeprom_timezone,tz);
+}
+
+uint8_t read_effect(void)
+{
+	return eeprom_read_byte(&eeprom_effect);
+}
+
+void store_effect(uint8_t e)
+{
+	eeprom_update_byte(&eeprom_effect,e);
+	mark_effect_modified();
+}
+
+uint8_t read_playlist(void)
+{
+	return eeprom_read_byte(&eeprom_playlist);
+}
+
+void store_playlist(uint8_t p)
+{
+	eeprom_update_byte(&eeprom_playlist,p);
+	mark_playlist_modified();
+}
+
+uint8_t read_mode(void)
+{
+	return eeprom_read_byte(&eeprom_mode);
+}
+
+void store_mode(uint8_t m)
+{
+	eeprom_update_byte(&eeprom_mode,m);
 }

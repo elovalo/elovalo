@@ -1,0 +1,14 @@
+- name: ilkka
+  length: 15
+- name: sine
+  length: 15
+- name: scroll_text
+  data: "C2Smartlight инновационные решения в области уличного освещения"
+  length: 33
+- name: finite_worm
+  length: 15
+- name: heart
+  length: 15
+- name: scroll_text
+  data: "C2Smartlight инновационные решения в области уличного освещения"
+  length: 33

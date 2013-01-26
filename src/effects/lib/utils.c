@@ -21,12 +21,12 @@
  * Led cube effect utilities
  */
 
-#include "../../assert.h"
+#include "../../common/assert.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "../../env.h"
-#include "../../cube.h"
+#include "../../common/env.h"
+#include "../../common/cube.h"
 #include "utils.h"
 
 /* If you are changing LED count make sure you are not using set_led
@@ -52,7 +52,7 @@ void set_row(uint8_t x, uint8_t z, uint8_t y1, uint8_t y2, uint16_t intensity)
 
 void set_z(uint8_t x, uint8_t y, uint16_t intensity)
 {
-	assert(intensity <= MAX_2D_PLOT_INTENSITY);
+	if (intensity > MAX_2D_PLOT_INTENSITY) return;
 
 	// Do linear interpolation (two voxels per x-y pair)
 	uint8_t lower_z = intensity >> GS_DEPTH;
@@ -71,6 +71,13 @@ void set_led_8_8_12(uint8_t x, uint8_t y, uint8_t z, uint16_t i)
 	assert(y < LEDS_Y);
 	assert(z < LEDS_Z);
 	assert(i < (1 << GS_DEPTH));
+
+#ifdef MIRROR_X
+	x = 7-x;
+#endif
+#ifdef MIRROR_Y
+	y = 7-y;
+#endif
 
 	/* Cube buffers are bit packed: 2 voxels per 3 bytes when
 	 * GS_DEPTH is 12. This calculates bit position efficiently by

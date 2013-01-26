@@ -23,35 +23,13 @@
 #include <util/atomic.h>
 #include "serial.h"
 
-// RX ring buffer
-uint8_t rx_buf[RX_BUF_SIZE];
-volatile uint8_t rx_in_i = 0; // Set by USART_RX_vect
-uint8_t rx_out_i = 0;
-
 // TX ring buffer
-uint8_t tx_buf[TX_BUF_SIZE];
-uint8_t tx_in_i = 0;
-volatile uint8_t tx_out_i = 0; // Set by USART_TX_vect
+static uint8_t tx_buf[TX_BUF_SIZE];
+static uint8_t tx_in_i = 0;
+volatile static uint8_t tx_out_i = 0; // Set by USART_TX_vect
 
-// Receiver and transmitter states
+// Transmitter state
 volatile uint8_t tx_state = TXRX_OK;
-volatile uint8_t rx_state = TXRX_OK;
-
-/**
- * Called when a byte is received from USART.
- */
-ISR(USART_RX_vect)
-{
-	rx_buf[rx_in_i++] = UDR0;
-
-	// Wrap to start
-	if (rx_in_i == RX_BUF_SIZE) rx_in_i = 0;
-	
-	if (rx_in_i == rx_out_i) {
-		// Overflow condition
-		rx_state = TXRX_OVERFLOW;
-	}
-}
 
 /**
  * Called when USART has finished transmit.
@@ -69,42 +47,9 @@ ISR(USART_TX_vect)
 	if (tx_out_i == TX_BUF_SIZE) tx_out_i = 0;
 }
 
-uint8_t serial_available(void) {
-	// If it overflows, do not let reads to happen
-	if (rx_state == TXRX_OVERFLOW) return 0;
-
-	uint8_t diff = rx_in_i - rx_out_i;
-	return (rx_in_i < rx_out_i) ? diff + RX_BUF_SIZE : diff;
-}
-
-void serial_RX_empty(void) {
-	rx_out_i = rx_in_i;
-	rx_state = TXRX_OK;
-}
-
 void serial_TX_empty(void) {
 	tx_in_i = tx_out_i;
 	tx_state = TXRX_OK;
-}
-
-uint8_t serial_read(void) {
-	uint8_t data = rx_buf[rx_out_i++];
-	if (rx_out_i == RX_BUF_SIZE) rx_out_i = 0;
-	return data;
-}
-
-void serial_ungetc(uint8_t x)
-{
-	// Done as single assignment this to avoid atomicity problem
-	if (rx_out_i == 0) rx_out_i = RX_BUF_SIZE - 1;
-	else rx_out_i--;
-
-	rx_buf[rx_out_i] = x;
-
-	if (rx_in_i == rx_out_i) {
-		// Overflow condition
-		rx_state = TXRX_OVERFLOW;
-	}
 }
 
 uint8_t serial_send_available(void) {
@@ -135,6 +80,73 @@ void serial_send_nonblocking(uint8_t data)
 	}
 }
 
+void serial_send(uint8_t data) {
+	while ((tx_in_i+1 == tx_out_i) ||
+		   (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
+	serial_send_nonblocking(data);
+}
+
+/* Receiver functions. Conditionally compiled only for elocmd
+ * target. ZCL versions are in serial_zcl.c */
+#ifdef AVR_ELO
+
+// RX ring buffer
+uint8_t rx_buf[RX_BUF_SIZE];
+volatile uint8_t rx_in_i = 0; // Set by USART_RX_vect
+uint8_t rx_out_i = 0;
+
+// Receiver state
+volatile uint8_t rx_state = TXRX_OK;
+
+/**
+ * Called when a byte is received from USART.
+ */
+ISR(USART_RX_vect)
+{
+	rx_buf[rx_in_i++] = UDR0;
+
+	// Wrap to start
+	if (rx_in_i == RX_BUF_SIZE) rx_in_i = 0;
+	
+	if (rx_in_i == rx_out_i) {
+		// Overflow condition
+		rx_state = TXRX_OVERFLOW;
+	}
+}
+
+uint8_t serial_available(void) {
+	// If it overflows, do not let reads to happen
+	if (rx_state == TXRX_OVERFLOW) return 0;
+
+	uint8_t diff = rx_in_i - rx_out_i;
+	return (rx_in_i < rx_out_i) ? diff + RX_BUF_SIZE : diff;
+}
+
+void serial_RX_empty(void) {
+	rx_out_i = rx_in_i;
+	rx_state = TXRX_OK;
+}
+
+uint8_t serial_read(void) {
+	uint8_t data = rx_buf[rx_out_i++];
+	if (rx_out_i == RX_BUF_SIZE) rx_out_i = 0;
+	return data;
+}
+
+void serial_ungetc(uint8_t x)
+{
+	// Done as single assignment this to avoid atomicity problem
+	if (rx_out_i == 0) rx_out_i = RX_BUF_SIZE - 1;
+	else rx_out_i--;
+
+	rx_buf[rx_out_i] = x;
+
+	if (rx_in_i == rx_out_i) {
+		// Overflow condition
+		rx_state = TXRX_OVERFLOW;
+	}
+}
+
 uint8_t serial_read_blocking(void) {
 	while(!serial_available()) {
 		sleep_mode();
@@ -142,8 +154,4 @@ uint8_t serial_read_blocking(void) {
 	return serial_read();
 }
 
-void serial_send(uint8_t data) {
-	while ((tx_in_i+1 == tx_out_i) ||
-	       (tx_in_i == TX_BUF_SIZE-1 && tx_out_i == 0));
-	serial_send_nonblocking(data);
-}
+#endif // AVR_ELO

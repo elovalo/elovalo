@@ -1,14 +1,15 @@
 [
     {
         "name": "sine",
-        "length": 500
+        "length": 4
     },
     {
-        "name": "wave",
-        "length": 500
+	"name": "scroll_text",
+	"data": "This works!",
+	"length": 10
     },
     {
         "name": "all_on",
-        "length": 500
+        "length": 4
     }
 ]

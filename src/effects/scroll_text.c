@@ -18,20 +18,39 @@
  */
 
 # pragma FLIP
+# pragma DYNAMIC_TEXT
 
 #include "common.h"
 
-PROGMEM static const char default_text[] = "\x05""ERROR";
+struct {
+	const void *data;
+	enum mem_type mem;
+	uint16_t width;
+} vars;
+
+void init(void)
+{
+	if (custom_data == NULL) {
+		// Use stored text in EEPROM
+		vars.data = stored_glyphs();
+		vars.mem = MEM_EEPROM;
+	} else {
+		// Use text constants
+		vars.data = custom_data; //(const struct glyph_buf *)custom_data;
+		vars.mem = MEM_PROG;
+	}
+	
+	// Get string length a bit hard way. 2 is padding and 8 is char width.
+	const struct glyph_buf *p = (const struct glyph_buf *)vars.data;
+	vars.width = 8*(multimem_get(p->len,word,vars.mem)+2);
+}
 
 void effect(void)
 {
-	// TODO: Should be asserted instead of just sending "ERROR"
-	const char *text = custom_data == NULL? default_text: (const char*)custom_data;
-
 	clear_buffer();
-
-	int16_t pos = ticks >> 3;
-	scroll_text(text, true, pos, render_xy);
-	scroll_text(text, true, pos-7, render_yz);
+	// Slow down scrolling speed and wrap to beginning if needed
+	int16_t pos = (ticks >> 3) % vars.width;
+	scroll_text(vars.data, vars.mem, pos, render_xy);
+	scroll_text(vars.data, vars.mem, pos-7, render_yz);
 }
 

@@ -31,15 +31,20 @@ file_start = '''/* GENERATED FILE! DON'T MODIFY!!!
 
 #include <stdlib.h>
 #include <stdint.h>
-#include "pgmspace.h"
-#include "env.h"
-#include "effects.h"
-#include "effects/common.h"
+#include "../common/pgmspace.h"
+#include "../common/env.h"
+#include "../common/effects.h"
+#include "../effects/common.h"
 '''
 
 
 def generate(source, target):
     inp = SourceFiles(glob(source))
+
+    parent_dir = os.path.split(target)[0]
+
+    if not os.path.exists(parent_dir):
+        os.mkdir(parent_dir)
 
     with open(target, 'w') as t:
         t.write(file_start)
@@ -63,6 +68,18 @@ def generate(source, target):
         t.write('\n')
         t.write(inp.functions)
 
+def generate_defines(source, target):
+    # FIXME Not effective, reads all contents to get just file names
+    inp = SourceFiles(glob(source))
+
+    with open(target, 'w') as t:
+        t.write('''/* GENERATED FILE! DON'T MODIFY!!!
+ * Effect related constants
+ */
+
+#define EFFECT_JSON_LEN ''')
+        t.write(str(inp.effect_json_len))
+        t.write('\n')
 
 class SourceFiles(object):
 
@@ -96,6 +113,10 @@ class SourceFiles(object):
             ]) + '\n'
 
     @property
+    def effect_json_len(self):
+        return 1+sum([f.name.__len__()+3 for f in self._files])
+
+    @property
     def function_names(self):
         name = lambda n: 'PROGMEM const char s_' + n + '[] = "' + n + '";'
 
@@ -116,10 +137,12 @@ class SourceFiles(object):
     @property
     def effects(self):
         definition = lambda f: '\t{ s_' + f.name + ', ' + init(f) + ', ' + \
-            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ' },'
+            effect(f) + ', ' + flip(f) + ', ' + f.max_fps + ', ' + \
+            dynamic_text(f) + ' },'
         init = lambda f: '&init_' + f.name if f.init else 'NULL'
         effect = lambda f: '&effect_' + f.name if f.effect else 'NULL'
         flip = lambda f: 'FLIP' if f.flip else 'NO_FLIP'
+        dynamic_text = lambda f: 'true' if f.dynamic_text else 'false'
 
         ret = ['const effect_t effects[] PROGMEM = {']
 
@@ -140,6 +163,7 @@ class SourceFiles(object):
 class SourceFile(object):
 
     def __init__(self, path):
+        self.path = ''.join(path.rpartition('src')[1:])
         self.name = os.path.splitext(os.path.basename(path))[0]
 
         with open(path, 'r') as f:
@@ -154,6 +178,7 @@ class SourceFile(object):
         self.effect = self._block(content, 'effect')
         self.flip = self._flip(content)
         self.max_fps = self._max_fps(content)
+        self.dynamic_text = self._dynamic_text(content)
         self.variables = self._variables(content)
 
     def _globals(self, c):
@@ -165,12 +190,13 @@ class SourceFile(object):
         )
 
     def _functions(self, c):
-        return ''.join(line['block'] for line in c
+        return ''.join(block_with_meta(line, self.path) for line in c
             if 'function' in line['types'] and len(line['types']) == 1
         )
 
     def _block(self, c, name):
-        return ''.join(line['block'] for line in c if name in line['types'])
+        return ''.join(block_with_meta(line, self.path) for line in c
+                if name in line['types'])
 
     def _flip(self, c):
         return filter(lambda line: 'flip' in line['types'], c)
@@ -185,11 +211,21 @@ class SourceFile(object):
 
         return DEFAULT_MINIMUM_TICKS
 
+    def _dynamic_text(self, c):
+        return filter(lambda line: 'dynamic_text' in line['types'], c)
+
     def _variables(self, c):
         a = filter(lambda line: 'struct' in line['types'], c)
 
         if a and a[0]['block'].endswith('vars;\n'):
             return a[0]['block']
+
+
+def block_with_meta(line, path):
+    line_number = line['line_number']
+    return '\n'.join(['#line ' + str(line_number + i) + ' ' +
+        '"' + path + '"' + '\n' + p
+        for i, p in enumerate(line['block'].split('\n')) if p.strip()]) + '\n'
 
 
 def find_globals(content):
@@ -210,10 +246,11 @@ def find_globals(content):
 
 
 def analyze(name, content):
-    def analyze_line(i, line):
+    def analyze_line(i, line, line_offset):
         types = '(void|uint8_t|uint16_t|float|int|char|double)'
         patterns = (
             ('flip', '#\s*pragma\s+FLIP\s*'),
+            ('dynamic_text', '#\s*pragma\s+DYNAMIC_TEXT\s*'),
             ('max_fps', '#\s*pragma\s+MAX_FPS\s+[0-9]+\s*'),
             ('init', 'void\s+init\s*[(]'),
             ('effect', '\s*effect\s*'),
@@ -240,7 +277,7 @@ def analyze(name, content):
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
-        if 'flip' in ret['types'] or 'max_fps' in ret['types']:
+        if 'flip' in ret['types'] or 'max_fps' in ret['types'] or 'dynamic_text' in ret['types']:
             ret['types'].remove('assignment')
 
         # TODO: fix the regex, matches too much
@@ -281,12 +318,16 @@ def analyze(name, content):
 
         ret['block'] = block
 
+        ret['line_number'] = line_offset + i + 1
+
         return ret
 
+    content_len = len(content)
     content = remove_comments(content)
+    line_offset = content_len - len(content)
     content = replace_variables(content, 'vars.', 'vars.' + name + '.')
 
-    return [analyze_line(i, line) for i, line in enumerate(content)]
+    return [analyze_line(i, line, line_offset) for i, line in enumerate(content)]
 
 
 def remove_comments(text):

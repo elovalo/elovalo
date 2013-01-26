@@ -17,13 +17,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-typedef struct {
-	uint8_t id;
-	uint16_t length;
-	void *data;
-} playlistitem_t;
+# pragma FLIP
 
-extern const playlistitem_t master_playlist[];
-extern const uint8_t master_playlist_len;
-extern const uint8_t playlists[];
-extern const uint8_t playlists_len;
+#include "common.h"
+
+XYZ(effect)
+{
+	set_led(x, y, z, 0);
+}

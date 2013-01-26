@@ -17,18 +17,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* It is assumed that X and Y form one layer on the LED cube. The
- * actual LED count may be smaller, of course.
- * 
- * SHIFT_REGISTER_BYTES tells how many bytes there are in shift
- * register of Z layer switcher.
- * 
- * If you are changing LED count or GS_DEPTH, make sure you have
- * compatible implementation of set_led() in effects/lib/utils.c */
+#include <stdint.h>
+#include <avr/pgmspace.h>
+#include "pgm_tricks.h"
 
-#define LEDS_X 8
-#define LEDS_Y 8
-#define LEDS_Z 8
-#define GS_DEPTH 12
-#define BYTES_PER_LAYER 96
-#define SHIFT_REGISTER_BYTES 1
+void pgm_aware_copy(void *dst, const void *src, const int n)
+{
+	const uint8_t *p = (uint8_t*)src;
+	const uint8_t *end = p+n;
+	uint8_t *dst_u8 = (uint8_t*)dst;
+
+	while (p < end) {
+		*dst_u8++ = pgm_read_byte_near(p++);
+	}
+}

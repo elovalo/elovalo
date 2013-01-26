@@ -20,7 +20,8 @@
 #ifndef EFFECT_UTILS_H
 #define EFFECT_UTILS_H
 
-#include "../../env.h"
+#include <stdbool.h>
+#include "../../common/env.h"
 
 /* Defining set_led() as a macro which chooses the most efficient
  * implementation available */
@@ -64,6 +65,7 @@ typedef struct {
 	draw_t draw;           // Drawing function, run once per buffer swap.
 	uint8_t flip_buffers;  // Flip buffers during execution.
 	uint8_t minimum_ticks; // Minimum amount of ticks per draw.
+	bool dynamic_text;     // Contains dynamic custom data?
 } effect_t;
 
 #define NO_FLIP 0
