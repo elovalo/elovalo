@@ -145,7 +145,7 @@ class EloParser():
     def parse_flip(self):
         self.parse_response()
         r = self.resp_data
-        return config.Response.FLIP in r
+        return config.Report.FLIP in r
 
     def parse_ok(self):
         self.parse_response()
