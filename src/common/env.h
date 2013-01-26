@@ -33,6 +33,14 @@
 #define BYTES_PER_LAYER 96
 #define SHIFT_REGISTER_BYTES 1
 
+#ifdef AVR_ZCL
+// ZCL version uses slower baud rate due to hardware limitation
+#define BAUD 9600
+#else
+// Other versions use higher rate to allow real time effect uploading
+#define BAUD 250000
+#endif
+
 /* To mirror cube coordinates, uncomment the axis. To rotate the cube
  * for 180 degrees, uncomment the both. */
 //#define MIRROR_X
