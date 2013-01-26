@@ -103,9 +103,10 @@ void export_effect(const effect_t *effect, double length, const char *sensor_pat
 		}
 	}
 
-	/* Increment frame counter always by 5 * 8 ms (25 fps)
-	   to simulate slow drawing. */
-	const uint16_t drawing_time = 5;
+	/* Increment frame counter at the rate desired by the
+	   effect. However, limit it to 25 fps to keep it compatible
+	   with the serial port speed. 5 * 8 ms (25 fps) */
+	const uint16_t drawing_time = effect->minimum_ticks < 5 ? 5 : effect->minimum_ticks;
 	const uint8_t fps = 125/drawing_time;
 	
 	int bytes = snprintf(filename, size, "exports/%s.%s", effect->name, 
