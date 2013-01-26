@@ -32,7 +32,7 @@
 #include "../common/effect_utils.h"
 #include "../common/cube.h"
 
-void export_effect(const effect_t *effect, int length, const char *sensor_path,
+void export_effect(const effect_t *effect, double length, const char *sensor_path,
 		   const char *data, bool binary);
 
 int main(int argc, char **argv) {
@@ -61,15 +61,15 @@ int main(int argc, char **argv) {
 			"Usage: %s [-b|--binary] name [length] [sensor_file] "
 			"[custom_data]\n",prog);
 	}
-	else if(argc == 3) export_effect(find_effect(argv[1]), atoi(argv[2]),
+	else if(argc == 3) export_effect(find_effect(argv[1]), atof(argv[2]),
 					 "", NULL, binary);
-	else if(argc == 4) export_effect(find_effect(argv[1]), atoi(argv[2]),
+	else if(argc == 4) export_effect(find_effect(argv[1]), atof(argv[2]),
 					 argv[3], NULL, binary);
-	else if(argc == 5) export_effect(find_effect(argv[1]), atoi(argv[2]),
+	else if(argc == 5) export_effect(find_effect(argv[1]), atof(argv[2]),
 					 argv[3], argv[4], binary);
 }
 
-void export_effect(const effect_t *effect, int length, const char *sensor_path, const char *data, bool binary) {
+void export_effect(const effect_t *effect, double length, const char *sensor_path, const char *data, bool binary) {
 	const int size = 50;
 	char filename[size];
 	uint8_t use_sensors = strlen(sensor_path) > 0;
@@ -113,7 +113,7 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	assert(bytes <= size);
 
 	printf("Exporting %f seconds of %s to file %s\n",
-		(double)length/1000,
+		length,
 		effect->name,
 		filename);
 
@@ -152,7 +152,7 @@ void export_effect(const effect_t *effect, int length, const char *sensor_path, 
 	}
 
 	int i;
-	for (i = 0, ticks = 0; ticks < length * 10; ticks += drawing_time, i++) {
+	for (i = 0, ticks = 0; i < (int)(fps*length); ticks += drawing_time, i++) {
 		if(use_sensors) {
 			sensors.distance1 = json_integer_value(json_array_get(distance1, i));
 			sensors.distance2 = json_integer_value(json_array_get(distance2, i));
