@@ -75,16 +75,9 @@ class EloCmd(cmd.Cmd):
             frame_size = struct.unpack(">H", f.read(2))[0]
 
             self.conn.send_command(config.Command.SERIAL_FRAME)
+            # FIXME: does not validate size
             self.response_parser().parse_response()
-# FIXME: does not validate size
-            """
-            device_fs = struct.unpack(">H", self.response_parser().parse_response()[2:5])[0]
-            if frame_size != device_fs:
-                print("Incompatible frame sizes {} != {}".format(frame_size,
-                    device_fs))
-                return
-            """
-            
+
             t = time.time()
             
             while True:
@@ -96,7 +89,6 @@ class EloCmd(cmd.Cmd):
                     return
                 t = t + (1.0/fps)
                 d = t - time.time()
-                print(d)
                 if d > 0:
                     time.sleep(d)
 
