@@ -75,7 +75,7 @@ class EloCmd(cmd.Cmd):
             frame_size = struct.unpack(">H", f.read(2))[0]
 
             self.conn.send_command(config.Command.SERIAL_FRAME)
-            device_fs = struct.unpack(">H", self.response_parser().parse_response()[:1])[0]
+            device_fs = struct.unpack(">H", self.response_parser().parse_response()[:2])[0]
             if frame_size != device_fs:
                 print("Incompatible frame sizes {} != {}".format(frame_size,
                     device_fs))
