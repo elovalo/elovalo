@@ -65,32 +65,35 @@ class EloCmd(cmd.Cmd):
         self.response_parser().parse_ok()
 
     def do_file(self, line):
-        """Open an effect data file and send its contents to the serial port"""
-        with open(line, 'r') as f:
-            m = f.read(3)
-            if m != "EV1":
-                print("Not an Elovalo effect file")
-                return
-            fps = struct.unpack(">B", f.read(1))[0]
-            frame_size = struct.unpack(">H", f.read(2))[0]
+        """Opens one or multiple effect data files and send their contents to the serial port"""
+        
+        # Prepare serial port for effect uploading
+        self.conn.send_command(config.Command.SERIAL_FRAME)
+        # FIXME: does not validate size
+        self.response_parser().parse_response()
 
-            self.conn.send_command(config.Command.SERIAL_FRAME)
-            # FIXME: does not validate size
-            self.response_parser().parse_response()
+        t = time.time()
 
-            t = time.time()
-            
-            while True:
-                frame = f.read(frame_size)
-                if not frame: break
-                self.conn.send_command('', frame)
-                if self.conn.ser.read(1) != '%':
-                    print("Incorrect response, expected FLIP")
+        for file in line.split():
+            with open(file, 'r') as f:
+                m = f.read(3)
+                if m != "EV1":
+                    print("Not an Elovalo effect file")
                     return
-                t = t + (1.0/fps)
-                d = t - time.time()
-                if d > 0:
-                    time.sleep(d)
+                fps = struct.unpack(">B", f.read(1))[0]
+                frame_size = struct.unpack(">H", f.read(2))[0]
+                
+                while True:
+                    frame = f.read(frame_size)
+                    if not frame: break
+                    self.conn.send_command('', frame)
+                    if self.conn.ser.read(1) != '%':
+                        print("No FLIP in 1 second. Is cube connected?")
+                        return
+                    t = t + (1.0/fps)
+                    d = t - time.time()
+                    if d > 0:
+                        time.sleep(d)
 
     def do_time(self, line):
         """Get and synchronize device time"""
