@@ -37,7 +37,7 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
 
             return {
                 startDate: d,
-                endData: d,
+                endDate: d,
                 headline: decode(v.title) || 'No Title',
                 text: content,
                 asset: {
@@ -46,6 +46,8 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
                     caption: ''
                 }
             };
+        }).filter(function(v) {
+            return parseInt(v.startDate.split(',')[0], 10) < 2014;
         });
 
         return {
