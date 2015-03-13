@@ -33,13 +33,22 @@ define(['jquery', 'utils', 'storyjs-embed'], function($, utils) {
                     media = 'http://youtu.be/' + parts[parts.length - 1];
                 }
             });
-            content = $content.html().replace('<br>www.youtube.com<br>', '', 'g');
+
+            // patch photo links
+            $('img', $content).each(function() {
+                var $e = $(this).parent();
+                var href = $e.attr('href');
+
+                if(href.indexOf('photos/') >= 0) {
+                    $e.attr('href', 'https://www.facebook.com' + href);
+                }
+            });
 
             return {
                 startDate: d,
                 endDate: d,
                 headline: decode(v.title) || 'No Title',
-                text: content,
+                text: $content.html().replace('<br>www.youtube.com<br>', '', 'g'),
                 asset: {
                     media: media,
                     credit: '',
