@@ -10,6 +10,10 @@ You should have at least gcc, avr-gcc, scons, gperf and preferably
 jansson and Blender installed in order to use the simulator. If you
 have Ubuntu 12.04 LTS or 12.10, we have instructions for you.
 
+### Ubuntu 14.10
+
+Something went wrong with GCC leading to this project not to compile. We are going to fix this after release of Ubuntu 15.04. If you happen te fix it, please send a patch!
+
 ### Ubuntu 12.10
 
 To build on Ubuntu 12.10, install the following packages:
@@ -72,20 +76,6 @@ reason. Add something like this to your .bashrc or .bash\_profile:
 are totally on your own with Eclipse. You may try consulting
 StackOverflow:
 http://stackoverflow.com/questions/1052759/eclipse-cdt-scons
-
-The old instructinos were:
-
-Import project to Eclipse using Projects from Git thingy.
-
-Choose *Debug* (or some other) build configuration if you want to
-build to AVR architecture.
-
-To compile and run the PC exporter, qhoose *Exporter* as your build
-configuration. You should run the produced executable (located at
-<tt>Exporter</tt> subdirectory) in the same directory as this
-file. For example, on Linux:
-
-    Exporter/ledivilkku2.elf
 
 ## Building with SCons
 
