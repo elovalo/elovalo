@@ -2,7 +2,7 @@
 
 # Elovalo LED Cube Pedestal
 
-You should check out [elovalo.org](http://elovalo.koodilehto.fi/) for more casual documentation. If you are interested in building the project and developing effects, read on.
+You should check out [elovalo.koodilehto.fi](http://elovalo.koodilehto.fi/) for more casual documentation. If you are interested in building the project and developing effects, read on.
 
 ## Dependencies
 
