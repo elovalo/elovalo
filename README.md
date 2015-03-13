@@ -18,7 +18,7 @@ Something went wrong with GCC leading to this project not to compile. We are goi
 
 To build on Ubuntu 12.10, install the following packages:
 
-    gcc-avr avr-libc gcc scons libjansson-dev gperf avrdude
+    sudo apt-get install gcc-avr avr-libc gcc scons libjansson-dev gperf avrdude
 
 If you want to generate animations, install the following packages as well:
 
@@ -72,14 +72,12 @@ reason. Add something like this to your .bashrc or .bash\_profile:
 
 ### Eclipse 
 
-**Please note:** Eclipse builds do not support code generation so you
-are totally on your own with Eclipse. You may try consulting
-StackOverflow:
+You may use Eclipse for editing but you need SCons because of the complexity of this build (we are using code generation and multiple targets). It may be possible to use SCons in Eclipse if you feel adventurous:
 http://stackoverflow.com/questions/1052759/eclipse-cdt-scons
 
 ## Building with SCons
 
-If you feel yourself more comfortable at command prompt, there is
+The recommended way to build this project is SCons and we have
 SCons build file for you. Just run:
 
     scons
